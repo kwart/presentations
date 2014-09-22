@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+
+<title>Java Security Manager + Prograde</title>
+
+<meta name="description" content="Java Security Manager + Prograde">
+<meta name="author" content="Josef Cacek">
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style"
+	content="black-translucent" />
+
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="stylesheet" href="css/reveal.min.css">
+<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+<!-- For syntax highlighting -->
+<link rel="stylesheet" href="lib/css/zenburn.css">
+
+<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+<style>
+.red h1, .red h2, .red h3, .red {
+	color: red;
+}
+
+.prograde-blue {
+  color: #429DFA;
+}
+
+
+.color-highlight {
+  color: #ff2c2d;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="reveal">
+
+		<!-- Any section element inside of this container is displayed as a slide -->
+		<div class="slides">
+
+			<section data-background="images/background.png" style="text-align: left;">
+				<h1 style="text-transform: none; vertical-align:top;">Java Security Manager</h1>
+				<h3 style="text-transform: none; padding-top=1em;padding-bottom:6em;">Josef Cacek / JBoss EAP QE</h3>
+        
+        <aside class="notes">
+          presentation should cover 3 basic questions
+				  <ul>
+					<li>why you should care?</li>
+					<li>what is it?</li>
+					<li>how you can use it?</li>
+				  </ul>           
+				</aside>
+			</section>
+			
+			<section>
+				<h1>Do you run</h1>
+				<h2 class="fragment">Java applications</h2>
+				<h1 style="padding-top: 30px">?</h1>
+
+				<aside class="notes">
+				  <ul>
+					<li>text editors or IDE - jEdit</li>
+					<li>apps deployed on web server - Tomcat</li>
+					<li>RapidShare downloaders, etc.</li>
+				  </ul>           
+				</aside>
+			</section>
+
+			<section data-background="images/psycho-303435.png">
+				<h2 style="color: red;">You should be afraid</h2>
+				<h1 class="fragment" style="color: red; padding-top:0.5em;">You are treatened!</h1>
+			</section>
+
+			<section class="red">
+
+				<section data-background="images/namibia.jpg">
+					<h1>bugs in libraries</h1>
+					<p><em>lazy programmers</em></p>
+					<h1 style="padding-top:2em">&nbsp;</h1>
+
+					<aside class="notes">
+						<ul>
+							<li>call System.exit on application server shuts down whole JVM</li>
+						</ul>           
+					</aside>
+				</section>
+
+				<section data-background="images/hidden.jpg">
+					<h1>hidden features</h1>
+					<p><em>evil programmers</em></p>
+					<h1 style="padding-top:2em">&nbsp;</h1>
+
+					<aside class="notes">
+						<ul>
+							<li>usage statistics sent over the network</li>
+							<li>or read cached passwords or read filesystem... and send it over the network</li>
+						</ul>           
+					</aside>
+				</section>
+				
+				<section data-background="images/woman.jpg">
+					<h1>Man In The Middle</h1>
+					<p><em>The Hackers</em></p>
+					<h1 style="padding-top:2em">&nbsp;</h1>
+
+					<aside class="notes">
+						<ul>
+							<li>trusted and tested library received over the untrusted channel</li>
+							<li>hackers - change downloaded libraries in their own way</li>
+						</ul>           
+					</aside>
+				</section>
+			</section>
+
+
+			<section>
+				<section>
+					<h1>Solution</h1>
+					<div class="fragment">
+					<img src="images/shield.png" style="border:0; opacity:1;"/>
+					<h2 style="padding-top: 0.5em;">Java Security Manager (JSM)</h2>
+					</div>
+				</section>
+
+				<section>
+					<p style="font-size: 150%; padding-bottom: 1em;">
+            <strong><em>The Java Security Manager checks<br/> if the <span class="color-highlight">caller</span> has permissions to run<br/> protected <span class="color-highlight">actions</span>.</em></strong>
+          </p>
+					
+					<p class="fragment"><em>JSM <span class="color-highlight" style="font-weight: bold;">enforces security policy</span> defined by the application administrator.</em></p>
+					
+					<aside class="notes">
+						<ul>
+							<li>Caller</li>
+							<ul>
+								<li>user</li>
+								<li>code</li>
+							</ul>
+							<li>Protected action</li>
+							<ul>
+								<li>read/write files</li>
+								<li>communicate through network</li>
+								<li>...</li>
+							</ul>
+						</ul>
+					</aside>
+				</section>
+
+				<section>
+					<h2>JSM Quickstart</h2>
+					<ul>
+						<li>set system property to enable the JSM<br/>
+							<code class="color-highlight" style="padding-left: 1em; font-weight: bold;">java.security.manager</code>
+						</li>
+						<li class="fragment">no sensitive action is allowed by default</li>
+						<li class="fragment">set system property to configure the policy<br/>
+							<code class="color-highlight" style="padding-left: 1em;font-weight: bold;">java.security.policy</code>
+						</li>
+					</ul>
+					
+					<pre class="fragment">
+						<code data-trim contenteditable
+							style="font-size: 24px; margin-top: 20px;">
+java \
+    -Djava.security.manager \
+    -Djava.security.policy=/path/to/application.policy \
+...
+</code>
+					</pre>
+					<h4 class="fragment">Application Policy</h4>
+					<pre class="fragment">
+<code data-trim contenteditable
+							style="font-size: 24px; margin-top: 20px;">
+// Grant all to everyone
+grant {
+  permission java.security.AllPermission;
+};
+</code>
+					</pre>
+				</section>
+
+				<section>
+					<h3 style="text-transform: none;">Avoid granting the AllPermission</h3>
+					<p>Use the "Principle of least privilege".</p>
+					<pre class="fragment">
+						<code data-trim contenteditable
+							style="font-size: 24px; margin-top: 20px;">
+grant codeBase "file:${application.home}/lib/hibernate.jar" {
+	
+  permission java.io.FilePermission 
+                 "/tmp/-", "read,write";
+                 
+  permission java.net.SocketPermission 
+                 "orcl11srv:1521", "connect,resolve";
+                 
+  // ...
+};
+</code>
+					</pre>
+				</section>
+
+
+				<section>
+					<h2>Permission checking algorithm</h2>
+          <ol>
+            <li class="fragment">cut the call stack below top-most <span class="color-highlight"><b>doPrivileged</b></span> call (if any) </li>
+            <li class="fragment">check if every entry on the call stack has the permission</li>
+            <li class="fragment">if there is an <span class="color-highlight"><b>inheritedContext</b></span> repeat the steps</li>
+          </ol>
+				</section>
+
+				<section>
+					<h2>Example - permissions checking</h2>
+          <ul>
+          <li>Let's have a simple application which reads a system file:</li>
+          <ul>
+            <li><code>App.class</code> in <code>app.jar</code></li>
+            <li><code>Utils.class</code> in <code>app-lib.jar</code></li>
+          </ul>
+          <li style="padding-top:1em;">Scenarios</li>
+          <ul>
+            <li><a href="images/app.svg">simple call</a></li>
+            <li><a href="images/app-privileged.svg">simple call, with privileged section</a></li>
+            <li><a href="images/app-threaded.svg">call from a new thread</a></li>
+            <li><a href="images/app-threaded-privileged.svg">call with privileged section from a new thread</a></li>
+          </ul>
+          </ul>
+				</section>
+
+				<section>
+					<h3>Policy file anatomy</h3>
+					<pre><code data-trim contenteditable
+						style="font-size: 24px; margin-top: 20px;">
+keystore "some_keystore_url", "keystore_type", "keystore_provider";
+keystorePasswordURL "some_password_url";
+						
+grant signedBy "signer_names", codeBase "URL",
+	principal principal_class_name "principal_name",
+	principal principal_class_name "principal_name",
+	... {
+
+  permission permission_class_name "target_name", "action", 
+	  signedBy "signer_names";
+  permission permission_class_name "target_name", "action", 
+	  signedBy "signer_names";
+  ...
+};
+
+grant ...
+</code></pre>
+				<aside class="notes">
+					<pre>
+keystore "file:///tmp/keystore.jks";
+keystorePasswordURL "pwd";
+						
+grant signedBy "jboss,andRedHat", codeBase "file:///tmp/hibernate.jar",
+	principal org.jboss.Principal "john",
+	principal org.jboss.Principal "jack" {
+
+  permission java.io.FilePermission "/-", "read,write";
+  permission java.security.AllPermission;
+};
+
+grant {
+  permission java.io.FilePermission "/tmp/-", "read";
+}
+					</pre>
+				</aside>
+				</section>
+
+				<section>
+					<h2>Implementing your own checks</h4>
+					<pre>
+						<code data-trim contenteditable
+							style="font-size: 24px; margin-top: 20px;">
+public static Map&lt;String, String&gt; getPasswordCache() {
+  SecurityManager sm = System.getSecurityManager();
+  if (sm != null) {
+    RuntimePermission p = new RuntimePermission(
+      "org.jboss.security.Util.getPasswordCache");
+    sm.checkPermission(p);
+  }
+  //...
+}
+</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Debug JSM</h2>
+					<ul>
+						<li>set system property to enable debug output<br/>
+							<code class="color-highlight" style="padding-left: 1em;font-weight: bold;">java.security.debug</code>
+						</li>
+					</ul>
+					
+					<pre>
+						<code data-trim contenteditable
+							style="font-size: 24px; margin-top: 20px;">
+java \
+  -Djava.security.manager \
+  -Djava.security.policy=/path/to/application.policy \
+  -Djava.security.debug=access:failure \
+...
+</code>
+					</pre>
+				</section>
+				
+			</section>
+
+			<section>
+				<section>
+					<h1>It's Demo Time</h1>
+          <p><em>Let's read some cool system properties.</em></p>
+				</section>
+
+				<section data-background="images/scales.png">
+          <p><code>Setting java.security.policy</code></p>
+					<p style="font-size: 400%; padding-top: 0.5em; font-weight: bold;"><code><span class="fragment">"="</span> <span class="fragment">!=</span> <span class="fragment">"=="</span></code></p>
+          <p class="fragment">To use or not to use the default policy?</p>
+          <p class="fragment">That is the question.</p>
+				</section>
+			</section>
+
+			<section>
+        
+        <section>
+          <h2>Do you need more?</h2>
+          <div class="fragment">
+            <img src="images/pro-grade.png" style="border:0;"/>
+            <h2>Use <span class="prograde-blue">pro-grade</span> library</h2>
+          </div>
+        </section>
+        
+        <section>
+          <h2>The <span class="prograde-blue">pro-grade</span> library</h2>
+          <h3>set of Security Managers and Policies</h3>
+          <ul>
+            <li>ProGrade policy with deny rules</li>
+            <li>Policy file generator</li>
+            <li>missing permissions debugger</li>
+          </ul>
+        </section>
+               
+				<section>
+					<h3>ProGrade policy</h3>
+          <p style="text-align: left;">-Djava.security.manager=<br/>
+          net.sourceforge.prograde.sm.ProGradeJSM</p>
+					<pre>
+						<code data-trim contenteditable
+							style="font-size: 24px; margin-top: 20px;">
+priority "deny";
+
+// grant full access to /tmp folder
+grant {
+	permission java.io.FilePermission "/tmp/-", "read,write";
+};
+
+// deny write access for a single subfolder in /tmp
+deny {
+	permission java.io.FilePermission "/tmp/static/-", "write";
+};
+</code>
+					</pre>
+				</section>
+
+				<section>
+					<h3><span class="prograde-blue">pro-grade</span> Policy file generator</h3>
+          <ul>
+            <li>-Djava.security.manager=<br/>net.sourceforge.prograde.sm.<b>PolicyFileGeneratorJSM</b></li>
+            <li>-Djava.security.policy=/path/to/initial.policy</li>
+            <li>-Dprograde.generated.policy=/path/to/generated.policy</li>
+          </ul>
+				</section>
+
+				<section>
+					<h3><span class="prograde-blue">pro-grade</span> Permissions debugger</h3>
+          <ul>
+            <li>-Djava.security.manager=net.sourceforge.prograde.sm.DumpMissingPermissionsJSM</li>
+            <li>-Djava.security.policy==/path/to/application.policy</li>
+            <li>-Dprograde.generated.policy=/path/to/generated.policy</li>
+          </ul>
+				</section>
+        
+      </section>
+
+			<section>
+        <h1>It's Demo Time</h1>
+        <!-- Tomcat or JBoss with PolicyFileGeneratorJSM -->
+				<p><em>Let's generate some cool text file.</em></p>
+
+				<aside class="notes">
+					<p>We have generated completely policy.</p>
+				</aside>
+			</section>
+
+			<section>
+				<h2 class="fragment highlight-red">Use The Java Security Manager!</h2>
+				<h2 style="padding-top:1em;" class="fragment">or <span class="prograde-blue">pro-grade</span> JSM!</h2>
+				<h2 style="padding-top:1em;" class="fragment roll-in">The End</h2>
+			</section>
+		</div>
+
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.min.js"></script>
+
+	<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				slideNumber: true,
+				
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+</body>
+</html>
