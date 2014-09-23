@@ -39,9 +39,9 @@
   color: #429DFA;
 }
 
-
-.color-highlight {
+.color-highlight, span.color-highlight, code.color-highlight {
   color: #ff2c2d;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -142,7 +142,7 @@
             <strong><em>The Java Security Manager checks<br/> if the <span class="color-highlight">caller</span> has permissions to run<br/> protected <span class="color-highlight">actions</span>.</em></strong>
           </p>
 					
-					<p class="fragment"><em>JSM <span class="color-highlight" style="font-weight: bold;">enforces security policy</span> defined by the application administrator.</em></p>
+					<p class="fragment"><em>JSM <span class="color-highlight">enforces security policy</span> defined by the application administrator.</em></p>
 					
 					<aside class="notes">
 						<ul>
@@ -165,11 +165,11 @@
 					<h2>JSM Quickstart</h2>
 					<ul>
 						<li>set system property to enable the JSM<br/>
-							<code class="color-highlight" style="padding-left: 1em; font-weight: bold;">java.security.manager</code>
+							<code class="color-highlight" style="padding-left: 1em;">java.security.manager</code>
 						</li>
 						<li class="fragment">no sensitive action is allowed by default</li>
 						<li class="fragment">set system property to configure the policy<br/>
-							<code class="color-highlight" style="padding-left: 1em;font-weight: bold;">java.security.policy</code>
+							<code class="color-highlight" style="padding-left: 1em;">java.security.policy</code>
 						</li>
 					</ul>
 					
@@ -218,9 +218,9 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 				<section>
 					<h2>Permission checking algorithm</h2>
           <ol>
-            <li class="fragment">cut the call stack below top-most <span class="color-highlight"><b>doPrivileged</b></span> call (if any) </li>
+            <li class="fragment">cut the call stack below top-most <span class="color-highlight">doPrivileged</span> call (if any) </li>
             <li class="fragment">check if every entry on the call stack has the permission</li>
-            <li class="fragment">if there is an <span class="color-highlight"><b>inheritedContext</b></span> repeat the steps</li>
+            <li class="fragment">if there is an <span class="color-highlight">inheritedContext</span> repeat the steps</li>
           </ol>
 				</section>
 
@@ -305,7 +305,7 @@ public static Map&lt;String, String&gt; getPasswordCache() {
 					<h2>Debug JSM</h2>
 					<ul>
 						<li>set system property to enable debug output<br/>
-							<code class="color-highlight" style="padding-left: 1em;font-weight: bold;">java.security.debug</code>
+							<code class="color-highlight" style="padding-left: 1em;">java.security.debug</code>
 						</li>
 					</ul>
 					
@@ -348,11 +348,11 @@ java \
         </section>
         
         <section>
-          <h2>The <span class="prograde-blue">pro-grade</span> library</h2>
-          <h3>set of Security Managers and Policies</h3>
+          <h2 style="text-transform: none;">The <span class="prograde-blue">pro-grade</span> library</h2>
+          <h3 style="text-transform: none;">set of Security Managers and Policies</h3>
           <ul>
-            <li>ProGrade policy with deny rules</li>
-            <li>Policy file generator</li>
+            <li>policy with <span class="color-highlight">deny rules</span></li>
+            <li>policy file generator</li>
             <li>missing permissions debugger</li>
           </ul>
         </section>
