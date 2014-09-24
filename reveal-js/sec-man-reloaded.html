@@ -219,8 +219,7 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 					<h2>Permission checking algorithm</h2>
           <ol>
             <li class="fragment">cut the call stack below top-most <span class="color-highlight">doPrivileged</span> call (if any) </li>
-            <li class="fragment">check if every entry on the call stack has the permission</li>
-            <li class="fragment">if there is an <span class="color-highlight">inheritedContext</span> repeat the steps</li>
+            <li class="fragment">check if every entry on the call stack (including <span class="color-highlight">inheritedContext</span>) has the permission</li>
           </ol>
 				</section>
 
