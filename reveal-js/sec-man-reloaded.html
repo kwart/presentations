@@ -235,19 +235,19 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 				<section>
 					<h2>Example - permissions checking</h2>
 					<ul>
-						<li><a href="http://github.com/kwart/test-app/tree/jsm-stacktrace-test">http://github.com/kwart/test-app/tree/jsm-stacktrace-test</a></li>
-						<li style="padding-top:1em;">Let's have a simple application which reads a system file:</li>
+						<li>simple application which reads /etc/passwd</li>
 						<ul>
 							<li><code>app.jar -&gt; App.class</code></li>
 							<li><code>app-lib.jar -&gt; Utils.class</code></li>
 						</ul>
 						<li style="padding-top:1em;">Scenarios</li>
 						<ul>
-							<li><a href="images/sec-man-reloaded/app.svg">simple call</a></li>
-							<li><a href="images/sec-man-reloaded/app-privileged.svg">simple call, with privileged section</a></li>
-							<li><a href="images/sec-man-reloaded/app-threaded.svg">call from a new thread</a></li>
-							<li><a href="images/sec-man-reloaded/app-threaded-privileged.svg">call with privileged section from a new thread</a></li>
+							<li>single thread: <a href="images/sec-man-reloaded/app.svg">simple</a>,
+								<a href="images/sec-man-reloaded/app-privileged.svg">privileged</a></li>
+							<li>two threads: <a href="images/sec-man-reloaded/app-threaded.svg">simple</a>,
+								<a href="images/sec-man-reloaded/app-threaded-privileged.svg">privileged</a></li>
 						</ul>
+						<li style="padding-top:1em;"><a href="http://github.com/kwart/test-app/tree/jsm-stacktrace-test">github.com/kwart/test-app/tree/jsm-stacktrace-test</a></li>
 					</ul>
 				</section>
 
@@ -308,6 +308,13 @@ public static Map&lt;String, String&gt; getPasswordCache() {
 }
 </code>
 					</pre>
+
+					<aside class="notes">
+						<ul>
+							<li>static methods</li>
+							<li>singletons</li>
+						</ul>
+					</aside>
 				</section>
 
 				<section>
