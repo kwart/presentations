@@ -36,12 +36,13 @@
 }
 
 .prograde-blue {
-  color: #429DFA;
+	color: #429DFA;
 }
 
 .color-highlight, span.color-highlight, code.color-highlight {
-  color: #ff2c2d;
-  font-weight: bold;
+	color: #F8FF46;
+	/* color: #ff2c2d; */
+	font-weight: bold;
 }
 </style>
 </head>
@@ -55,7 +56,7 @@
 
 			<section data-background="images/sec-man-reloaded/background.png" style="text-align: left;">
 				<h1 style="text-transform: none; vertical-align:top;">Java Security Manager</h1>
-				<h3 style="text-transform: none; padding-top=1em;padding-bottom:6em;">Josef Cacek / JBoss EAP QE</h3>
+				<h3 style="text-transform: none; padding-top=1em;padding-bottom:6em;">Josef Cacek / JBoss EAP QE / Red Hat</h3>
         
         <aside class="notes">
           presentation should cover 3 basic questions
@@ -182,9 +183,12 @@ java \
 ...
 </code>
 					</pre>
-					<h4 class="fragment">Application Policy</h4>
-					<pre class="fragment">
-<code data-trim contenteditable
+				</section>
+
+				<section>
+					<h3>The Simplest Application Policy</h3>
+					<pre>
+						<code data-trim contenteditable
 							style="font-size: 24px; margin-top: 20px;">
 // Grant all to everyone
 grant {
@@ -217,28 +221,28 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 
 				<section>
 					<h2>Permission checking algorithm</h2>
-          <ol>
-            <li class="fragment">cut the call stack below top-most <span class="color-highlight">doPrivileged</span> call (if any) </li>
-            <li class="fragment">check if every entry on the call stack (including <span class="color-highlight">inheritedContext</span>) has the permission</li>
-          </ol>
+					<ol>
+						<li class="fragment">cut the call stack below top-most <span class="color-highlight">doPrivileged</span> call (if any) </li>
+						<li class="fragment">check if every entry on the call stack (including <span class="color-highlight">inheritedContext</span>) has the permission</li>
+					</ol>
 				</section>
 
 				<section>
 					<h2>Example - permissions checking</h2>
-          <ul>
-          <li>Let's have a simple application which reads a system file:</li>
-          <ul>
-            <li><code>App.class</code> in <code>app.jar</code></li>
-            <li><code>Utils.class</code> in <code>app-lib.jar</code></li>
-          </ul>
-          <li style="padding-top:1em;">Scenarios</li>
-          <ul>
-            <li><a href="images/sec-man-reloaded/app.svg">simple call</a></li>
-            <li><a href="images/sec-man-reloaded/app-privileged.svg">simple call, with privileged section</a></li>
-            <li><a href="images/sec-man-reloaded/app-threaded.svg">call from a new thread</a></li>
-            <li><a href="images/sec-man-reloaded/app-threaded-privileged.svg">call with privileged section from a new thread</a></li>
-          </ul>
-          </ul>
+					<ul>
+						<li>Let's have a simple application which reads a system file:</li>
+						<ul>
+							<li><code>app.jar -&gt; App.class</code></li>
+							<li><code>app-lib.jar -&gt; Utils.class</code></li>
+						</ul>
+						<li style="padding-top:1em;">Scenarios</li>
+						<ul>
+							<li><a href="images/sec-man-reloaded/app.svg">simple call</a></li>
+							<li><a href="images/sec-man-reloaded/app-privileged.svg">simple call, with privileged section</a></li>
+							<li><a href="images/sec-man-reloaded/app-threaded.svg">call from a new thread</a></li>
+							<li><a href="images/sec-man-reloaded/app-threaded-privileged.svg">call with privileged section from a new thread</a></li>
+						</ul>
+					</ul>
 				</section>
 
 				<section>
@@ -329,82 +333,90 @@ java \
 				</section>
 
 				<section data-background="images/sec-man-reloaded/scales.png">
-          <p><code>Setting java.security.policy</code></p>
-					<p style="font-size: 400%; padding-top: 0.5em; font-weight: bold;"><code><span class="fragment">"="</span> <span class="fragment">!=</span> <span class="fragment">"=="</span></code></p>
-          <p class="fragment">To use or not to use the default policy?</p>
-          <p class="fragment">That is the question.</p>
+					<p><code>Setting java.security.policy</code></p>
+					<p style="font-size: 400%; padding-top: 0.5em; font-weight: bold;"><code>
+						<span class="fragment">"="</span>
+						<span class="fragment">!=</span>
+						<span class="fragment">"=="</span>
+					</code></p>
+					<p class="fragment"><em>To use or not to use the default policy?<br/>That is the question.</em></p>
 				</section>
 			</section>
 
 			<section>
-        
-        <section>
-          <h2>Do you need more?</h2>
-          <div class="fragment">
-            <img src="images/sec-man-reloaded/pro-grade.png" style="border:0;"/>
-            <h2>Use <span class="prograde-blue">pro-grade</span> library</h2>
-          </div>
-        </section>
-        
-        <section>
-          <h2 style="text-transform: none;">The <span class="prograde-blue">pro-grade</span> library</h2>
-          <h3 style="text-transform: none;">set of Security Managers and Policies</h3>
-          <ul>
-            <li>policy with <span class="color-highlight">deny rules</span></li>
-            <li>policy file generator</li>
-            <li>missing permissions debugger</li>
-          </ul>
-        </section>
-               
+
 				<section>
-					<h3>ProGrade policy</h3>
-          <p style="text-align: left;">-Djava.security.manager=<br/>
-          net.sourceforge.prograde.sm.ProGradeJSM</p>
+					<h2>Do you need more?</h2>
+					<div class="fragment">
+						<img src="images/sec-man-reloaded/pro-grade.png" style="border:0;"/>
+						<h2 style="text-transform: none;">Use <span class="prograde-blue">pro-grade</span> Library!</h2>
+					</div>
+				</section>
+
+				<section>
+					<h2 style="text-transform: none;">The <span class="prograde-blue">pro-grade</span> Library</h2>
+					<h4 style="text-transform: none;">Java Security Manager made easy<em>(ier)</em></h4>
+					<ul style="padding-top: 1em;" class="fragment">
+						<li>set of Security Managers and Policies</li>
+						<li><a href="http://pro-grade.sourceforge.net/">pro-grade.sourceforge.net</a></li>
+						<li>Apache License, v. 2.0</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2 style="text-transform: none;"><span class="prograde-blue">pro-grade</span> components</h2>
+					<ul style="padding-top: 1em;" class="fragment">
+						<li>policy with <span class="color-highlight">deny</span> rules</li>
+						<li>policy file <span class="color-highlight">generator</span></li>
+						<li>missing permissions debugger</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3 style="text-transform: none;"><span class="prograde-blue">pro-grade</span> Policy with Deny Rules</h3>
+					<pre style="font-size: 22px;">-Djava.security.manager=net.sourceforge.prograde.sm.ProGradeJSM</pre>
 					<pre>
 						<code data-trim contenteditable
 							style="font-size: 24px; margin-top: 20px;">
-priority "deny";
-
 // grant full access to /tmp folder
 grant {
-	permission java.io.FilePermission "/tmp/-", "read,write";
+  permission java.io.FilePermission 
+    "/tmp/-",
+    "read,write";
 };
 
-// deny write access for a single subfolder in /tmp
+// deny write access to the static subfolder of /tmp
 deny {
-	permission java.io.FilePermission "/tmp/static/-", "write";
+  permission java.io.FilePermission 
+    "/tmp/static/-",
+    "write";
 };
 </code>
 					</pre>
 				</section>
 
 				<section>
-					<h3><span class="prograde-blue">pro-grade</span> Policy file generator</h3>
-          <ul>
-            <li>-Djava.security.manager=<br/>net.sourceforge.prograde.sm.<b>PolicyFileGeneratorJSM</b></li>
-            <li>-Djava.security.policy=/path/to/initial.policy</li>
-            <li>-Dprograde.generated.policy=/path/to/generated.policy</li>
-          </ul>
+					<h3 style="text-transform: none;"><span class="prograde-blue">pro-grade</span> Policy File Generator</h3>
+					<pre style="font-size: 22px; padding: 1em;">-Djava.security.manager=
+	net.sourceforge.prograde.sm.<b>PolicyFileGeneratorJSM</b></pre>
+					<p><em>The name says it all.</em></p>
 				</section>
 
 				<section>
-					<h3><span class="prograde-blue">pro-grade</span> Permissions debugger</h3>
-          <ul>
-            <li>-Djava.security.manager=net.sourceforge.prograde.sm.DumpMissingPermissionsJSM</li>
-            <li>-Djava.security.policy==/path/to/application.policy</li>
-            <li>-Dprograde.generated.policy=/path/to/generated.policy</li>
-          </ul>
+					<h3 style="text-transform: none; padding-bottom: 1em;"><span class="prograde-blue">pro-grade</span> Permissions Debugger</h3>
+					<pre style="font-size: 22px; padding: 1em;">-Djava.security.manager=
+	net.sourceforge.prograde.sm.<b>DumpMissingPermissionsJSM</b></pre>
+					<p style="padding-top: 1em;"><em>Lightweight alternative to <b>java.security.debug</b></em></p>
 				</section>
-        
-      </section>
+			</section>
 
 			<section>
-        <h1>It's Demo Time</h1>
-        <!-- Tomcat or JBoss with PolicyFileGeneratorJSM -->
+				<h1>It's Demo Time</h1>
+				<!-- Tomcat or JBoss with PolicyFileGeneratorJSM -->
 				<p><em>Let's generate some cool text file.</em></p>
 
 				<aside class="notes">
-					<p>We have generated completely policy.</p>
+					<p>We will generate a new policy file.</p>
 				</aside>
 			</section>
 
