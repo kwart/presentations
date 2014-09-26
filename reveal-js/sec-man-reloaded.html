@@ -4,9 +4,9 @@
 <head>
 <meta charset="utf-8">
 
-<title>Java Security Manager + Prograde</title>
+<title>Java Security Manager Reloaded</title>
 
-<meta name="description" content="Java Security Manager + Prograde">
+<meta name="description" content="Java Security Manager Reloaded">
 <meta name="author" content="Josef Cacek">
 
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -35,7 +35,7 @@
 	color: red;
 }
 
-.prograde-blue {
+.prograde-blue, h1.prograde-blue, h2.prograde-blue, h3.prograde-blue {
 	color: #429DFA;
 }
 
@@ -54,20 +54,24 @@
 		<!-- Any section element inside of this container is displayed as a slide -->
 		<div class="slides">
 
+			<section data-background="images/sec-man-reloaded/DV14-cover.png"/>
+			</section>
+
 			<section data-background="images/sec-man-reloaded/background.png" style="text-align: left;">
-				<h1 style="text-transform: none; vertical-align:top;">Java Security Manager</h1>
+				<h1 style="text-transform: none;">Java Security Manager</h1>
+				<h1 style="text-transform: none;" class="prograde-blue">Reloaded</h1>
 				<h3 style="text-transform: none; padding-top=1em;padding-bottom:6em;">Josef Cacek / JBoss EAP QE / Red Hat</h3>
-        
-        <aside class="notes">
-          presentation should cover 3 basic questions
-				  <ul>
-					<li>why you should care?</li>
-					<li>what is it?</li>
-					<li>how you can use it?</li>
-				  </ul>           
+
+				<aside class="notes">
+					presentation should cover 3 basic questions
+					<ul>
+						<li>why you should care?</li>
+						<li>what is it?</li>
+						<li>how you can use it?</li>
+					</ul>
 				</aside>
 			</section>
-			
+
 			<section>
 				<h1>Do you run</h1>
 				<h2 class="fragment">Java applications</h2>
@@ -82,12 +86,12 @@
 				</aside>
 			</section>
 
-			<section data-background="images/sec-man-reloaded/psycho-303435.png">
-				<h2 style="color: red;">You should be afraid</h2>
-				<h1 class="fragment" style="color: red; padding-top:0.5em;">You are treatened!</h1>
-			</section>
-
 			<section class="red">
+
+				<section data-background="images/sec-man-reloaded/psycho-303435.png">
+					<h2 style="color: red;">You should be afraid</h2>
+					<h1 class="fragment" style="color: red; padding-top:0.5em;">You are treatened!</h1>
+				</section>
 
 				<section data-background="images/sec-man-reloaded/namibia.jpg">
 					<h1>bugs in libraries</h1>
@@ -140,11 +144,13 @@
 
 				<section>
 					<p style="font-size: 150%; padding-bottom: 1em;">
-            <strong><em>The Java Security Manager checks<br/> if the <span class="color-highlight">caller</span> has permissions to run<br/> protected <span class="color-highlight">actions</span>.</em></strong>
-          </p>
-					
+						<strong><em>The Java Security Manager checks<br/>
+						if the <span class="color-highlight">caller</span> has permissions to run<br/>
+						protected <span class="color-highlight">actions</span>.</em></strong>
+					</p>
+
 					<p class="fragment"><em>JSM <span class="color-highlight">enforces security policy</span> defined by the application administrator.</em></p>
-					
+
 					<aside class="notes">
 						<ul>
 							<li>Caller</li>
@@ -173,7 +179,7 @@
 							<code class="color-highlight" style="padding-left: 1em;">java.security.policy</code>
 						</li>
 					</ul>
-					
+
 					<pre class="fragment">
 						<code data-trim contenteditable
 							style="font-size: 24px; margin-top: 20px;">
@@ -218,7 +224,6 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 					</pre>
 				</section>
 
-
 				<section>
 					<h2>Permission checking algorithm</h2>
 					<ol>
@@ -230,7 +235,8 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 				<section>
 					<h2>Example - permissions checking</h2>
 					<ul>
-						<li>Let's have a simple application which reads a system file:</li>
+						<li><a href="http://github.com/kwart/test-app/tree/jsm-stacktrace-test">http://github.com/kwart/test-app/tree/jsm-stacktrace-test</a></li>
+						<li style="padding-top:1em;">Let's have a simple application which reads a system file:</li>
 						<ul>
 							<li><code>app.jar -&gt; App.class</code></li>
 							<li><code>app-lib.jar -&gt; Utils.class</code></li>
@@ -311,7 +317,7 @@ public static Map&lt;String, String&gt; getPasswordCache() {
 							<code class="color-highlight" style="padding-left: 1em;">java.security.debug</code>
 						</li>
 					</ul>
-					
+
 					<pre>
 						<code data-trim contenteditable
 							style="font-size: 24px; margin-top: 20px;">
@@ -329,7 +335,7 @@ java \
 			<section>
 				<section>
 					<h1>It's Demo Time</h1>
-          <p><em>Let's read some cool system properties.</em></p>
+					<p><em>Let's read some cool system properties.</em></p>
 				</section>
 
 				<section data-background="images/sec-man-reloaded/scales.png">
@@ -425,6 +431,10 @@ deny {
 				<h2 style="padding-top:1em;" class="fragment">or <span class="prograde-blue">pro-grade</span> JSM!</h2>
 				<h2 style="padding-top:1em;" class="fragment roll-in">The End</h2>
 			</section>
+
+			<section data-background="images/sec-man-reloaded/DV14-qa.png"/>
+			</section>
+
 		</div>
 
 	</div>
