@@ -230,17 +230,14 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 					<pre>
 						<code data-trim contenteditable
 							style="font-size: 24px; margin-top: 20px;">
-public static Map&lt;String, String&gt; getPasswordCache() {
-
-  SecurityManager sm = System.getSecurityManager();
-
+public static String setProperty(String key, String value) {
+  checkKey(key);
+  SecurityManager sm = getSecurityManager();
   if (sm != null) {
-    RuntimePermission p = new RuntimePermission(
-      "org.jboss.security.Util.getPasswordCache");
-    sm.checkPermission(p);
+    sm.checkPermission(new PropertyPermission(key, "write"));
   }
 
-  //...
+  return (String) props.setProperty(key, value);
 }
 </code>
 					</pre>
@@ -491,7 +488,10 @@ deny {
 				history: true,
 				center: true,
 				slideNumber: true,
-				
+
+				width: 1280,
+				height: 720,
+
 				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
 				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
 
