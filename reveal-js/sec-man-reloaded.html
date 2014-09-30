@@ -416,7 +416,9 @@ java \
 
 				<section>
 					<h3 style="text-transform: none;"><span class="prograde-blue">pro-grade</span> Policy with Deny Rules</h3>
+<!--
 					<pre style="font-size: 22px;">-Djava.security.manager=net.sourceforge.prograde.sm.ProGradeJSM</pre>
+-->
 					<pre>
 						<code data-trim contenteditable
 							style="font-size: 24px; margin-top: 20px;">
@@ -439,22 +441,28 @@ deny {
 
 				<section>
 					<h3 style="text-transform: none;"><span class="prograde-blue">pro-grade</span> Policy File Generator</h3>
+<!--
 					<pre style="font-size: 22px; padding: 1em;">-Djava.security.manager=
 	net.sourceforge.prograde.sm.<b>PolicyFileGeneratorJSM</b></pre>
+-->
+					<img style="border:0;"  src="images/sec-man-reloaded/typewriter.png"/>
 					<p><em>The name says it all.</em></p>
 				</section>
 
 				<section>
 					<h3 style="text-transform: none; padding-bottom: 1em;"><span class="prograde-blue">pro-grade</span> Permissions Debugger</h3>
+<!--
 					<pre style="font-size: 22px; padding: 1em;">-Djava.security.manager=
 	net.sourceforge.prograde.sm.<b>DumpMissingPermissionsJSM</b></pre>
+-->
+					<img style="border:0;"  src="images/sec-man-reloaded/firebug.png"/>
 					<p style="padding-top: 1em;"><em>Lightweight alternative to <b>java.security.debug</b></em></p>
 				</section>
 			</section>
 
 			<section>
 				<h1>It's Demo Time</h1>
-				<!-- Tomcat or JBoss with PolicyFileGeneratorJSM -->
+				<!-- JBoss EAP with PolicyFileGeneratorJSM -->
 				<p><em>Let's generate some cool text file.</em></p>
 
 				<aside class="notes">
