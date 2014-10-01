@@ -1,0 +1,1 @@
+grant { permission java.util.PropertyPermission "java.home", "read"; };

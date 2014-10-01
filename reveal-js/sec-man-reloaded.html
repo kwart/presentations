@@ -232,7 +232,7 @@ grant codeBase "file:${application.home}/lib/hibernate.jar" {
 							style="font-size: 24px; margin-top: 20px;">
 public static String setProperty(String key, String value) {
   checkKey(key);
-  SecurityManager sm = getSecurityManager();
+  SecurityManager sm = System.getSecurityManager();
   if (sm != null) {
     sm.checkPermission(new PropertyPermission(key, "write"));
   }
@@ -328,8 +328,7 @@ grant ...
 </code></pre>
 				<aside class="notes">
 					<pre>
-keystore "file:///tmp/keystore.jks";
-keystorePasswordURL "pwd";
+keystore "/tmp/keystore.jks";
 						
 grant signedBy "jboss,andRedHat", codeBase "file:///tmp/hibernate.jar",
 	principal org.jboss.Principal "john",
@@ -372,6 +371,23 @@ java \
 				<section>
 					<h1>It's Demo Time</h1>
 					<p><em>Let's read some cool system properties.</em></p>
+
+					<aside class="notes">
+						<p>We will create a simple application which prints content of system property.</p>
+<pre>
+geany code/sec-man-reloaded/Demo.java
+geany code/sec-man-reloaded/Demo.final.java
+
+javac Demo.java
+java Demo java.home
+java -Djava.security.manager Demo java.home
+echo 'grant { permission java.util.PropertyPermission "java.home", "read"; };' > security.policy
+java -Djava.security.manager -Djava.security.policy=security.policy Demo java.home
+java -Djava.security.manager -Djava.security.policy=security.policy Demo test.property
+java -Djava.security.manager -Djava.security.policy=security.policy Demo java.version
+java -Djava.security.manager -Djava.security.policy==security.policy Demo java.version
+</pre>
+				</aside>
 				</section>
 
 				<section data-background="images/sec-man-reloaded/scales.png">
@@ -462,11 +478,31 @@ deny {
 
 			<section>
 				<h1>It's Demo Time</h1>
-				<!-- JBoss EAP with PolicyFileGeneratorJSM -->
 				<p><em>Let's generate some cool text file.</em></p>
+				<p><em>Policy File for WildFly 8.1 in 5 minutes.</em></p>
 
 				<aside class="notes">
-					<p>We will generate a new policy file.</p>
+					<p>We will generate a new policy file for WildFly application server.</p>
+<pre>
+JBOSS_HOME=/home/kwart/test/wfly810/wildfly-8.1.0.Final
+cp  ~/projects/pro-grade/target/pro-grade.jar $JBOSS_HOME/
+
+colordiff code/sec-man-reloaded/standalone.sh $JBOSS_HOME/bin/standalone.sh
+colordiff code/sec-man-reloaded/standalone.conf $JBOSS_HOME/bin/standalone.conf
+
+cp  code/sec-man-reloaded/standalone.* $JBOSS_HOME/bin
+$JBOSS_HOME/bin/standalone.sh
+
+# go to http://localhost:8080
+
+# stop server
+geany $JBOSS_HOME/wildfly.policy
+
+geany $JBOSS_HOME/bin/standalone.conf
+# enable standard security manager with the generated policy
+</pre>
+					<p>Usually you would go through normal workflows in your deployed applications and 
+					policy file would contain the permissions for those applications too.</p>
 				</aside>
 			</section>
 
