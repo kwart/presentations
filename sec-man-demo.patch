@@ -1,0 +1,25 @@
+diff -urN wildfly-8.1.0.Final/bin/standalone.conf wildfly-8.1.0.Final.jsm-template/bin/standalone.conf
+--- wildfly-8.1.0.Final/bin/standalone.conf	2014-05-30 21:54:24.000000000 +0200
++++ wildfly-8.1.0.Final.jsm-template/bin/standalone.conf	2014-10-11 15:35:59.265575744 +0200
+@@ -68,3 +68,9 @@
+ # Uncomment this in order to be able to run WildFly on FreeBSD
+ # when you get "epoll_create function not implemented" message in dmesg output
+ #JAVA_OPTS="$JAVA_OPTS -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.PollSelectorProvider"
++
++JAVA_OPTS="$JAVA_OPTS -Djava.security.manager=net.sourceforge.prograde.sm.PolicyFileGeneratorJSM -Djava.security.policy==/dev/null -Dprograde.generated.policy=$JBOSS_HOME/wildfly.policy"
++
++#JAVA_OPTS="$JAVA_OPTS -Djava.security.manager -Djava.security.policy==$JBOSS_HOME/wildfly.policy"
++#JAVA_OPTS="$JAVA_OPTS -Djava.security.manager -Djava.security.policy==$JBOSS_HOME/wildfly.policy -Djava.security.debug=access:failure"
++#JAVA_OPTS="$JAVA_OPTS -Djava.security.manager=net.sourceforge.prograde.sm.DumpMissingPermissionsJSM -Djava.security.policy==$JBOSS_HOME/wildfly.policy"
+diff -urN wildfly-8.1.0.Final/bin/standalone.sh wildfly-8.1.0.Final.jsm-template/bin/standalone.sh
+--- wildfly-8.1.0.Final/bin/standalone.sh	2014-05-30 21:54:24.000000000 +0200
++++ wildfly-8.1.0.Final.jsm-template/bin/standalone.sh	2014-10-11 15:36:18.093240361 +0200
+@@ -258,7 +258,7 @@
+       eval \"$JAVA\" -D\"[Standalone]\" $JAVA_OPTS \
+          \"-Dorg.jboss.boot.log.file=$JBOSS_LOG_DIR/server.log\" \
+          \"-Dlogging.configuration=file:$JBOSS_CONFIG_DIR/logging.properties\" \
+-         -jar \"$JBOSS_HOME/jboss-modules.jar\" \
++         -cp \"$HOME/tools/pro-grade-1.1.1/pro-grade.jar:$JBOSS_HOME/jboss-modules.jar\" org.jboss.modules.Main \
+          -mp \"${JBOSS_MODULEPATH}\" \
+          org.jboss.as.standalone \
+          -Djboss.home.dir=\"$JBOSS_HOME\" \
