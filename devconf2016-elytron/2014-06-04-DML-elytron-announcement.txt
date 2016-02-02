@@ -1,0 +1,91 @@
+WildFly Elytron [1] is a new WildFly sub-project which will completely 
+replace the combination of PicketBox and JAAS as the WildFly client and 
+server security mechanism.
+
+An "elytron" (ĕl´·ĭ·trŏn, plural "elytra") is the hard, protective 
+casing over a wing of certain flying insects (e.g. beetles).
+
+Here is a high-level project summary:
+
+WildFly Elytron does presently, or will, satisfy the following goals:
+
+• Establish and clearly define terminology around WildFly's security 
+concepts
+• Provide support for secure server-side authentication mechanisms (i.e. 
+eliminating the historical "send the password everywhere" style of 
+authentication and forwarding) supporting HTTP [2], SASL [3] (including 
+SASL+GSSAPI [4]), and TLS [5] connection types, as well as supporting 
+other authentication protocols in the future without change (such as 
+RADIUS [6], GSS [7], EAP [8])
+• Provide a simple means to support multiple security associations per 
+security context (one per authentication system, including local and 
+remote application servers, remote databases, remote LDAP, etc.)
+• Provide support for password credential types using the standard JCE 
+archetypal API structure (including but not limited to plain, UNIX 
+DES/MD5/SHA crypt types, bcrypt, mechanism-specific pre-hashed 
+passwords, etc.)
+• Provide SPIs to support all of the above, such that consumers such as 
+Undertow, JBoss SASL, HornetQ etc. can use them directly with a minimum 
+of integration overhead
+• Provide SPIs to support and maintain security contexts
+• Integrate seamlessly with PicketLink IDM and Keycloak projects
+• Provide SPIs to integrate with IDM systems (such as PicketLink) as 
+well as simple/local user stores (such as KeyStores or plain files, and 
+possibly also simple JDBC and/or LDAP backends as well)
+• Provide SPIs to support name rewriting and realm selection based on 
+arbitrary, pluggable criteria
+• Provide a Remoting-based connection-bound authentication service to 
+establish or forward authentication between systems
+• Provide SPIs to allow all Remoting-based protocols to reuse/share 
+security contexts (EJB, JNDI, etc.)
+• Integrate seamlessly with Kerberos authentication schemes for all 
+authentication mechanisms (including inbound and outbound identity 
+propagation for all currently supporting protocols)
+• Provide improved integration with EE standards (JAAC and JASPIC)
+
+The following are presently non- or anti-goals:
+
+• Any provision to support JAAS Subject as a security context (due to 
+performance and correctness concerns)†
+• Any provision to support JAAS LoginContext (due to tight integration 
+with Subject)
+• Any provision to maintain API compatibility with PicketBox (this is 
+not presently an established requirement and thus would add undue 
+implementation complexity, if it is indeed even possible)
+• Replicate Kerberos-style ticket-based credential forwarding (just use 
+Kerberos in this case)
+
+† You may note that this is in contrast with a previous post to the AS 7 
+list [9] in which I advocated simply unifying on Subject.  Subsequent 
+research uncovered a number of performance and implementation weaknesses 
+in JAAS that have since convinced the security team that we should no 
+longer be relying on it.
+
+Most of the discussion on this project happens in the #wildfly-dev+ 
+(note the plus sign) channel on FreeNode IRC.  At some point in the 
+near-ish future I will hopefully also have some (open-source) 
+presentation materials about the architecture.
+
+Questions and comments welcome; feel free to peruse the code and comment 
+in GitHub as well.
+
+References/links:
+
+[1] https://github.com/wildfly-security/wildfly-elytron
+[2] http://tools.ietf.org/html/rfc2616
+[3] http://tools.ietf.org/html/rfc4422
+[4] http://tools.ietf.org/html/rfc4752
+[5] http://tools.ietf.org/html/rfc5246
+[6] http://tools.ietf.org/html/rfc2865 and 
+http://tools.ietf.org/html/rfc2866
+[7] http://tools.ietf.org/html/rfc2743 and related
+[8] http://tools.ietf.org/html/rfc3748
+[9] http://lists.jboss.org/pipermail/jboss-as7-dev/2013-February/007730.html
+
+-- 
+- DML
+
+_______________________________________________
+wildfly-dev mailing list
+wildfly-dev@lists.jboss.org
+https://lists.jboss.org/mailman/listinfo/wildfly-dev

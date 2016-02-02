@@ -1,0 +1,34 @@
+# Put this file into ~/ and press Ctrl-x Ctrl-r for reload
+
+# Prepare Demo env
+"\e00": "#\ncd ~/projects/presentations/devconf2016-elytron\nexport PS1='$ '\nexport WILDFLY_HOME=$HOME/wildfly-10.0.0.Final-elytron_integration"
+"\e01": "#\n# Unzip WildFly\nrm -rf $WILDFLY_HOME; unzip -q $HOME/test/wildfly-10.0.0.Final-elytron_integration.zip -d $HOME"
+"\e02": "#\n# Start WildFly\n$WILDFLY_HOME/bin/standalone.sh"
+
+# Deploy and run test application against legacy security domain
+"\e11": "#12\n# show test application structure\ntree test.war"
+"\e12": "#21\n# list files in application\nfind test.war -type f -exec vi {} \\;"
+
+# Legacy security domain
+"\e21": "#22\n# Legacy security domain and realm\n# user population lives in property files\ntree /opt/web-tests"
+"\e22": "#23\n# list files in application\nfind /opt/web-tests -type f -exec vi {} \\;"
+"\e23": "#24\n# add web-tests domain\ncat cli/00-legacy.cli"
+"\e24": "#25\n$WILDFLY_HOME/bin/jboss-cli.sh -c --file=cli/00-legacy.cli"
+
+"\e25": "#26\n# deploy test application\ncp -r test.war $WILDFLY_HOME/standalone/deployments/; touch $WILDFLY_HOME/standalone/deployments/test.war.dodeploy"
+"\e26": "#27\n# test without authentication\ncurl http://localhost:8080/test/ -v"
+"\e27": "#31\n# test with authentication\ncurl http://localhost:8080/test/ -v -u admin:admin.1234"
+
+# extension
+"\e31": "#\n#32\n# add Elytron extension and subsystem to WildFly configuration\nless cli/01-extension.cli"
+"\e32": "#26\n$WILDFLY_HOME/bin/jboss-cli.sh -c --file=cli/01-extension.cli; grep WFLYELY $WILDFLY_HOME/standalone/log/server.log"
+
+
+# Deploy and run test application
+"\e71": "#72\n# show test application structure\ntree providers.war"
+"\e72": "#73\n# list files in application\nfind providers.war -type f -exec vi {} \\;"
+"\e73": "#74\n# deploy test application\ncp -r providers.war $WILDFLY_HOME/standalone/deployments/; touch $WILDFLY_HOME/standalone/deployments/providers.war.dodeploy"
+"\e74": "#75\n# list security providers\ncurl http://localhost:8080/providers/"
+# Security domain in Undertow
+"\e75": "#76\n# configure SunPKCS11 provider\ncat cli/05-provider.cli"
+"\e76": "#74\n$WILDFLY_HOME/bin/jboss-cli.sh -c --file=cli/05-provider.cli"

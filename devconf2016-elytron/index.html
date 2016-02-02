@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Are you ready for a new WildFly security? Elytron!</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+## Are you ready for a new WildFly security? 
+
+# Elytron!
+
+???
+
+Welcome to the last presentation today. 
+
+It's cool to see audience even in such a late time.
+
+The presentation is be about project Elytron,
+new security subsystem for WildFly.
+
+The excellent WildFly 10 was released before one week without Elytron.
+So you still have a time to prepare for the changes coming in next versions!
+
+---
+
+## Disclaimer
+
+* The information in this presentation is provided "AS IS" with no warranties;
+* Use this presentation at your discretion;
+* All slides here are my personal opinions, and do not represent 
+those of my employer.
+
+???
+
+I always wanted to have a slide with disclaimer in my presentation. I love the second slide
+in presentation of Oracle employees, so I made one too.
+
+The Elytron is not yet in WildFly and many of things can change 
+or evolve in different ways until it will be fully integrated.
+
+---
+
+## Agenda
+
+* Conclusion
+* Icebreakers
+* Problems we solve
+* Features we have
+* Future we define
+* Backward compatible are we?
+* Demo time
+
+???
+
+This is my plan for this presentation:
+
+* let's start with conclusion, because I have to catch a classical music concert at 7:30
+* then it's a good practice to include some icebreakers in the presentation, so let's do it too
+* we'll shortly talk about background of this change, **WHY it's important?**
+* current state of the project, i.e **WHAT we have**
+* and let's also talk about our (or my) expectations - **WHERE the Elytron will go in next days and months?**
+* the expectations also cover expected problems we'll see once the Elytron in WildFly is live
+* And finally, let's try some live demo.
+
+---
+
+## Elytron Summary - Conclusion
+
+* set of APIs and SPIs
+* unified security configuration
+* SASL based authentication
+* supports new security approaches and mechanisms
+
+*WildFly Elytron is a new WildFly sub-project which is **completely replacing** the combination of **PicketBox and JAAS** as the WildFly client and server security mechanism.*
+
+???
+
+Elytron Wildfly is set of APIs and SPIs which cover application server security.
+
+It unifies the security configuration accross the application server. It will resolve the fragmentation in security configuration. (for instance SSL configuration)
+
+Elytron announcement from David LLoyd on WildFly-dev mailing list in June 2014.
+
+---
+
+## Who is Josef Cacek?
+
+* Red Hatter - Principal Quality Engineer in JBoss EAP team
+  * security
+  * containers
+  * clouds  
+* father
+* hobby runner
+* organ player
+
+???
+
+This is my background info. I work in Red Hat as a JBoss quality engineer
+ focused mainly on security and in last months also on containers and clouds.
+
+Other roles, I play more-or-less succesfully are happy father, experienced hobby runner and organ player.
+
+---
+
+# What about you?
+
+???
+
+Aaaand now the social part.... the icebreakers
+---
+
+# What about you?
+
+* Do you work with Java application servers?
+
+???
+
+Are you Java EE friends? 
+
+Raise your hands, please.
+---
+
+# What about you?
+
+* Do you work with Java application servers?
+* Have you ever tried to change some security configuration in WildFly?
+
+???
+
+Have you ever met security domains, realms, or SSL configuration in WildFly?
+
+---
+
+# What about you?
+
+* Do you work with Java application servers?
+* Have you ever tried to change some security configuration in WildFly?
+* Do you run?
+
+???
+
+And Mathew in the Bible says something like: "Man shall not live on WildFly alone"
+
+
+So now the runners, my friends, raise your hands and inspire/enthuse the rest of this group for this great religion.
+---
+
+## Problems we solve
+
+* JAAS limitations
+  * Subject performance
+  * not standardized in Java EE
+* need for stronger authentication
+* fragmented security configuration in subsystems
+  * security domains
+  * security realms
+  * vaults
+  * subsystems with their own configuration
+
+???
+
+The icebreakers part is succesfully completed, let's continue with more serious business.
+
+**"Why are we replacing current solution?"**
+
+Let's dive into a history little bit.
+
+* JAAS is actually a client side API that pre-dated Java EE
+* JEE specs left security decisions down to the vendors
+* only simple security solutions were in demand at that time (validate plain text username and password). As a result JAAS was quickly adopted as this was something it could do.
+* with JBoss AS7 preference was to switch to stronger authentication mechanisms - which meant SASL based authentication, which was not compatible with JAAS
+* as a result we have 2 different security solutions (one focussed on SASL compatibility and one focussed on the legacy approach of principal / credential validation with integration between the two)
+* having 2 different security solutions solving the same problem from completely different perspectives is confusing for user
+* this led to the initiation of the Elytron project to provide a single unified security solution across the whole application server.
+
+It was beginning of 2013, when David LLoyd wrote about a need of uniform way
+how to handle security context propagation. He described limitations which
+came from using JAAS Subject-based approach in WildFly.
+
+---
+
+## Features we have
+
+**Elytron**
+* Password Factory
+* Security Realm
+* Security Domain
+* SASL Mechanisms
+* HTTP Authentication Framework
+* JACC
+* JCA Providers support
+
+**Subsystems integration** (*Work in Progress*)
+* Undertow
+* EJBs
+
+???
+
+PasswordFactory API/SPI
+* Implementation of numerous password types and representations (hashed / salted)
+* Mechanism specific representations e.g. Digest/SCRAM/OTP
+* Some level of transformation
+
+Security Realms - Integration point with account store
+* when we simplify it: validate credentials, retrieve them from backing store, modify credentials
+* implementations: Legacy properties file, JDBC, LDAP, File based
+* Also have modifiable realm API/SPI
+
+Security Domain - Authentication Starts Against This
+* Aggregation of security realms
+* Returns SecurityIdentity (getRoles based on RoleMapper, getPermissions based on PermissionMapper)
+
+SASL Mechanisms (Based on JBoss SASL)  
+HTTP Authentication Framework - SASL pattern for HTTP
+
+```java
+public WildFlyElytronProvider() {
+    putHttpAuthenticationMechanismImplementations();
+    putKeyStoreImplementations();
+    putPasswordImplementations();
+    putSaslMechanismImplementations();
+}
+```
+---
+
+## Features we have 
+
+### WildFly Security Manager
+
+* present in WildFly already
+
+```bash
+$WILDFLY_HOME/bin/standalone.sh -secmgr
+```
+
+???
+
+WildFly Security Manager which is already present in WF, can be seen also
+as part of Elytron effort.
+
+It has its own subsystem.
+
+---
+## Subsystems comparison
+
+* `/subsystem=security`
+  * XSD - 424 lines
+  * subsystem resource description - 1286 lines
+* `/subsystem=elytron`
+  * XSD - 2387 lines
+  * subsystem resource description - 3256 lines
+
+???
+
+We can compare the legacy security subsystem and new elytron one (which is not finished yet).
+
+From this simple comparison, we'll see the configuration will surely cover large area.
+
+The XML Schema file of Elytron subsystem has 5-times more lines than  security subsystem.
+---
+
+## Subsystems comparison - Legacy Security subsystem
+
+```xml
+<subsystem xmlns="urn:jboss:domain:security:3.0">
+  <security-domains>
+    <security-domain name="myDomain" cache-type="default">
+      <authentication>
+        <login-module code="UsersRoles" flag="default">
+          <module-option name="usersProperties" 
+                         value="/etc/wf-users.properties" />
+          <module-option name="rolesProperties" 
+                         value="/etc/wf-roles.properties" />
+        </login-module>
+      </authentication>
+    </security-domain>
+</subsystem>
+```
+???
+Standard form of configuration in legacy subsystem
+* named security domain which can be referenced from deployed applications and used for controlling authentication and authorization
+* it contains one or more login modules which are usually responsible for authentication and role mapping
+---
+## Subsystems comparison - Elytron subsystem
+
+```xml
+<subsystem xmlns="urn:wildfly:elytron:1.0">
+  <security-domains>
+    <security-domain name="testdomain" default-realm="fsRealm">
+      <realm name="fsRealm" />
+    </security-domain>
+  </security-domains>
+  <security-realms>
+    <filesystem-realm name="fsRealm">
+      <file path="fs-realm" relative-to="jboss.server.config.dir" />
+    </filesystem-realm>
+  </security-realms>
+  <http>
+    <http-server-authentication name="server-authn" 
+             http-server-factory="global" security-domain="testdomain">
+      <mechanism-configuration>
+        <mechanism mechanism-name="BASIC">
+          <mechanism-realm realm-name="Secured by Elytron" />
+        </mechanism>
+      </mechanism-configuration>
+    </http-server-authentication>
+    <provider-http-server-factory name="global" />
+  </http>
+</subsystem>
+```
+???
+Elytron subsystem has to contain much more stuff
+* we have analogy to login modules and legacy domains in Elytron security realms and domains
+* but to get it working with WildFly web server Undertow you have to define also HTTP authentication
+* We can expect that default server configuration will contain reasonable defaults for the HTTP authn
+---
+## Future we define
+
+* Credential Store
+* Single SSL/TLS configuration place
+* Subsystems integration (Remoting, JMS, ...)
+
+???
+
+Credential Store API/SPI
+* replacement for security vaults
+  * store sensitive information out of the server configuration
+  * for instance DB passwords
+* probably with tooling to convert existing vaults
+* more instances in one configuration
+
+Single SSL/TLS
+* Currently several places where SSL is configured
+  * domains
+  * realms
+  * Undertow
+
+There will be a need for integration work in other subsystems like Remoteing, Messaging, and others.
+Thanks to new feature in WildFly 10, which is called capabilities and requirements, there will hopefully be no need 
+for direct dependency on Elytron.
+---
+
+## Backward compatibility
+
+**Compatibility level is not clear at this moment!**
+
+Terminology is not compatible already (Domains and Realms).
+
+Probably:
+* old and new systems will live together (for some time);
+* only LoginModules will survive (afterwards);
+* migration tool for vaults will be introduced.
+
+???
+
+And now the real speculations.
+
+Once the Elytron is merged to WF, users will start to ask
+* if it's compatible with legacy solution.
+* how to convert existing configuration to Elytron
+* what will happen with custom authentication modules developed by users
+
+ 
+---
+
+## Demo time - Securing web application
+
+**Demo app**
+* single JSP with declarative security in web.xml
+
+**Legacy way configuration**
+* Authentication through legacy security domain
+  * property file
+
+**Elytron way configuration**
+* Authentication through Elytron security domain
+  * FileSystem Realm
+* HTTP authentication configuration
+* Undertow configuration
+
+???
+And now the demo time.
+
+I will use WildFly 10 from Elytron integration branch to show you how to do HTTP authentication
+with Elytron.
+
+We'll cover securing a simple web-application.
+
+We'll start with showing legacy solution and then switching to Elytron.
+
+* legacy domain
+* test app
+
+* HTTP authentication in Undertow web server
+ * extension and subsystem
+ * realm and domain
+ * HTTP authentication
+ * Undertow
+ * deploy and run test app
+ 
+---
+
+## Demo time - Add Security provider
+
+* add SunPKCS11 provider through Elytron subsystem
+  * standard way to deal with keys on crypto devices like smart-cards, USB tokens, NSS keystores
+
+???
+
+Escape-7 x
+
+Second demo will show other part of Elytron configuration.
+
+We will add support for PKCS11 keystore type by adding SunPKCS11 security provider.
+
+The PKCS11 keystores can be used to deal with crypto devices like smart cards and USB crypto-tokens.
+
+In my case I don't have such a device now, so I'll bind it to Netscape Security Services
+keystore type, which is available through libnss3 library and has support in SunPKCS11 security
+provider.
+---
+
+## Elytron Summary - Conclusion
+
+* set of APIs and SPIs
+* unified security configuration
+* SASL based authentication
+* supports new security approaches and mechanisms
+
+*WildFly Elytron is a new WildFly sub-project which is **completely replacing** the combination of **PicketBox and JAAS** as the WildFly client and server security mechanism.*
+
+---
+
+# Elytron is the next BIG thing!
+
+* Give it a try!
+  * https://github.com/wildfly-security/  
+  Elytron, Elytron subsystem
+  * https://github.com/wildfly-security-incubator/  
+  WildFly Core, WildFly
+* Report issues
+  * https://issues.jboss.org/projects/ELY
+* Discuss with developers
+  * https://www.hipchat.com/gKoTFkUyg
+
+???
+
+The second conclusion of this presentation is:
+* Don't be afraid of changes. They'll surely come.
+* Try Elytron in WildFly
+* If you find an issue, fill it in the JBoss issue tracker
+* Talk to developers on HipChat about your thoughts, concerns, ideas.
+
+---
+
+class: center, middle
+
+# Questions?
+
+jcacek@redhat.com  
+https://github.com/kwart/  
+@jckwart
+
+
+???
+
+Thank you for attention
+
+    </textarea>
+    <script src="remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>

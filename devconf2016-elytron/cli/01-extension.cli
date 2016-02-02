@@ -1,0 +1,39 @@
+
+# Enable extension & subsystem
+
+/extension=org.wildfly.extension.elytron:add
+/subsystem=elytron:add
+reload
+
+# Add FileSystem security realm
+
+/subsystem=elytron/filesystem-realm=fsRealm:add(path="fs-realm", relative-to="jboss.server.config.dir")
+
+# We don't need add-user.sh tool!
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:add()
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:set-password(clear={password="admin.1234e"})
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:add-attribute(name=Roles, value=["Admin","User"])
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:add()
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:set-password(clear={password="user.1234e"})
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:add-attribute(name=Roles, value=["User"])
+
+# Add Security domain with the realm
+
+/subsystem=elytron/security-domain=testdomain:add(default-realm=fsRealm, realms=[{realm=fsRealm}])
+
+# HTTP server factory
+
+/subsystem=elytron/provider-http-server-factory=global:add
+
+# HTTP server authentication
+
+/subsystem=elytron/http-server-authentication=server-authn:add( \
+   http-server-factory=global, security-domain=testdomain, \
+   mechanism-configurations=[ \
+     {mechanism-name=BASIC, mechanism-realm-configurations=[realm-name="Secured by Elytron"]} \
+   ])
+
+# Security domain mapping in Undertow
+
+/subsystem=undertow/application-security-domain=web-tests:add(http-authentication-factory=server-authn)
+reload
