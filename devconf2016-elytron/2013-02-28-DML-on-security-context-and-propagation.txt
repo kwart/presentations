@@ -1,0 +1,170 @@
+The Problem
+===========
+In order to support all the Java EE 7 requirements, we need to be able 
+to propagate security context in a predictable and uniform manner. 
+Unfortunately, we have almost as many security context concepts as we do 
+projects which support authentication.  There is no single way to 
+execute a task given a security context snapshot from another thread 
+that will work for all of our projects.
+
+Project-Specific Security Context
+---------------------------------
+The typical implementation of a project-specific security context is 
+just a Subject, cached into a ThreadLocal and available via some 
+accessors.  In addition we have the SecurityRolesAssociation concept 
+from PicketBox, which is meant to encapsulate roles from an EE perspective.
+
+Available Mechanisms
+====================
+A number of mechanisms are provided by the JDK and the EE SDK 
+specifically for addressing this problem domain.  Here's a quick review 
+so we are all speaking the same language.
+
+javax.security.auth.Subject
+---------------------------
+The focal point for security in both SE and EE is the Subject class, 
+which is an encapsulation of related information for a security entity, 
+including credentials (passwords, keys, etc.) and identities (user/group 
+names, roles, etc.).  Most (not all) of our security-aware projects 
+already seem to use Subject, though they may not all be using it in the 
+same way.
+
+Subject has some utility methods which are intended to allow association 
+with the current security context.  With these methods you can run tasks 
+as different Subjects.  We currently do not support these methods.
+
+java.security.Principal
+-----------------------
+The base interface for an identity.  Though there are no specific 
+supported implementations for EE use cases, this interface would be the 
+base for user names, group names, role names, and so on.  JDK Principal 
+implementations do exist for filesystem users and groups, certificate 
+signers and principals, JMX authenticated identities, etc.
+
+java.security.AccessControlContext ("ACC")
+------------------------------------------
+This is *the* JDK-provided security context.  It represents the 
+accumulated privileges of "protection domains", which can in turn 
+correspond to principals, permissions, and/or code sources (i.e. JARs). 
+  A given ACC, in simplified terms, represents the *intersection* of 
+privileges granted by all the invocations on the call stack.
+
+It gets a bit complex once you plumb the depths but imagine ACC 
+conceptually like a second execution stack.  Every time you call into 
+another module, you push another layer on the stack which includes that 
+module's permission set (which is AllPermission by default, but can be 
+restricted on a per-module basis).  This also includes calling into 
+deployments.  You can also push a Subject on to this stack using 
+Subject.doAs*().
+
+It is worth emphasizing that the effective permission set for an ACC is 
+the intersection of all of its parts, so the more calls you make, the 
+more restricted your permissions are.  This is why we use 
+AccessController.doPrivileged*() and/or Subject.doAsPrivileged(): it 
+"clears" the stack for the duration of the invocation, adding only the 
+module which hosts the Privileged*Action class being executed (and 
+optionally the given Subject as well).  This becomes important when you 
+consider that in many cases, you have no idea under what context a given 
+piece of code will be run, thus you cannot be certain whether a 
+restricted operation will succeed without using doPrivileged().
+
+Perhaps the canonical case of this is class initialization.  Common 
+sense would seem to imply that classes should always be initialized in a 
+privileged context, but that does not seem to be the case in reality. 
+Thus class init is often stuck with awkward doPrivileged constructs, 
+especially when field init is involved.
+
+A Unified Security Context
+==========================
+The ACC affords us a uniquely suited mechanism for security association. 
+  Subjects are already designed to be connected into ACCs; in fact, you 
+can query an ACC for its associated Subject with a simple get.  In turn 
+the Subject can be queried for its Principals and credentials.
+
+This also gives us saner integration with JAAS, to the extent that such 
+sanity is possible; users can use the returned Subject with 
+Subject.doAs() and get the results they would expect in any situation.
+
+Finally ACC is in the JDK - any third-party security-aware framework is 
+much more likely to integrate with ACC and Subject than with some 
+framework provided by us.  And, the JDK security manager framework is 
+ready to handle it, so a user security policy could for example forbid 
+certain Subjects from performing operations as an additional security layer.
+
+Getting the Current Subject
+---------------------------
+To get the current subject you can do something like this:
+
+    Subject current = Subject.getSubject(AccessController.getContext());
+
+This will work from any context - though there is a permission check 
+involved so a security action is in order in this case.
+
+Propagation Within the AS
+-------------------------
+We need to do in-system propagation of security context in a few 
+situations.  The predominant one (to me) is using JSR-236 thread pools - 
+tasks submitted by an EE component must run under the same security 
+context that the submitter holds.
+
+Fortunately propagation of this nature is quite simple: use 
+AccessController.getContext() to acquire the current security context, 
+and use AccessController.doPrivileged() to resume.
+
+Propagation to other components (e.g. EJBs) is a little different 
+though.  In this case you do not want the baggage of the caller ACC; you 
+only need to preserve the caller Subject.  In this case, you would 
+acquire the Subject as above, and the security interceptor would simply 
+use Subject.doAs() to resume.
+
+Propagation Over the Network
+----------------------------
+It should be possible to use Principal information stored on the Subject 
+in combination with private credentials to provide all the information 
+required for network propagation of security context.  This should work 
+particularly well with the Remoting authentication service in particular.
+
+One Step Farther: ACC-Based Permission Checking
+-----------------------------------------------
+It is possible to take this idea a little farther and introduce 
+permission checking for JACC-style permissions based on the ACC.  Using 
+ACC.checkPermission we can do permission checking regardless of the 
+presence or absence of a SecurityManager.  However, it is not clear what 
+benefits we would derive from this move (if any).
+
+Costs and Alternatives
+======================
+ACC is not free.  It's a fairly heavyweight structure (though it does 
+make certain optimizations in some cases), and it contains what is 
+probably more information than is strictly necessary as it is designed 
+for full-bore SecurityManager sandboxing and permission checking.  Thus 
+it is worth exploring alternatives.
+
+Alternative: Central Security Context
+-------------------------------------
+Alternative #1 is to support a central security context represented by a 
+Subject in one place which all frameworks and libraries share.
+
+Pros: lightweight (as much as possible anyway); conceptually simple
+Cons: not compatible Subject.doAs or AccessController.doPrivileged; 
+additional dependency for all security-aware frameworks; third-party 
+stuff is less likely to just work
+
+Alternative: ???
+----------------
+Add your ideas here!
+
+Action
+======
+I think, barring any major dissent, we should make a move towards using 
+ACC as a unified security context.  I think that given the EE 7 security 
+manager requirements and user requests over time, that standardizing 
+around ACC makes sense.
+
+Discussion: go!
+
+-- 
+- DML
+Previous message: [jboss-as7-dev] Security manager test runs
+Next message: [jboss-as7-dev] On security context and propagation
+Messages sorted by: [ date ] [ thread ] [ subject ] [ author ]

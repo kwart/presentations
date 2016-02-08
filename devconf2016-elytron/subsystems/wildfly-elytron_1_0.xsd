@@ -1,0 +1,2389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ JBoss, Home of Professional Open Source.
+  ~ Copyright 2014 Red Hat, Inc., and individual contributors
+  ~ as indicated by the @author tags.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="urn:wildfly:elytron:1.0"
+            xmlns="urn:wildfly:elytron:1.0"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified"
+            version="1.0">
+
+    <!-- The subsystem root element -->
+    <xs:element name="subsystem" type="subsystemType"/>
+
+    <xs:complexType name="subsystemType">
+        <xs:all>
+            <xs:element name="security-properties" type="securityPropertiesType" minOccurs="0" />
+            <xs:element name="provider-loaders" type="providerLoadersType" minOccurs="0" />
+            <xs:element name="security-domains" type="securityDomainsType" minOccurs="0" />
+            <xs:element name="security-realms" type="realmsType" minOccurs="0" />
+            <xs:element name="mappers" type="mappersType" minOccurs="0" />
+            <xs:element name="http" type="httpType" minOccurs="0" />    
+            <xs:element name="sasl" type="saslType" minOccurs="0" />
+            <xs:element name="tls" type="tlsType" minOccurs="0" />
+        </xs:all>
+    </xs:complexType>
+
+    <!--
+        Security Properties
+     -->
+
+    <xs:complexType name="securityPropertiesType">
+        <xs:annotation>
+            <xs:documentation>
+                Type to contain a list of security properties to be set.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="security-property" type="propertyType" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="propertyType">
+        <xs:annotation>
+            <xs:documentation>
+                Representation of a key/value property
+                pair.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="key" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The key for this property.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="value" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The value for this property.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!--
+        Providers
+     -->
+
+     <xs:complexType name="providerLoadersType">
+         <xs:annotation>
+             <xs:documentation>
+                 Container for definitions of java.security.Provider loaders.
+             </xs:documentation>
+         </xs:annotation>
+         <xs:sequence>
+             <xs:element name="provider-loader" maxOccurs="unbounded">
+                 <xs:annotation>
+                     <xs:documentation>
+                         An individual provider loader definitions.
+                     </xs:documentation>
+                 </xs:annotation>
+                 <xs:complexType>
+                     <xs:sequence>
+                         <xs:element name="provider" minOccurs="0" maxOccurs="unbounded">
+                             <xs:complexType>
+                                 <xs:choice minOccurs="0">
+                                     <xs:element name="configuration-file">
+                                         <xs:complexType>
+                                                 <!-- TODO Put this pair of attributes in a common type or attribute group. -->
+                                                 <xs:attribute name="relative-to" type="xs:string" use="optional">
+                                                     <xs:annotation>
+                                                         <xs:documentation>
+                                                             A reference to a previously defined path that the file name is
+                                                             relative to.
+                                                         </xs:documentation>
+                                                     </xs:annotation>
+                                                 </xs:attribute>
+                                                 <xs:attribute name="path" type="xs:string" use="required">
+                                                     <xs:annotation>
+                                                         <xs:documentation>
+                                                             The remaining path to the file referenced.
+                                                         </xs:documentation>
+                                                     </xs:annotation>
+                                                 </xs:attribute>
+                                         </xs:complexType>
+                                     </xs:element>
+                                     <xs:element name="configuration-properties">
+                                         <xs:annotation>
+                                             <xs:documentation>
+                                                 An ordered list of properties to be used to configure all of the providers.
+                                             </xs:documentation>
+                                         </xs:annotation>
+                                         <xs:complexType>
+                                             <xs:sequence>
+                                                 <xs:element name="property" type="propertyType" maxOccurs="unbounded" />
+                                             </xs:sequence>
+                                         </xs:complexType>
+                                     </xs:element>
+                                 </xs:choice>
+                                 <xs:attribute name="module" type="xs:string" use="optional">
+                                     <xs:annotation>
+                                         <xs:documentation>
+                                             The name of the module to use to load the providers.
+
+                                             If this is not specified the ClassLoader used to load the service will be used instead.
+                                         </xs:documentation>
+                                     </xs:annotation>
+                                 </xs:attribute>
+                                 <xs:attribute name="slot" type="xs:string" use="optional">
+                                     <xs:annotation>
+                                         <xs:documentation>
+                                             The slot of the module to use to load the providers.
+
+                                             This will only be required in rare situations where a single module is defined with multiple slots.
+                                         </xs:documentation>
+                                     </xs:annotation>
+                                 </xs:attribute>
+                                 <xs:attribute name="load-services" type="xs:boolean" default="false">
+                                     <xs:annotation>
+                                         <xs:documentation>
+                                             Should ServiceLoader discovery be used to identify the providers?
+
+                                             Note: ServiceLoader discovery happens before any specified classes are loaded.
+                                         </xs:documentation>
+                                     </xs:annotation>
+                                 </xs:attribute>
+                                 <xs:attribute name="class-names" type="stringListType" use="optional">
+                                     <xs:annotation>
+                                         <xs:documentation>
+                                             The fully qualified class names of the providers to load.
+
+                                             These providers are loaded after ServiceLoader based discovery, duplicates are silently skipped.
+                                         </xs:documentation>
+                                     </xs:annotation>
+                                 </xs:attribute>
+                             </xs:complexType>
+                         </xs:element>
+                     </xs:sequence>
+                     <xs:attribute name="name" type="xs:string" use="required">
+                         <xs:annotation>
+                             <xs:documentation>
+                                 The name to use to represent this provider loader in the management model.
+                             </xs:documentation>
+                         </xs:annotation>
+                     </xs:attribute>
+                     <xs:attribute name="register" type="xs:boolean" default="false">
+                         <xs:annotation>
+                             <xs:documentation>
+                                 Should the providers defined here be globally registered.
+
+                                 If not registered globally security definitions within the subsystem can still use a provider by
+                                 referencing it's name as defined here.
+                             </xs:documentation>
+                         </xs:annotation>
+                     </xs:attribute>
+                 </xs:complexType>
+             </xs:element>
+
+         </xs:sequence>
+     </xs:complexType>
+
+    <!--
+        Domains and Realms
+     -->
+
+    <xs:complexType name="securityDomainsType">
+        <xs:annotation>
+            <xs:documentation>
+                Container for the security domain definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="security-domain" type="securityDomainType" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="securityDomainType">
+        <xs:annotation>
+            <xs:documentation>
+                Complex type for the definition of a single security domain.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="realm" type="realmRefType" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required" />
+        <xs:attribute name="default-realm" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    Which of the listed realms should be the default?
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="pre-realm-name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the NameRewriter to be applied before the realm is selected.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="post-realm-name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the NameRewriter to be applied after the realm is selected.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="principal-decoder" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the PrincipalDecoder to be used by this domain.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="realm-mapper" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a RealmMapper to be used by this security domain.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="role-mapper" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a RoleMapper to be used by the domain.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="permission-mapper" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the PermissionMapper to be used by the domain.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="realmRefType">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to a security realm.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required" />
+        <xs:attribute name="name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    The NameRewriter to be associated with this realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="role-decoder" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    The RoleDecoder to be associated with this realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="role-mapper" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    The RoleMapper to be associated with this realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="realmsType">
+        <xs:annotation>
+            <xs:documentation>
+                Container for the security realm definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="aggregate-realm" type="aggregateRealmType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="custom-realm" type="customRealmType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="jdbc-realm" type="jdbcRealmType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="keystore-realm" type="keyStoreRealmType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="properties-realm" type="propertiesRealmType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="ldap-realm" type="ldapRealmType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="filesystem-realm" type="fileSystemRealmType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="realmType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all realm definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the realm, note names used for realms must be unique across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="aggregateRealmType">
+        <xs:annotation>
+            <xs:documentation>
+                Realm definition for an aggregate realm where authenticaton and authorization are handled by
+                two separate realms.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmType">
+                <xs:attribute name="authentication-realm" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The name of the realm to use for the authentication steps (obtaining or validating credentials).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="authorization-realm" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The name of the realm to use for the authorization steps (loading of the identity).
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+	<xs:complexType name="customRealmType">
+		<xs:annotation>
+			<xs:documentation>
+				Realm definition for a custom realm implementation.
+
+				Generally subsystems that provide security realms should make them available
+				using the capabilities and requirements features of the application
+				server, this custom mechanism is provided for truly issolated realm implementations.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+		    <xs:extension base="realmType">
+		        <xs:sequence>
+		            <xs:element name="configuration" type="customComponentConfiguration" minOccurs="0">
+		                <xs:annotation>
+		                    <xs:documentation>
+		                        The configuration to apply to the SecurityRealm implementation.
+
+		                        Note: If configuration is supplied the realm MUST implement the Configurable interface.
+		                    </xs:documentation>
+		                </xs:annotation>
+		            </xs:element>
+		        </xs:sequence>
+                <xs:attributeGroup ref="customComponentAttributes" />
+		    </xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+    <xs:complexType name="jdbcRealmType">
+        <xs:annotation>
+            <xs:documentation>
+                A security realm definition backed by database using JDBC.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmType">
+                <xs:sequence>
+                    <xs:element name="principal-query" type="authenticationQueryType" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="authenticationQueryType">
+        <xs:annotation>
+            <xs:documentation>
+                The authentication query used to authenticate users based on specific key types.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs="1">
+            <xs:sequence>
+                <xs:element name="clear-password-mapper" type="clearPasswordMapperType" minOccurs="0"/>
+                <xs:element name="bcrypt-mapper" type="bcryptMapperType" minOccurs="0"/>
+                <xs:element name="simple-digest-mapper" type="simpleDigestMapperType" minOccurs="0"/>
+                <xs:element name="salted-simple-digest-mapper" type="saltedSimpleDigestMapperType" minOccurs="0"/>
+                <xs:element name="scram-mapper" type="scramMapperType" minOccurs="0"/>
+                <xs:element name="attribute-mapping" type="jdbcAttributeMappingType" minOccurs="0"/>
+            </xs:sequence>
+        </xs:choice>
+        <xs:attribute name="sql" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The SQL statement used to obtain the keys(as table columns) for a specific user and map them accordingly with their type.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="data-source" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the datasource used to connecto to the database.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="jdbcAttributeMappingType">
+        <xs:sequence>
+            <xs:element name="attribute" type="jdbcAttributeType" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="jdbcAttributeType">
+        <xs:annotation>
+            <xs:documentation>
+                The configuration used to map a specific column in a table as an identity attribute.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="index" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from a query that representing the mapped attribute.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="to" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the identity attribute mapped from a column returned from a SQL query.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="clearPasswordMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A key mapper that maps a column returned from a SQL query to a Clear Password key type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="password-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the user's password.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="bcryptMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A key mapper that maps a column returned from a SQL query to a Bcrypt key type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="password-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the user's password.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="salt-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the password's salt, if supported.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="iteration-count-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the password's iteration count, if supported.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="saltedSimpleDigestMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A key mapper that maps a column returned from a SQL query to a Salted Simple Digest key type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="password-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the user's password.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="salt-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the password's salt, if supported.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="simpleDigestMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A key mapper that maps a column returned from a SQL query to a Simple Digest key type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="password-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the user's password.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="scramMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A key mapper that maps a column returned from a SQL query to a Scram key type.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="password-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the user's password.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="salt-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the password's salt, if supported.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="iteration-count-index" type="xs:int" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The column index from an authentication query that represents the password's iteration count, if supported.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="keyStoreRealmType">
+        <xs:complexContent>
+            <xs:extension base="realmType">
+                <xs:attribute name="keystore" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the KeyStore to be used by this realm.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="propertiesRealmType">
+        <xs:annotation>
+            <xs:documentation>
+                Realm definition for a realm backed by a properties file.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmType">
+                <xs:all>
+                    <xs:element name="users-properties" type="basicFileType">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The location of the properties file containing the users and their passwords.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="groups-properties" type="basicFileType" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The location of the properties file containing the users and their groups.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:all>
+                <xs:attribute name="plain-text" type="xs:boolean" default="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Are the passwords stored in the properties file in plain text or pre-hashed?
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="groups-attribute" type="xs:string" default="groups">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The name of the attribute in the returned AuthorizationIdentity that should contain the group membership information for the identity.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- Ldap Security Realm -->
+
+    <xs:complexType name="ldapRealmType">
+        <xs:annotation>
+            <xs:documentation>
+                A security realm definition backed by LDAP.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmType">
+                <xs:all>
+                    <xs:element name="dir-context" type="dirContextType" nillable="false"/>
+                    <xs:element name="identity-mapping" type="identityMappingType" nillable="false"/>
+                </xs:all>
+                <xs:attribute name="direct-verification" type="xs:boolean" use="optional" default="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Should this realm instance support verification of credentials by directly connecting to LDAP as the account being authenticated.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- FileSystem Security Realm -->
+    <xs:complexType name="fileSystemRealmType">
+        <xs:annotation>
+            <xs:documentation>
+                A simple security realm definition backed by the filesystem.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmType">
+                <xs:all>
+                    <xs:element name="file" type="basicFileType">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The location of the file to use to handle the security realm.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="name-rewriter" type="nameRewriterRefType" minOccurs="0"/>
+                </xs:all>
+                <xs:attribute name="levels" type="xs:int" default="2">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The number of levels of directory hashing to apply
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="dirContextType">
+        <xs:annotation>
+            <xs:documentation>
+                The configuration options that define how principals are mapped to their corresponding entries in the underlying LDAP server.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="url" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The connection url.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="authentication-level" type="xs:string" use="optional" default="simple">
+            <xs:annotation>
+                <xs:documentation>
+                    The authentication level.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="principal" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The principal to authenticate and connect to the LDAP server.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="credential" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The credential to authenticate and connect to the LDAP server.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enable-connection-pooling" type="xs:boolean" default="false" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Indicates if connection pooling is enabled.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="identityMappingType">
+        <xs:annotation>
+            <xs:documentation>
+                The configuration options that define how principals are mapped to their corresponding entries in the underlying LDAP server.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="attribute-mapping" type="ldapAttributeMappingType" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        The attribute mappings defined for this resource.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="rdn-identifier" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The RDN part of the principal's DN to be used to obtain the principal's name from an LDAP entry.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="search-base-dn" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The base DN to be used when executing queries.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="use-recursive-search" type="xs:boolean" default="false" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Indicates if queries are recursive.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="ldapAttributeMappingType">
+        <xs:sequence>
+            <xs:element name="attribute" type="ldapAttributeType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ldapAttributeType">
+        <xs:annotation>
+            <xs:documentation>
+                The configuration used to map a specific LDAP attribute as an identity attribute.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="from" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the LDAP attribute to map to an identity attribute.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="to" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the identity attribute mapped from a specific LDAP attribute. If not provided, the name of the attribute
+                    is the same as define in 'from'.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="filter" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The filter to use to obtain the values for a specific attribute.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="filter-base-dn" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the context where the filter should be performed.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="as-rdn" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The RDN key to use as the value for an attribute, in case the value in its raw form is in X.500 format.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!--
+        General Mappers and Rewriters
+     -->
+
+    <xs:complexType name="mappersType">
+        <xs:annotation>
+            <xs:documentation>
+                A general container type to hold the various name rewriter and mapper definitions
+                as used within the subsystem.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="aggregate-name-rewriter" type="aggregateNameRewriterType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="chained-name-rewriter" type="chainedNameRewriterType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="constant-name-rewriter" type="constantNameRewriter" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="custom-name-rewriter" type="customNameRewriterType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="regex-name-rewriter" type="regexNameRewriterType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="regex-name-validating-rewriter" type="regexNameValidatingRewriter" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="aggregate-principal-decoder" type="aggregatePrincipalDecoderType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="custom-principal-decoder" type="customPrincipalDecoderType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="x500-attribute-principal-decoder" type="x500AttributePrincipalDecoderType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="custom-permission-mapper" type="customPermissionMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="custom-realm-mapper" type="customRealmMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="simple-regex-realm-mapper" type="simpleRegexRealmMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="mapped-regex-realm-mapper" type="mappedRegexRealmMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="custom-role-decoder" type="customRoleDecoderType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="simple-role-decoder" type="simpleRoleDecoderType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="empty-role-decoder" type="emptyRoleDecoderType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="add-prefix-role-mapper" type="addPrefixRoleMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="add-suffix-role-mapper" type="addSuffixRoleMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="aggregate-role-mapper" type="aggregateRoleMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="constant-role-mapper" type="constantRoleMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="custom-role-mapper" type="customRoleMapperType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="logical-role-mapper" type="logicalRoleMapperType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="nameRewriterType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all NameRewriter definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the NameRewriter, note names used for NameRewriters must be unique
+                    across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="regexNameRewriterType">
+        <xs:annotation>
+            <xs:documentation>
+                A NameRewriter definition using regular expressions and Matcher based
+                replacement.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="nameRewriterType">
+                <xs:attribute name="pattern" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The regular expression to use for this NameRewriter.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="replacement" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The replacement string for this NameRewriter.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="replace-all" type="xs:boolean" default="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Should all occurences be replaced or just the first?
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="regexNameValidatingRewriter">
+        <xs:annotation>
+            <xs:documentation>
+                A NameWriter that instead of rewriting the name validates that it is
+                correct according to the supplied regular expression.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="nameRewriterType">
+                <xs:attribute name="pattern" type="xs:string"
+                    use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The regular expression to use for this NameRewriter.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="match" type="xs:boolean"
+                    default="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Is the name being checked required to be matched by the regular
+                            expression.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="constantNameRewriter">
+        <xs:annotation>
+            <xs:documentation>
+                A NameWriter that always returns the same constant.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="nameRewriterType">
+                <xs:attribute name="constant" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The constant value that will always be returned by this NameRewriter.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="customNameRewriterType">
+        <xs:annotation>
+            <xs:documentation>
+                Generic definition for a custom NameRewriter implementation.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="nameRewriterType">
+                <xs:sequence>
+                    <xs:element name="configuration"
+                        type="customComponentConfiguration" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The configuration to apply to the NameRewriter implementation.
+
+                                Note: If configuration is supplied the NameRewriter MUST implement the Configurable interface.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attributeGroup ref="customComponentAttributes" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="aggregateNameRewriterType">
+        <xs:annotation>
+            <xs:documentation>
+                A NameRewriter definition that is actually an aggregation of other NameRewriters.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="nameRewriterType">
+                <xs:sequence>
+                    <xs:element name="name-rewriter" type="nameRewriterRefType" minOccurs="2" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="chainedNameRewriterType">
+        <xs:annotation>
+            <xs:documentation>
+                A NameRewriter definition that is actually a chain of other NameRewriters.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="nameRewriterType">
+                <xs:sequence>
+                    <xs:element name="name-rewriter" type="nameRewriterRefType" minOccurs="2" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="nameRewriterRefType">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to a NameRewriter
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+
+    <xs:complexType name="customPermissionMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                Generic definition for a custom PermissionMapper implementation.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="configuration" type="customComponentConfiguration"
+                minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The configuration to apply to the RoleMapper implementation.
+
+                        Note: If configuration is supplied the RoleMapper MUST implement the
+                        Configurable interface.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the PrincipalDecoder, note names used for
+                    PrincipalDecoders must be unique across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attributeGroup ref="customComponentAttributes" />
+    </xs:complexType>
+
+    <xs:complexType name="principalDecoderType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all PrincipalDecoder definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the PrincipalDecoder, note names used for PrincipalDecoders must be unique
+                    across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="customPrincipalDecoderType">
+        <xs:annotation>
+            <xs:documentation>
+                Generic definition for a custom PrincipalDecoder implementation.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="principalDecoderType">
+                <xs:sequence>
+                    <xs:element name="configuration"
+                        type="customComponentConfiguration" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The configuration to apply to the PrincipalDecoder implementation.
+
+                                Note: If configuration is supplied the PrincipalDecoder MUST implement the Configurable interface.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attributeGroup ref="customComponentAttributes" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="aggregatePrincipalDecoderType">
+        <xs:annotation>
+            <xs:documentation>
+                A PrincipalDecoder definition that is actually an aggregation of other PrincipalDecoders.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="principalDecoderType">
+                <xs:sequence>
+                    <xs:element name="principal-decoder" type="principalDecoderRefType" minOccurs="2" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="principalDecoderRefType">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to a PrincipalDecoder
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+
+    <xs:complexType name="x500AttributePrincipalDecoderType">
+        <xs:annotation>
+            <xs:documentation>
+                A PrincipalDecoder definition based on a X500 attribute.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="principalDecoderType">
+                <xs:attribute name="oid" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The oid of the attribute to map.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="joiner" type="xs:string" default=".">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The joining string.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="maximum-segments" type="xs:int" default=" 2147483647">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The maximum number of occurences of the attribute to map.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="realmMapperType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all RealmMapper definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the RealmMapper, note names used for NameRewriters must be unique
+                    across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="customRealmMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                Generic definition for a custom RealmMapper implementation.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmMapperType">
+                <xs:sequence>
+                    <xs:element name="configuration"
+                        type="customComponentConfiguration" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The configuration to apply to the RealmMapper implementation.
+
+                                Note: If configuration is supplied the RealmMapper MUST implement the Configurable interface.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attributeGroup ref="customComponentAttributes" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="simpleRegexRealmMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A simple RealmMapper definition that attempts to extract the realm name using the capture group from the regular expression, if that does not provide a
+                match then the delegate RealmMapper is used instead.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmMapperType">
+                <xs:attribute name="pattern" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The regular expression to use for this NameRewriter.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="delegate-realm-mapper" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The RealmMapper to delegate to if the pattern does not match.  If no delegate is specified then the default realm on
+                            the domain will be used instead.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="mappedRegexRealmMapperType">
+        <xs:annotation>
+            <xs:documentation>
+              A RealmMapper implementaion that first uses a regular expression to extract the realm name, this is then converted using the configured mapping of realm names.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="realmMapperType">
+                <xs:sequence>
+                    <xs:element name="realm-mapping" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="from" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        The realm name to map from.
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="to" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        The realm name to map to.
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="pattern" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The regular expression to use for this NameRewriter.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="delegate-realm-mapper" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The RealmMapper to delegate to if the pattern does not match.  If no delegate is specified then the default realm on
+                            the domain will be used instead.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="roleDecoderType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all RoleDecoder definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the RoleDecoder, note names used for RoleDecoders must be unique
+                    across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="customRoleDecoderType">
+        <xs:annotation>
+            <xs:documentation>
+                Generic definition for a custom RoleDecoder implementation.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleDecoderType">
+                <xs:sequence>
+                    <xs:element name="configuration"
+                        type="customComponentConfiguration" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The configuration to apply to the RoleDecoder implementation.
+
+                                Note: If configuration is supplied the RoleDecoder MUST implement the Configurable interface.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attributeGroup ref="customComponentAttributes" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="emptyRoleDecoderType">
+        <xs:annotation>
+            <xs:documentation>
+                A RoleDecoder definition that returns no roles.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleDecoderType">
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="simpleRoleDecoderType">
+        <xs:annotation>
+            <xs:documentation>
+                A RoleDecoder definition that maps a single attribute to roles.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleDecoderType">
+                <xs:attribute name="attribute" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The attribute to take from the identity and map directly to roles.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="roleMapperType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all RoleMapper definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the RoleMapper, note names used for RoleMappers must be unique
+                    across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="addPrefixRoleMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A RoleMapper definition that adds a specified prefix to every role.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleMapperType">
+                <xs:attribute name="prefix" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The prefix to add to each role.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="addSuffixRoleMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A RoleMapper definition that adds a specified suffix to every role.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleMapperType">
+                <xs:attribute name="suffix" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The suffix to add to each role.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="aggregateRoleMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A RoleMapper definition that is actually an aggregation of other RoleMappers.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleMapperType">
+                <xs:sequence>
+                    <xs:element name="role-mapper" type="roleMapperRefType" minOccurs="2" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="customRoleMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                Generic definition for a custom RoleMapper implementation.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleMapperType">
+                <xs:sequence>
+                    <xs:element name="configuration"
+                        type="customComponentConfiguration" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                The configuration to apply to the RoleMapper implementation.
+
+                                Note: If configuration is supplied the RoleMapper MUST implement the Configurable interface.
+                            </xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attributeGroup ref="customComponentAttributes" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="constantRoleMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A RoleMapper definition that always returns a pre-defined set of roles.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleMapperType">
+                <xs:attribute name="roles" type="stringListType" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The list of roles to be returned by the RoleMapper.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="logicalRoleMapperType">
+        <xs:annotation>
+            <xs:documentation>
+                A RoleMapper definition for a RoleMapper that performs a logical operation using two refereced RoleMappers.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="roleMapperType">
+                <xs:attribute name="logical-operation" type="logicalOperationType" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The logicial operation to perform using the two referenced RoleMappers.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="left" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the RoleMapper to use to the left of the operation.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="right" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the RoleMapper to use to the right of the operation.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="logicalOperationType">
+        <xs:annotation>
+            <xs:documentation>
+                The supported set of logical operations.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="and" />
+            <xs:enumeration value="minus" />
+            <xs:enumeration value="or" />
+            <xs:enumeration value="xor" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="roleMapperRefType">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to a RoleMapper
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the referenced RoleMapper.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- 
+        Mechanism Configuration
+    -->
+
+    <xs:complexType name="mechanismConfigurationType">
+        <xs:annotation>
+            <xs:documentation>
+                Wrapper type to contain the configuration of the authentication mechanisms.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="mechanism" type="mechanismType" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="mechanismType">
+        <xs:annotation>
+            <xs:documentation>
+                Configuration for a specific authentication mechanism.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="mechanism-realm" type="mechanismRealmType" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="mechanism-name" type="xs:string" use="required" >
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the authentication mechanism being configured.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="pre-realm-name-rewriter" type="xs:string" >
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a NameRewriter that should be used before the actual realm is selected.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="post-realm-name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a NameRewriter that should be used after the realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="final-name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the final NameRewriter.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="realm-mapper" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a RealmMapper to be used by this mechanism.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="credential-security-factories" type="stringListType">
+            <xs:annotation>
+                <xs:documentation>
+                  A list of references to security factories that can return credentials for use by this mechanism.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+
+    <xs:complexType name="mechanismRealmType">
+        <xs:annotation>
+            <xs:documentation>
+                Definition of a realm name specific to the mechanism.
+
+                This is the realm name that a mechanism may present to the remote client being authenticated, if a mechanism
+                only supports a single realm then only the first will be used and the remainder ignored.
+
+                If a mechanism does not support realm names then the entire list will be ignored.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="realm-name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="pre-realm-name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a NameRewriter that should be used before the actual realm is selected.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="post-realm-name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a NameRewriter that should be used after the realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="final-name-rewriter" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to the final NameRewriter.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="realm-mapper" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Reference to a RealmMapper to be used by this mechanism realm.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!--
+        HTTP Components
+     -->
+
+     <xs:complexType name="httpType">
+         <xs:annotation>
+             <xs:documentation>
+                 Complex type definition to hold the various HTTP definitions within the subsystem.
+             </xs:documentation>
+         </xs:annotation>
+         <xs:choice maxOccurs="unbounded">
+             <xs:element name="http-server-authentication" type="httpServerAuthenticationType" minOccurs="0"/>
+             <xs:element name="aggregate-http-server-factory" type="aggregateHttpServerFactoryType" minOccurs="0" />
+             <xs:element name="configurable-http-server-factory" type="configurableHttpServerFactoryType" minOccurs="0" />
+             <xs:element name="provider-http-server-factory" type="providerHttpServerFactoryType" minOccurs="0" />
+             <xs:element name="service-loader-http-server-factory" type="serviceLoaderHttpServerFactoryType" minOccurs="0" />
+         </xs:choice>
+     </xs:complexType>
+
+     <xs:complexType name="httpServerAuthenticationType">
+        <xs:annotation>
+            <xs:documentation>
+                Complex type for the definition of the server side HTTP authentication policy.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="mechanism-configuration" minOccurs="0" type="mechanismConfigurationType"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required" />
+        <xs:attribute name="security-domain" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The security-domain referenced by this resource.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="http-server-factory" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The http-server-factory referenced by this resource.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="httpServerFactoryType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all http server factory definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the http server factory, note names used for http server factories must be unique across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="aggregateHttpServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A HTTP server factory definition that is actually an aggregation of other HTTP server factories.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="httpServerFactoryType">
+                <xs:sequence>
+                    <xs:element name="http-server-factory" type="httpServerFactoryRefType" minOccurs="2" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="configurableHttpServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A HTTP server factory definition that wraps another HTTP server factory and applies the specified configuration and filtering.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="httpServerFactoryType">
+                <xs:sequence>
+                    <xs:element name="filters" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Filters to be applied to the available mechanisms by name.
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="filter" maxOccurs="unbounded">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element name="pattern-filter">
+                                                <xs:annotation>
+                                                    <xs:documentation>
+                                                        A fiter that filters mechanism names using a regular expression pattern.
+                                                    </xs:documentation>
+                                                </xs:annotation>
+                                                <xs:complexType>
+                                                    <xs:attribute name="value" type="xs:string" use="required">
+                                                        <xs:annotation>
+                                                            <xs:documentation>
+                                                                The regular expression.
+                                                            </xs:documentation>
+                                                        </xs:annotation>
+                                                    </xs:attribute>
+                                                </xs:complexType>
+                                            </xs:element>
+                                        </xs:sequence>
+                                        <xs:attribute name="enabling" type="xs:boolean" default="true">
+                                            <xs:annotation>
+                                                <xs:documentation>
+                                                    When set to true all mechanisms are disabled unless enabled by matching one of the defined fiters.
+                                                    
+                                                    When set to false all mechanisms are enabled unless disabled by matching one of the defined filters.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:attribute>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="properties" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Additional properties that should be passed to the factor for SASL mechanism detection and creation.
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="property" type="propertyType" maxOccurs="unbounded" />
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="http-server-factory" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the HTTP server factory to be wrapped by this configuration.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="providerHttpServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A HTTP server factory definition that searches an array of Provider instances for all available HTTP server factories.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="httpServerFactoryType">
+                <xs:attribute name="provider-loader" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the Provider[] capability to obtain the array of Providers to use.
+                            
+                            If not specified the system registered Providers are used instead.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="serviceLoaderHttpServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A HTTP server factory definition that uses a ServiceLoader to search for HTTP server factory implementations.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="httpServerFactoryType">
+                <xs:attribute name="module" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The name of the module to use.
+
+                            If this is not specified the ClassLoader used to load the service will be used instead.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="slot" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The slot of the module to use to load the providers.
+
+                            This will only be required in rare situations where a single module is defined with multiple slots.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="httpServerFactoryRefType">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to a HTTP server factory.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+
+    <!-- 
+        SASL Components
+     -->
+
+    <xs:complexType name="saslType">
+        <xs:annotation>
+            <xs:documentation>
+                Complex type definition type to hold the various SASL definitions within the subsystem. 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="sasl-server-authentication" type="saslServerAuthenticationType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="aggregate-sasl-server-factory" type="aggregateSaslServerFactoryType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="configurable-sasl-server-factory" type="configurableSaslServerFactoryType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="mechanism-provider-filtering-sasl-server-factory" type="mechanismProviderFilteringSaslServerFactoryType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="provider-sasl-server-factory" type="providerSaslServerFactoryType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="service-loader-sasl-server-factory" type="serviceLoaderSaslServerFactoryType" minOccurs="0" maxOccurs="unbounded" />
+         </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="saslServerAuthenticationType">
+        <xs:annotation>
+            <xs:documentation>
+                The SASL authentication policy for the server side. 
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="mechanism-configuration" minOccurs="0" type="mechanismConfigurationType"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required" />
+        <xs:attribute name="security-domain" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The security-domain referenced by this resource.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="sasl-server-factory" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The sasl-server-factory referenced by this resource.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="saslServerFactoryType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Base type for all sasl server factory definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The unique name for the sasl server factory, note names used for sasl server factories must be unique across the whole context.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="aggregateSaslServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A SASL server factory definition that is actually an aggregation of other SASL server factories.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="saslServerFactoryType">
+                <xs:sequence>
+                    <xs:element name="sasl-server-factory" type="saslServerFactoryRefType" minOccurs="2" maxOccurs="unbounded" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="configurableSaslServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A SaslServerFactory definition that wraps another SaslServerFactory and applies the specified configuration and filtering.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="saslServerFactoryType">
+                <xs:all>
+                    <xs:element name="filters" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Filters to be applied to the available mechanisms by name.
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="filter" maxOccurs="unbounded">
+                                    <xs:complexType>
+                                        <xs:choice maxOccurs="unbounded">
+                                            <xs:element name="predefined-filter">
+                                                <xs:annotation>
+                                                    <xs:documentation>
+                                                        A predefined filter to filter mechanisms.
+                                                    </xs:documentation>
+                                                </xs:annotation>
+                                                <xs:complexType>
+                                                    <xs:attribute name="value" type="predefinedFilterType" use="required">
+                                                        <xs:annotation>
+                                                            <xs:documentation>
+                                                                The name of the predefined filter.
+                                                            </xs:documentation>
+                                                        </xs:annotation>
+                                                    </xs:attribute>
+                                                </xs:complexType>
+                                            </xs:element>
+                                            <xs:element name="pattern-filter">
+                                                <xs:annotation>
+                                                    <xs:documentation>
+                                                        A fiter that filters mechanism names using a regular expression pattern.
+                                                    </xs:documentation>
+                                                </xs:annotation>
+                                                <xs:complexType>
+                                                    <xs:attribute name="value" type="xs:string" use="required">
+                                                        <xs:annotation>
+                                                            <xs:documentation>
+                                                                The regular expression.
+                                                            </xs:documentation>
+                                                        </xs:annotation>
+                                                    </xs:attribute>
+                                                </xs:complexType>
+                                            </xs:element>
+                                        </xs:choice>
+                                        <xs:attribute name="enabling" type="xs:boolean" default="true">
+                                            <xs:annotation>
+                                                <xs:documentation>
+                                                    When set to true all mechanisms are disabled unless enabled by matching one of the defined fiters.
+                                                    
+                                                    When set to false all mechanisms are enabled unless disabled by matching one of the defined filters.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:attribute>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="properties" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Additional properties that should be passed to the factor for SASL mechanism detection and creation.
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="property" type="propertyType" maxOccurs="unbounded" />
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:all>
+                <xs:attribute name="sasl-server-factory" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the SaslServerFactory to be wrapped by this configuration.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="protocol" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Override the protocol specifed when creating a SASL mechanism.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="server-name" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Override the server name specified when creating a SASL mechanism.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="predefinedFilterType">
+        <xs:annotation>
+            <xs:documentation>
+                The supported set of predefined filters.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="HASH_MD5" />
+            <xs:enumeration value="HASH_SHA" />
+            <xs:enumeration value="HASH_SHA_256" />
+            <xs:enumeration value="HASH_SHA_384" />
+            <xs:enumeration value="HASH_SHA_512" />
+            <xs:enumeration value="GS2" />
+            <xs:enumeration value="SCRAM" />
+            <xs:enumeration value="DIGEST" />
+            <xs:enumeration value="IEC_ISO_9798" />
+            <xs:enumeration value="EAP" />
+            <xs:enumeration value="MUTUAL" />
+            <xs:enumeration value="BINDING" />
+            <xs:enumeration value="RECOMMENDED" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="mechanismProviderFilteringSaslServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A SaslServerFactory definition that wraps another SaslServerFactory and enables filtering of mechanisms based on the mechanism name and Provider name and version.
+                
+                Any mechanisms loaded by factories not located using a Provider will not be filtered by this definition.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="saslServerFactoryType">
+                <xs:sequence>
+                    <xs:element name="filters" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Filters to be applied to the available mechanisms by name.
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="filter" maxOccurs="unbounded">
+                                    <xs:complexType>
+                                        <xs:attribute name="mechanism-name" type="xs:string">
+                                            <xs:annotation>
+                                                <xs:documentation>
+                                                    The name of the mechanism this filter matches, if omited all names match.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:attribute>
+                                        <xs:attribute name="provider-name" type="xs:string" use="required">
+                                            <xs:annotation>
+                                                <xs:documentation>
+                                                    The name of the provider to match against.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:attribute>
+                                        <xs:attribute name="provider-version" type="xs:double">
+                                            <xs:annotation>
+                                                <xs:documentation>
+                                                    Version to compare agasint the version reported by the provider.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:attribute>
+                                        <xs:attribute name="version-comparison" type="inequalityType" default="less-than">
+                                            <xs:annotation>
+                                                <xs:documentation>
+                                                    When set to 'less-than' a Provider will match against the filter if the Provider's version is less-than the version specified here.
+
+                                                    Setting to 'greater-than' has the opposite effect.
+
+                                                    Has no effect if a provider-version has not been specified in the filter.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:attribute>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:attribute name="sasl-server-factory" type="xs:string" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the SaslServerFactory to be wrapped by this configuration.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="enabling" type="xs:boolean" default="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            When set to true all provider loaded mechanisms are disabled unless macthed by one of the filters defined here.
+                            
+                            When set to false all provider loaded mechanisms are enabled unless matched.
+                            
+                            Any mechansims from a factory not loaded by a Provider are unaffected.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="inequalityType">
+        <xs:annotation>
+            <xs:documentation>
+                The type of equality check to use in a comparison.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="less-than" />
+            <xs:enumeration value="greater-than" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="providerSaslServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A SaslServerFactory definition that searches an array of Provider instances for all availabel SaslServerFactories.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="saslServerFactoryType">
+                <xs:attribute name="provider-loader" type="xs:string">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Reference to the Provider[] capability to obtain the array of Providers to use.
+                            
+                            If not specified the system registered Providers are used instead.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="serviceLoaderSaslServerFactoryType">
+        <xs:annotation>
+            <xs:documentation>
+                A SaslServerFactory definition that uses a ServiceLoader to search for SaslServerFactory implementations.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="saslServerFactoryType">
+                <xs:attribute name="module" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The name of the module to use.
+
+                            If this is not specified the ClassLoader used to load the service will be used instead.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="slot" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The slot of the module to use to load the providers.
+
+                            This will only be required in rare situations where a single module is defined with multiple slots.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="saslServerFactoryRefType">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to a SaslServerFactory
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:complexType>
+
+    <!--
+        TLS Components
+     -->
+
+    <xs:complexType name="tlsType">
+        <xs:annotation>
+            <xs:documentation>
+                Complex type to contain the definitions of the various components needed
+                for SSL, the end result being that these components can be combined together to
+                create a fully defined SSLContext.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="keystores" type="keyStoresType" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="keyStoresType">
+        <xs:annotation>
+            <xs:documentation>
+                Container for the KeyStore definitions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="keystore" type="keyStoreType" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="keyStoreType">
+        <xs:annotation>
+            <xs:documentation>
+                An individual names KeyStore definition.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="file" type="fileType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        The location of the file to use to initialise the KeyStore instance.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required" />
+        <xs:attribute name="type" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The KeyStore type, e.g. jks, pkcs#12.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="provider" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the provider to use to
+                    instantiate the KeyStore, if the provider is not
+                    specified then the first provider found that can
+                    create an instance of the specified 'type' will be
+                    used.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="provider-loader" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The name of the provider-loader defined within the subsystem to obtain the Providers
+                    to search for the one that can create the required KeyStore type.
+
+                    If this is not specified then the global list of Providers is used instead.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="password" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    The password to use when initialising / loading the KeyStore.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!--
+        General Types
+     -->
+
+     <xs:complexType name="basicFileType">
+         <xs:annotation>
+             <xs:documentation>
+                 Minimal attributes required to specify the location to a file.
+             </xs:documentation>
+         </xs:annotation>
+        <xs:attribute name="relative-to" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    A reference to a previously defined path that the file name is
+                    relative to.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="path" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>
+                    The remaining path to the file referenced.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+     </xs:complexType>
+
+    <xs:complexType name="fileType">
+        <xs:annotation>
+            <xs:documentation>
+                A reference to a file.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="basicFileType">
+                <xs:attribute name="read-only" type="xs:boolean"
+                    use="optional" default="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            When set to 'true' this attribute prevents the in-memory
+                            representation of the file from being written back to the file.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="required" type="xs:boolean"
+                    use="optional" default="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            It is possible that a KeyStore definition can be created to a
+                            non-existent file and the file be automatically created when the store is saved, however
+                            no error will be reported where the file does not exist to begin with.
+
+                            If the intent is that the store will always exist in advance set
+                            this to 'true' so that an error will be reported if the file is missing.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+	<xs:attributeGroup name="customComponentAttributes">
+		<xs:annotation>
+			<xs:documentation>The attributes required for a custom component.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="module" type="xs:string">
+			<xs:annotation>
+				<xs:documentation>
+					The module to use to load the custom component.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="slot" type="xs:string">
+			<xs:annotation>
+				<xs:documentation>
+					The module slot to use when loading the custom component.
+
+					Note: This has no effect if a module is not specified.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="class-name" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>
+					The fully qualified class name of the custom component implementation to
+					load.
+
+					The specified class must have a public no-args constructor.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+
+	<xs:complexType name="customComponentConfiguration">
+		<xs:annotation>
+			<xs:documentation>
+				The optional configuration for a custom component.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="property" type="propertyType" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+    <xs:simpleType name="stringListType">
+        <xs:annotation>
+            <xs:documentation>A list of String.</xs:documentation>
+        </xs:annotation>
+        <xs:list itemType="xs:string"/>
+    </xs:simpleType>
+
+</xs:schema>
+
+

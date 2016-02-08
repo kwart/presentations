@@ -1,0 +1,1285 @@
+{
+    "outcome" => "success",
+    "result" => {
+        "description" => "The configuration of the security subsystem.",
+        "capabilities" => [{
+            "name" => "org.wildfly.security",
+            "dynamic" => false
+        }],
+        "deprecated" => {
+            "since" => "1.3.0",
+            "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+        },
+        "attributes" => {"deep-copy-subject-mode" => {
+            "type" => BOOLEAN,
+            "description" => "Sets the copy mode of subjects done by the security managers to be deep copies that makes copies of the subject principals and credentials if they are cloneable. It should be set to true if subject include mutable content that can be corrupted when multiple threads have the same identity and cache flushes/logout clearing the subject in one thread results in subject references affecting other threads.",
+            "expressions-allowed" => true,
+            "nillable" => true,
+            "default" => false,
+            "access-constraints" => {"sensitive" => {"misc-security" => {"type" => "security"}}},
+            "access-type" => "read-write",
+            "storage" => "configuration",
+            "restart-required" => "no-services"
+        }},
+        "operations" => undefined,
+        "notifications" => undefined,
+        "children" => {
+            "security-domain" => {
+                "description" => "Configures a security domain. Authentication, authorization, ACL, mapping, auditing and identity trust are configured here.",
+                "model-description" => {"*" => {
+                    "description" => "Configures a security domain. Authentication, authorization, ACL, mapping, auditing and identity trust are configured here.",
+                    "deprecated" => {
+                        "since" => "1.3.0",
+                        "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                    },
+                    "access-constraints" => {
+                        "sensitive" => {"security-domain" => {"type" => "core"}},
+                        "application" => {"security-domain" => {"type" => "security"}}
+                    },
+                    "attributes" => {
+                        "cache-type" => {
+                            "type" => STRING,
+                            "description" => "Adds a cache to speed up authentication checks. Allowed values are 'default' to use simple map as the cache and 'infinispan' to use an Infinispan cache.",
+                            "expressions-allowed" => true,
+                            "nillable" => true,
+                            "min-length" => 1L,
+                            "max-length" => 2147483647L,
+                            "allowed" => [
+                                "default",
+                                "infinispan"
+                            ],
+                            "access-type" => "read-write",
+                            "storage" => "configuration",
+                            "restart-required" => "no-services"
+                        },
+                        "export-elytron-realm" => {
+                            "type" => STRING,
+                            "description" => "Indicates if an Elytron compatible realm should be exported as a capability by the security domain.",
+                            "expressions-allowed" => false,
+                            "nillable" => true,
+                            "min-length" => 1L,
+                            "max-length" => 2147483647L,
+                            "access-type" => "read-write",
+                            "storage" => "configuration",
+                            "restart-required" => "no-services"
+                        }
+                    },
+                    "operations" => undefined,
+                    "notifications" => undefined,
+                    "children" => {
+                        "audit" => {
+                            "description" => "Auditing configuration. Configures a list of provider modules to be used.",
+                            "model-description" => {"classic" => {
+                                "description" => "Auditing configuration. Configures a list of provider modules to be used.",
+                                "deprecated" => {
+                                    "since" => "1.3.0",
+                                    "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                },
+                                "access-constraints" => {
+                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                    "application" => {"security-domain" => {"type" => "security"}}
+                                },
+                                "attributes" => {"provider-modules" => {
+                                    "type" => LIST,
+                                    "description" => "List of provider modules",
+                                    "expressions-allowed" => false,
+                                    "nillable" => true,
+                                    "deprecated" => {
+                                        "since" => "1.2.0",
+                                        "reason" => "This attribute is replaced with sub resource"
+                                    },
+                                    "value-type" => {
+                                        "code" => {
+                                            "description" => "Class name of the module to be instantiated.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "min-length" => 1
+                                        },
+                                        "module-options" => {
+                                            "description" => "List of module options containing a name/value pair.",
+                                            "type" => OBJECT,
+                                            "value-type" => STRING,
+                                            "nillable" => true
+                                        }
+                                    },
+                                    "access-type" => "read-write",
+                                    "storage" => "configuration",
+                                    "restart-required" => "all-services"
+                                }},
+                                "operations" => undefined,
+                                "notifications" => undefined,
+                                "children" => {"provider-module" => {
+                                    "description" => "Provider module",
+                                    "model-description" => {"*" => {
+                                        "description" => "List of modules that map principal, role, and credential information",
+                                        "access-constraints" => {
+                                            "sensitive" => {"security-domain" => {"type" => "core"}},
+                                            "application" => {"security-domain" => {"type" => "security"}}
+                                        },
+                                        "attributes" => {
+                                            "code" => {
+                                                "type" => STRING,
+                                                "description" => "Class name of the module to be instantiated.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module-options" => {
+                                                "type" => OBJECT,
+                                                "description" => "List of module options containing a name/value pair.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "value-type" => STRING,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            }
+                                        },
+                                        "operations" => undefined,
+                                        "notifications" => undefined,
+                                        "children" => {}
+                                    }}
+                                }}
+                            }}
+                        },
+                        "authorization" => {
+                            "description" => "Authorization configuration. Configures a list of authorization policy modules to be used.",
+                            "model-description" => {"classic" => {
+                                "description" => "Authorization configuration. Configures a list of authorization policy modules to be used.",
+                                "deprecated" => {
+                                    "since" => "1.3.0",
+                                    "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                },
+                                "access-constraints" => {
+                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                    "application" => {"security-domain" => {"type" => "security"}}
+                                },
+                                "attributes" => {"policy-modules" => {
+                                    "type" => LIST,
+                                    "description" => "List of authorization modules",
+                                    "expressions-allowed" => false,
+                                    "nillable" => true,
+                                    "deprecated" => {
+                                        "since" => "1.2.0",
+                                        "reason" => "Use of this attribute is deprecated, use resource"
+                                    },
+                                    "value-type" => {
+                                        "code" => {
+                                            "description" => "Class name of the module to be instantiated.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "min-length" => 1
+                                        },
+                                        "flag" => {
+                                            "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "allowed" => [
+                                                "required",
+                                                "requisite",
+                                                "sufficient",
+                                                "optional"
+                                            ]
+                                        },
+                                        "module" => {
+                                            "type" => STRING,
+                                            "nillable" => true,
+                                            "description" => "Name of JBoss Module where the policy module code is located."
+                                        },
+                                        "module-options" => {
+                                            "description" => "List of module options containing a name/value pair.",
+                                            "type" => OBJECT,
+                                            "value-type" => STRING,
+                                            "nillable" => true
+                                        }
+                                    },
+                                    "access-type" => "read-write",
+                                    "storage" => "configuration",
+                                    "restart-required" => "all-services"
+                                }},
+                                "operations" => undefined,
+                                "notifications" => undefined,
+                                "children" => {"policy-module" => {
+                                    "description" => "Policy module",
+                                    "model-description" => {"*" => {
+                                        "description" => "List of authentication modules",
+                                        "access-constraints" => {
+                                            "sensitive" => {"security-domain" => {"type" => "core"}},
+                                            "application" => {"security-domain" => {"type" => "security"}}
+                                        },
+                                        "attributes" => {
+                                            "code" => {
+                                                "type" => STRING,
+                                                "description" => "Class name of the module to be instantiated.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "flag" => {
+                                                "type" => STRING,
+                                                "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => false,
+                                                "allowed" => [
+                                                    "required",
+                                                    "requisite",
+                                                    "sufficient",
+                                                    "optional"
+                                                ],
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module" => {
+                                                "type" => STRING,
+                                                "description" => "Name of JBoss Module where the login module is located.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module-options" => {
+                                                "type" => OBJECT,
+                                                "description" => "List of module options containing a name/value pair.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "value-type" => STRING,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            }
+                                        },
+                                        "operations" => undefined,
+                                        "notifications" => undefined,
+                                        "children" => {}
+                                    }}
+                                }}
+                            }}
+                        },
+                        "authentication" => {
+                            "description" => "\"Authentication configuration for this domain. Can either be classic or jaspi.",
+                            "model-description" => {
+                                "jaspi" => {
+                                    "description" => "JASPI authentication configuration.",
+                                    "deprecated" => {
+                                        "since" => "1.3.0",
+                                        "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                    },
+                                    "access-constraints" => {
+                                        "sensitive" => {"security-domain" => {"type" => "core"}},
+                                        "application" => {"security-domain" => {"type" => "security"}}
+                                    },
+                                    "attributes" => {"auth-modules" => {
+                                        "type" => LIST,
+                                        "description" => "List of authentication modules to be used.",
+                                        "expressions-allowed" => false,
+                                        "nillable" => true,
+                                        "deprecated" => {
+                                            "since" => "1.2.0",
+                                            "reason" => "Use of this attribute is deprecated, use resource"
+                                        },
+                                        "value-type" => {
+                                            "code" => {
+                                                "description" => "Class name of the module to be instantiated.",
+                                                "type" => STRING,
+                                                "nillable" => false,
+                                                "min-length" => 1
+                                            },
+                                            "flag" => {
+                                                "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                "type" => STRING,
+                                                "nillable" => true,
+                                                "allowed" => [
+                                                    "required",
+                                                    "requisite",
+                                                    "sufficient",
+                                                    "optional"
+                                                ]
+                                            },
+                                            "module" => {
+                                                "type" => STRING,
+                                                "nillable" => true,
+                                                "description" => "Name of JBoss Module where the auth module code is located."
+                                            },
+                                            "module-options" => {
+                                                "description" => "List of module options containing a name/value pair.",
+                                                "type" => OBJECT,
+                                                "value-type" => STRING,
+                                                "nillable" => true
+                                            },
+                                            "login-module-stack-ref" => {
+                                                "description" => "Reference to a login module stack name previously configured in the same security domain.",
+                                                "type" => STRING,
+                                                "nillable" => true,
+                                                "min-length" => 1
+                                            }
+                                        },
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "all-services"
+                                    }},
+                                    "operations" => undefined,
+                                    "notifications" => undefined,
+                                    "children" => {
+                                        "login-module-stack" => {
+                                            "description" => "List of \"named\" login modules that are used by jaspi authentication modules.",
+                                            "model-description" => {"*" => {
+                                                "description" => "List of \"named\" login modules that are used by jaspi authentication modules.",
+                                                "access-constraints" => {
+                                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                                    "application" => {"security-domain" => {"type" => "security"}}
+                                                },
+                                                "attributes" => {"login-modules" => {
+                                                    "type" => LIST,
+                                                    "description" => "List of authentication modules",
+                                                    "expressions-allowed" => false,
+                                                    "nillable" => true,
+                                                    "deprecated" => {
+                                                        "since" => "1.2.0",
+                                                        "reason" => "This attribute is replaced with sub resource"
+                                                    },
+                                                    "value-type" => {
+                                                        "code" => {
+                                                            "description" => "Class name of the module to be instantiated.",
+                                                            "type" => STRING,
+                                                            "nillable" => false,
+                                                            "min-length" => 1
+                                                        },
+                                                        "flag" => {
+                                                            "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                            "type" => STRING,
+                                                            "nillable" => false,
+                                                            "allowed" => [
+                                                                "required",
+                                                                "requisite",
+                                                                "sufficient",
+                                                                "optional"
+                                                            ]
+                                                        },
+                                                        "module" => {
+                                                            "type" => STRING,
+                                                            "nillable" => true,
+                                                            "description" => "Name of JBoss Module where the login module is located."
+                                                        },
+                                                        "module-options" => {
+                                                            "description" => "List of module options containing a name/value pair.",
+                                                            "type" => OBJECT,
+                                                            "value-type" => STRING,
+                                                            "nillable" => true
+                                                        }
+                                                    },
+                                                    "access-type" => "read-write",
+                                                    "storage" => "configuration",
+                                                    "restart-required" => "all-services"
+                                                }},
+                                                "operations" => undefined,
+                                                "notifications" => undefined,
+                                                "children" => {"login-module" => {
+                                                    "description" => "Login module",
+                                                    "model-description" => {"*" => {
+                                                        "description" => "List of authentication modules",
+                                                        "access-constraints" => {
+                                                            "sensitive" => {"security-domain" => {"type" => "core"}},
+                                                            "application" => {"security-domain" => {"type" => "security"}}
+                                                        },
+                                                        "attributes" => {
+                                                            "code" => {
+                                                                "type" => STRING,
+                                                                "description" => "Class name of the module to be instantiated.",
+                                                                "expressions-allowed" => false,
+                                                                "nillable" => false,
+                                                                "min-length" => 1L,
+                                                                "max-length" => 2147483647L,
+                                                                "access-type" => "read-write",
+                                                                "storage" => "configuration",
+                                                                "restart-required" => "no-services"
+                                                            },
+                                                            "flag" => {
+                                                                "type" => STRING,
+                                                                "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                                "expressions-allowed" => true,
+                                                                "nillable" => false,
+                                                                "allowed" => [
+                                                                    "required",
+                                                                    "requisite",
+                                                                    "sufficient",
+                                                                    "optional"
+                                                                ],
+                                                                "access-type" => "read-write",
+                                                                "storage" => "configuration",
+                                                                "restart-required" => "no-services"
+                                                            },
+                                                            "module" => {
+                                                                "type" => STRING,
+                                                                "description" => "Name of JBoss Module where the login module is located.",
+                                                                "expressions-allowed" => false,
+                                                                "nillable" => true,
+                                                                "min-length" => 1L,
+                                                                "max-length" => 2147483647L,
+                                                                "access-type" => "read-write",
+                                                                "storage" => "configuration",
+                                                                "restart-required" => "no-services"
+                                                            },
+                                                            "module-options" => {
+                                                                "type" => OBJECT,
+                                                                "description" => "List of module options containing a name/value pair.",
+                                                                "expressions-allowed" => true,
+                                                                "nillable" => true,
+                                                                "value-type" => STRING,
+                                                                "access-type" => "read-write",
+                                                                "storage" => "configuration",
+                                                                "restart-required" => "no-services"
+                                                            }
+                                                        },
+                                                        "operations" => undefined,
+                                                        "notifications" => undefined,
+                                                        "children" => {}
+                                                    }}
+                                                }}
+                                            }}
+                                        },
+                                        "auth-module" => {
+                                            "description" => "Auth module",
+                                            "model-description" => {"*" => {
+                                                "description" => "List of modules that map principal, role, and credential information",
+                                                "access-constraints" => {
+                                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                                    "application" => {"security-domain" => {"type" => "security"}}
+                                                },
+                                                "attributes" => {
+                                                    "code" => {
+                                                        "type" => STRING,
+                                                        "description" => "Class name of the module to be instantiated.",
+                                                        "expressions-allowed" => false,
+                                                        "nillable" => false,
+                                                        "min-length" => 1L,
+                                                        "max-length" => 2147483647L,
+                                                        "access-type" => "read-write",
+                                                        "storage" => "configuration",
+                                                        "restart-required" => "no-services"
+                                                    },
+                                                    "flag" => {
+                                                        "type" => STRING,
+                                                        "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                        "expressions-allowed" => true,
+                                                        "nillable" => true,
+                                                        "allowed" => [
+                                                            "required",
+                                                            "requisite",
+                                                            "sufficient",
+                                                            "optional"
+                                                        ],
+                                                        "access-type" => "read-write",
+                                                        "storage" => "configuration",
+                                                        "restart-required" => "no-services"
+                                                    },
+                                                    "login-module-stack-ref" => {
+                                                        "type" => STRING,
+                                                        "description" => "Reference to a login module stack name previously configured in the same security domain.",
+                                                        "expressions-allowed" => false,
+                                                        "nillable" => true,
+                                                        "min-length" => 1L,
+                                                        "max-length" => 2147483647L,
+                                                        "access-type" => "read-write",
+                                                        "storage" => "configuration",
+                                                        "restart-required" => "no-services"
+                                                    },
+                                                    "module" => {
+                                                        "type" => STRING,
+                                                        "description" => "Name of JBoss Module where the mapping module code is located.",
+                                                        "expressions-allowed" => false,
+                                                        "nillable" => true,
+                                                        "min-length" => 1L,
+                                                        "max-length" => 2147483647L,
+                                                        "access-type" => "read-write",
+                                                        "storage" => "configuration",
+                                                        "restart-required" => "no-services"
+                                                    },
+                                                    "module-options" => {
+                                                        "type" => OBJECT,
+                                                        "description" => "List of module options containing a name/value pair.",
+                                                        "expressions-allowed" => true,
+                                                        "nillable" => true,
+                                                        "value-type" => STRING,
+                                                        "access-type" => "read-write",
+                                                        "storage" => "configuration",
+                                                        "restart-required" => "no-services"
+                                                    }
+                                                },
+                                                "operations" => undefined,
+                                                "notifications" => undefined,
+                                                "children" => {}
+                                            }}
+                                        }
+                                    }
+                                },
+                                "classic" => {
+                                    "description" => "Traditional authentication configuration.  Configures a list of login modules to be used.",
+                                    "deprecated" => {
+                                        "since" => "1.3.0",
+                                        "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                    },
+                                    "access-constraints" => {
+                                        "sensitive" => {"security-domain" => {"type" => "core"}},
+                                        "application" => {"security-domain" => {"type" => "security"}}
+                                    },
+                                    "attributes" => {"login-modules" => {
+                                        "type" => LIST,
+                                        "description" => "List of authentication modules",
+                                        "expressions-allowed" => false,
+                                        "nillable" => true,
+                                        "deprecated" => {
+                                            "since" => "1.2.0",
+                                            "reason" => "This attribute was replaced with sub resource"
+                                        },
+                                        "value-type" => {
+                                            "code" => {
+                                                "description" => "Class name of the module to be instantiated.",
+                                                "type" => STRING,
+                                                "nillable" => false,
+                                                "min-length" => 1
+                                            },
+                                            "flag" => {
+                                                "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                "type" => STRING,
+                                                "nillable" => false,
+                                                "allowed" => [
+                                                    "required",
+                                                    "requisite",
+                                                    "sufficient",
+                                                    "optional"
+                                                ]
+                                            },
+                                            "module" => {
+                                                "type" => STRING,
+                                                "nillable" => true,
+                                                "description" => "Name of JBoss Module where the login module code is located."
+                                            },
+                                            "module-options" => {
+                                                "description" => "List of module options containing a name/value pair.",
+                                                "type" => OBJECT,
+                                                "value-type" => STRING,
+                                                "nillable" => true
+                                            }
+                                        },
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "all-services"
+                                    }},
+                                    "operations" => undefined,
+                                    "notifications" => undefined,
+                                    "children" => {"login-module" => {
+                                        "description" => "Login module",
+                                        "model-description" => {"*" => {
+                                            "description" => "List of authentication modules",
+                                            "access-constraints" => {
+                                                "sensitive" => {"security-domain" => {"type" => "core"}},
+                                                "application" => {"security-domain" => {"type" => "security"}}
+                                            },
+                                            "attributes" => {
+                                                "code" => {
+                                                    "type" => STRING,
+                                                    "description" => "Class name of the module to be instantiated.",
+                                                    "expressions-allowed" => false,
+                                                    "nillable" => false,
+                                                    "min-length" => 1L,
+                                                    "max-length" => 2147483647L,
+                                                    "access-type" => "read-write",
+                                                    "storage" => "configuration",
+                                                    "restart-required" => "no-services"
+                                                },
+                                                "flag" => {
+                                                    "type" => STRING,
+                                                    "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                    "expressions-allowed" => true,
+                                                    "nillable" => false,
+                                                    "allowed" => [
+                                                        "required",
+                                                        "requisite",
+                                                        "sufficient",
+                                                        "optional"
+                                                    ],
+                                                    "access-type" => "read-write",
+                                                    "storage" => "configuration",
+                                                    "restart-required" => "no-services"
+                                                },
+                                                "module" => {
+                                                    "type" => STRING,
+                                                    "description" => "Name of JBoss Module where the login module is located.",
+                                                    "expressions-allowed" => false,
+                                                    "nillable" => true,
+                                                    "min-length" => 1L,
+                                                    "max-length" => 2147483647L,
+                                                    "access-type" => "read-write",
+                                                    "storage" => "configuration",
+                                                    "restart-required" => "no-services"
+                                                },
+                                                "module-options" => {
+                                                    "type" => OBJECT,
+                                                    "description" => "List of module options containing a name/value pair.",
+                                                    "expressions-allowed" => true,
+                                                    "nillable" => true,
+                                                    "value-type" => STRING,
+                                                    "access-type" => "read-write",
+                                                    "storage" => "configuration",
+                                                    "restart-required" => "no-services"
+                                                }
+                                            },
+                                            "operations" => undefined,
+                                            "notifications" => undefined,
+                                            "children" => {}
+                                        }}
+                                    }}
+                                }
+                            }
+                        },
+                        "jsse" => {
+                            "description" => "JSSE configuration. Configures attributes for keystores that can be used for setting up SSL.",
+                            "model-description" => {"classic" => {
+                                "description" => "JSSE configuration. Configures attributes for keystores that can be used for setting up SSL.",
+                                "deprecated" => {
+                                    "since" => "1.3.0",
+                                    "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                },
+                                "access-constraints" => {
+                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                    "application" => {"security-domain" => {"type" => "security"}}
+                                },
+                                "attributes" => {
+                                    "additional-properties" => {
+                                        "type" => OBJECT,
+                                        "description" => "Additional properties that may be necessary to configure JSSE.",
+                                        "expressions-allowed" => true,
+                                        "nillable" => true,
+                                        "value-type" => STRING,
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "cipher-suites" => {
+                                        "type" => STRING,
+                                        "description" => "Comma separated list of cipher suites to enable on SSLSockets.",
+                                        "expressions-allowed" => true,
+                                        "nillable" => true,
+                                        "min-length" => 1L,
+                                        "max-length" => 2147483647L,
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "client-alias" => {
+                                        "type" => STRING,
+                                        "description" => "Preferred alias to use when the KeyManager chooses the client alias.",
+                                        "expressions-allowed" => true,
+                                        "nillable" => true,
+                                        "min-length" => 1L,
+                                        "max-length" => 2147483647L,
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "client-auth" => {
+                                        "type" => BOOLEAN,
+                                        "description" => "Boolean attribute to indicate if client's certificates should also be authenticated on the server side.",
+                                        "expressions-allowed" => true,
+                                        "nillable" => true,
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "key-manager" => {
+                                        "type" => OBJECT,
+                                        "description" => "JSEE Key Manager factory",
+                                        "expressions-allowed" => false,
+                                        "nillable" => true,
+                                        "value-type" => {
+                                            "algorithm" => {
+                                                "type" => STRING,
+                                                "description" => "Algorithm to use when creating the KeyManagerFactory.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "provider" => {
+                                                "type" => STRING,
+                                                "description" => "Provider class name to use when creating the KeyManagerFactory.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            }
+                                        },
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "keystore" => {
+                                        "type" => OBJECT,
+                                        "description" => "Configures a JSSE key store",
+                                        "expressions-allowed" => false,
+                                        "nillable" => true,
+                                        "value-type" => {
+                                            "password" => {
+                                                "type" => STRING,
+                                                "description" => "Sets the password of the keystore. Either this or 'truststore-password' must be present otherwise the security domain will be useless.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "type" => {
+                                                "type" => STRING,
+                                                "description" => "Type of the keystore. If not set, type defaults to 'JKS'.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "url" => {
+                                                "type" => STRING,
+                                                "description" => "URL of the keystore.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "provider" => {
+                                                "type" => STRING,
+                                                "description" => "Provider class name to use when creating the KeyStore.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "provider-argument" => {
+                                                "type" => STRING,
+                                                "description" => "String argument to pass to the keystore Provider constructor when instantiating it.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            }
+                                        },
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "protocols" => {
+                                        "type" => STRING,
+                                        "description" => "Comma separated list of protocols to enable on SSLSockets.",
+                                        "expressions-allowed" => true,
+                                        "nillable" => true,
+                                        "min-length" => 1L,
+                                        "max-length" => 2147483647L,
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "server-alias" => {
+                                        "type" => STRING,
+                                        "description" => "Preferred alias to use when the KeyManager chooses the server alias.",
+                                        "expressions-allowed" => true,
+                                        "nillable" => true,
+                                        "min-length" => 1L,
+                                        "max-length" => 2147483647L,
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "service-auth-token" => {
+                                        "type" => STRING,
+                                        "description" => "Token to retrieve PrivateKeys from the KeyStore.",
+                                        "expressions-allowed" => true,
+                                        "nillable" => true,
+                                        "min-length" => 1L,
+                                        "max-length" => 2147483647L,
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "trust-manager" => {
+                                        "type" => OBJECT,
+                                        "description" => "JSEE Trust Manager factory",
+                                        "expressions-allowed" => false,
+                                        "nillable" => true,
+                                        "value-type" => {
+                                            "algorithm" => {
+                                                "type" => STRING,
+                                                "description" => "Algorithm to use when creating the TrustManagerFactory.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "provider" => {
+                                                "type" => STRING,
+                                                "description" => "Provider class name to use when creating the TrustManagerFactory.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            }
+                                        },
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    },
+                                    "truststore" => {
+                                        "type" => OBJECT,
+                                        "description" => "Configures a JSSE trust store",
+                                        "expressions-allowed" => false,
+                                        "nillable" => true,
+                                        "value-type" => {
+                                            "password" => {
+                                                "type" => STRING,
+                                                "description" => "Sets the password of the truststore. Either this or 'keystore-password' must be present otherwise the security domain will be useless.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "type" => {
+                                                "type" => STRING,
+                                                "description" => "Type of the truststore. If not set, type defaults to 'JKS'.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "url" => {
+                                                "type" => STRING,
+                                                "description" => "URL of the truststore.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "provider" => {
+                                                "type" => STRING,
+                                                "description" => "Provider class name to use when creating the truststore.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            },
+                                            "provider-argument" => {
+                                                "type" => STRING,
+                                                "description" => "String argument to pass to the truststore Provider constructor when instantiating it.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L
+                                            }
+                                        },
+                                        "access-type" => "read-write",
+                                        "storage" => "configuration",
+                                        "restart-required" => "no-services"
+                                    }
+                                },
+                                "operations" => undefined,
+                                "notifications" => undefined,
+                                "children" => {}
+                            }}
+                        },
+                        "mapping" => {
+                            "description" => "Mapping configuration. Configures a list of mapping modules to be used for principal, role, attribute and credential mapping.",
+                            "model-description" => {"classic" => {
+                                "description" => "Mapping configuration. Configures a list of mapping modules to be used for principal, role, attribute and credential mapping.",
+                                "deprecated" => {
+                                    "since" => "1.3.0",
+                                    "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                },
+                                "access-constraints" => {
+                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                    "application" => {"security-domain" => {"type" => "security"}}
+                                },
+                                "attributes" => {"mapping-modules" => {
+                                    "type" => LIST,
+                                    "description" => "List of modules that map principal, role, and credential information",
+                                    "expressions-allowed" => false,
+                                    "nillable" => true,
+                                    "deprecated" => {
+                                        "since" => "1.2.0",
+                                        "reason" => "Use of this attribute is deprecated, use resource"
+                                    },
+                                    "value-type" => {
+                                        "code" => {
+                                            "description" => "Class name of the module to be instantiated.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "min-length" => 1
+                                        },
+                                        "type" => {
+                                            "description" => "Type of mapping this module performs. Allowed values are principal, role, attribute or credential..",
+                                            "type" => STRING,
+                                            "nillable" => false
+                                        },
+                                        "module-options" => {
+                                            "description" => "List of module options containing a name/value pair.",
+                                            "type" => OBJECT,
+                                            "value-type" => STRING,
+                                            "nillable" => true
+                                        }
+                                    },
+                                    "access-type" => "read-write",
+                                    "storage" => "configuration",
+                                    "restart-required" => "all-services"
+                                }},
+                                "operations" => undefined,
+                                "notifications" => undefined,
+                                "children" => {"mapping-module" => {
+                                    "description" => "List of modules that map principal, role, and credential information",
+                                    "model-description" => {"*" => {
+                                        "description" => "List of modules that map principal, role, and credential information",
+                                        "access-constraints" => {
+                                            "sensitive" => {"security-domain" => {"type" => "core"}},
+                                            "application" => {"security-domain" => {"type" => "security"}}
+                                        },
+                                        "attributes" => {
+                                            "code" => {
+                                                "type" => STRING,
+                                                "description" => "Class name of the module to be instantiated.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module" => {
+                                                "type" => STRING,
+                                                "description" => "Name of JBoss Module where the mapping module code is located.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module-options" => {
+                                                "type" => OBJECT,
+                                                "description" => "List of module options containing a name/value pair.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "value-type" => STRING,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "type" => {
+                                                "type" => STRING,
+                                                "description" => "Type of mapping this module performs. Allowed values are principal, role, attribute or credential..",
+                                                "expressions-allowed" => true,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            }
+                                        },
+                                        "operations" => undefined,
+                                        "notifications" => undefined,
+                                        "children" => {}
+                                    }}
+                                }}
+                            }}
+                        },
+                        "identity-trust" => {
+                            "description" => "Identity trust configuration. Configures a list of trust modules to be used.",
+                            "model-description" => {"classic" => {
+                                "description" => "Identity trust configuration. Configures a list of trust modules to be used.",
+                                "deprecated" => {
+                                    "since" => "1.3.0",
+                                    "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                },
+                                "access-constraints" => {
+                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                    "application" => {"security-domain" => {"type" => "security"}}
+                                },
+                                "attributes" => {"trust-modules" => {
+                                    "type" => LIST,
+                                    "description" => "List of trust modules",
+                                    "expressions-allowed" => false,
+                                    "nillable" => true,
+                                    "deprecated" => {
+                                        "since" => "1.2.0",
+                                        "reason" => "This attribute was replaced with sub resource"
+                                    },
+                                    "value-type" => {
+                                        "code" => {
+                                            "description" => "Class name of the module to be instantiated.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "min-length" => 1
+                                        },
+                                        "flag" => {
+                                            "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "allowed" => [
+                                                "required",
+                                                "requisite",
+                                                "sufficient",
+                                                "optional"
+                                            ]
+                                        },
+                                        "module" => {
+                                            "type" => STRING,
+                                            "nillable" => true,
+                                            "description" => "Name of JBoss Module where the identity trust module code is located."
+                                        },
+                                        "module-options" => {
+                                            "description" => "List of module options containing a name/value pair.",
+                                            "type" => OBJECT,
+                                            "value-type" => STRING,
+                                            "nillable" => true
+                                        }
+                                    },
+                                    "access-type" => "read-write",
+                                    "storage" => "configuration",
+                                    "restart-required" => "all-services"
+                                }},
+                                "operations" => undefined,
+                                "notifications" => undefined,
+                                "children" => {"trust-module" => {
+                                    "description" => "Trust module",
+                                    "model-description" => {"*" => {
+                                        "description" => "List of authentication modules",
+                                        "access-constraints" => {
+                                            "sensitive" => {"security-domain" => {"type" => "core"}},
+                                            "application" => {"security-domain" => {"type" => "security"}}
+                                        },
+                                        "attributes" => {
+                                            "code" => {
+                                                "type" => STRING,
+                                                "description" => "Class name of the module to be instantiated.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "flag" => {
+                                                "type" => STRING,
+                                                "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => false,
+                                                "allowed" => [
+                                                    "required",
+                                                    "requisite",
+                                                    "sufficient",
+                                                    "optional"
+                                                ],
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module" => {
+                                                "type" => STRING,
+                                                "description" => "Name of JBoss Module where the login module is located.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module-options" => {
+                                                "type" => OBJECT,
+                                                "description" => "List of module options containing a name/value pair.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "value-type" => STRING,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            }
+                                        },
+                                        "operations" => undefined,
+                                        "notifications" => undefined,
+                                        "children" => {}
+                                    }}
+                                }}
+                            }}
+                        },
+                        "acl" => {
+                            "description" => "Access control list configuration. Configures a list of ACL modules to be used.",
+                            "model-description" => {"classic" => {
+                                "description" => "Access control list configuration. Configures a list of ACL modules to be used.",
+                                "deprecated" => {
+                                    "since" => "1.3.0",
+                                    "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                                },
+                                "access-constraints" => {
+                                    "sensitive" => {"security-domain" => {"type" => "core"}},
+                                    "application" => {"security-domain" => {"type" => "security"}}
+                                },
+                                "attributes" => {"acl-modules" => {
+                                    "type" => LIST,
+                                    "description" => "List of acl modules",
+                                    "expressions-allowed" => false,
+                                    "nillable" => true,
+                                    "deprecated" => {
+                                        "since" => "1.2.0",
+                                        "reason" => "This attribute is replaced with sub resource"
+                                    },
+                                    "value-type" => {
+                                        "code" => {
+                                            "description" => "Class name of the module to be instantiated.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "min-length" => 1
+                                        },
+                                        "flag" => {
+                                            "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                            "type" => STRING,
+                                            "nillable" => false,
+                                            "allowed" => [
+                                                "required",
+                                                "requisite",
+                                                "sufficient",
+                                                "optional"
+                                            ]
+                                        },
+                                        "module" => {
+                                            "type" => STRING,
+                                            "nillable" => true,
+                                            "description" => "Name of JBoss Module where the acl provider module code is located."
+                                        },
+                                        "module-options" => {
+                                            "description" => "List of module options containing a name/value pair.",
+                                            "type" => OBJECT,
+                                            "value-type" => STRING,
+                                            "nillable" => true
+                                        }
+                                    },
+                                    "access-type" => "read-write",
+                                    "storage" => "configuration",
+                                    "restart-required" => "all-services"
+                                }},
+                                "operations" => undefined,
+                                "notifications" => undefined,
+                                "children" => {"acl-module" => {
+                                    "description" => "ACL module",
+                                    "model-description" => {"*" => {
+                                        "description" => "List of authentication modules",
+                                        "access-constraints" => {
+                                            "sensitive" => {"security-domain" => {"type" => "core"}},
+                                            "application" => {"security-domain" => {"type" => "security"}}
+                                        },
+                                        "attributes" => {
+                                            "code" => {
+                                                "type" => STRING,
+                                                "description" => "Class name of the module to be instantiated.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => false,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "flag" => {
+                                                "type" => STRING,
+                                                "description" => "The flag controls how the module participates in the overall procedure. Allowed values are requisite, required, sufficient or optional.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => false,
+                                                "allowed" => [
+                                                    "required",
+                                                    "requisite",
+                                                    "sufficient",
+                                                    "optional"
+                                                ],
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module" => {
+                                                "type" => STRING,
+                                                "description" => "Name of JBoss Module where the login module is located.",
+                                                "expressions-allowed" => false,
+                                                "nillable" => true,
+                                                "min-length" => 1L,
+                                                "max-length" => 2147483647L,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            },
+                                            "module-options" => {
+                                                "type" => OBJECT,
+                                                "description" => "List of module options containing a name/value pair.",
+                                                "expressions-allowed" => true,
+                                                "nillable" => true,
+                                                "value-type" => STRING,
+                                                "access-type" => "read-write",
+                                                "storage" => "configuration",
+                                                "restart-required" => "no-services"
+                                            }
+                                        },
+                                        "operations" => undefined,
+                                        "notifications" => undefined,
+                                        "children" => {}
+                                    }}
+                                }}
+                            }}
+                        }
+                    }
+                }}
+            },
+            "vault" => {
+                "description" => "Security Vault for attributes.",
+                "model-description" => {"classic" => {
+                    "description" => "Security Vault for attributes.",
+                    "deprecated" => {
+                        "since" => "1.3.0",
+                        "reason" => "The Security subsystem is deprecated and may be removed, significantly revised, or limited to managed domain legacy server use in future versions."
+                    },
+                    "attributes" => {
+                        "code" => {
+                            "type" => STRING,
+                            "description" => "Fully Qualified Name of the Security Vault Implementation.",
+                            "expressions-allowed" => false,
+                            "nillable" => true,
+                            "min-length" => 1L,
+                            "max-length" => 2147483647L,
+                            "access-type" => "read-write",
+                            "storage" => "configuration",
+                            "restart-required" => "no-services"
+                        },
+                        "vault-options" => {
+                            "type" => OBJECT,
+                            "description" => "Security Vault options.",
+                            "expressions-allowed" => true,
+                            "nillable" => true,
+                            "value-type" => STRING,
+                            "access-type" => "read-write",
+                            "storage" => "configuration",
+                            "restart-required" => "no-services"
+                        }
+                    },
+                    "operations" => undefined,
+                    "notifications" => undefined,
+                    "children" => {}
+                }}
+            }
+        }
+    }
+}

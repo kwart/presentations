@@ -1,0 +1,15 @@
+
+# Add legacy security realm
+/core-service=management/security-realm=LegacyRealm:add
+/core-service=management/security-realm=LegacyRealm/authentication=properties:add( \
+  path=/opt/web-tests/users.properties, plain-text=true)
+/core-service=management/security-realm=LegacyRealm/authorization=properties:add( \
+  path=/opt/web-tests/roles.properties)
+
+# Add legacy security domain
+/subsystem=security/security-domain=web-tests:add(cache-type=default)
+/subsystem=security/security-domain=web-tests/authentication=classic:add
+/subsystem=security/security-domain=web-tests/authentication=classic/login-module=RealmDirect:add( \
+  code=RealmDirect, flag=required, \
+  module-options=[("realm"=>"LegacyRealm")])
+reload

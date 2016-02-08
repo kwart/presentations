@@ -1,0 +1,12 @@
+
+# Configure SunPKCS11 security provider
+
+/subsystem=elytron/provider-loader=NSSfips:add( \
+  providers=[{class-names=["sun.security.pkcs11.SunPKCS11"], \
+  module="sun.jdk", \
+  property-list=[{key="nssModule", value="fips"}, \
+    {key="nssSecmodDirectory", value="/opt/fips-test/fipsdb"}, \
+    {key="nssLibraryDirectory",value="/usr/lib/x86_64-linux-gnu"}, \
+    {key="nssDbMode",value="readWrite"}, \
+    {key="name", value="testPKCS11"}]} \
+  ], register=true)
