@@ -1,0 +1,55 @@
+#!/bin/bash
+
+########################################################################
+###
+### Script for demoing on Linux (automated typing during live demos)
+### Author: Josef Cacek (josef.cacek@gmail.com)
+###
+### Usage:
+### * put this script on your PATH
+### * install xdotool into your system
+### * make 2 keyboard shortcuts to your system setting
+###   * the first runs "demo-step" command (I use Ctrl-Shift-E)
+###   * the second runs "demo-step reply" command (I use Ctrl-Shift-R)
+### * put commands as a lines into ~/demo.commands file
+###   use escape sequences to enter special charaters
+###   E.g. one line in my demo.commands file contains:
+###   #\n# search images in Docker public registry (Docker hub)\ndocker search wildfly
+### * and DEMO!
+###   * press your demo-step keyboard shortcut and watch what is script typing
+###   * it gets (and removes) first line from demo.commands puts it into new file 
+###     with escape sequences already resolved. Then using xdotool type the lines
+###   * when you need to replay last command use the "demo-step replay" 
+###     keyboard shortcut
+###
+########################################################################
+
+DEMO_COMMANDS=~/demo.commands
+
+DEMO_CURRENT=~/demo.current
+DEMO_CURRENT_BACKUP=~/demo.current.backup
+
+# run only if commands file is present
+if [ -f "$DEMO_COMMANDS" ]; then
+  if [ $# -gt 0 -a $1 == "replay" ]; then
+    # if we want to replay last command, then use backup to recreate command state
+    cp "$DEMO_CURRENT_BACKUP" "$DEMO_CURRENT"
+  else
+    # get first line from commands file
+    LINE=$(head -n1 "$DEMO_COMMANDS")
+    # and remove it from the original file
+    sed -i '1d' "$DEMO_COMMANDS"
+    # in my ubuntu mate 15.10 newlines in xdotool don't work (even the documentation says it should work)
+    # this is the workaround
+    echo -n -e "$LINE" > "${DEMO_CURRENT}"
+    cp "${DEMO_CURRENT}" "$DEMO_CURRENT_BACKUP"
+  fi
+  
+  sleep 0.5
+  while [ -s "${DEMO_CURRENT}" ]; do
+    TYPELINE=$(head -n1 "$DEMO_CURRENT")
+    sed -i '1d' "$DEMO_CURRENT"
+    xdotool key --clearmodifiers Return
+    xdotool type --clearmodifiers --delay 25 "$TYPELINE"
+  done
+fi

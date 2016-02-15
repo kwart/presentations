@@ -1,0 +1,13 @@
+#\n# prepare environment\ndocker rm -f $(docker ps -aq)
+#\n# search images in Docker public registry (Docker hub)\ndocker search wildfly
+#\n# run container from an image\ndocker run -it jboss/wildfly
+#\n# create a new image with bundled application\ndocker build --rm -t kwart/wildfly-with-test - <<EOT\n  FROM jboss/wildfly\n  ADD https://github.com/kwart/secured-webapp-template/releases/download/single-jsp-app-default-domain/secured-webapp.war \\\n    /opt/jboss/wildfly/standalone/deployments/test.war\n  USER root\n  RUN chown jboss:jboss /opt/jboss/wildfly/standalone/deployments/test.war\n  USER jboss\nEOT
+#\n# run the image and map host port 80 to containers port 8080\ndocker run -it -p 80:8080 kwart/wildfly-with-test
+#\n# test the test application\ncurl -v http://localhost/test/
+#\n# list the image layers\ndocker history kwart/wildfly-with-test
+#\n# next slide please ###
+#\n# check /etc/redhat-release on my system\ncat /etc/redhat-release
+#\n# run RHEL image from Red Hat public registry\ndocker run -it --rm registry.access.redhat.com/rhel7.2
+#\n# check /etc/redhat-release in RHEL container\ncat /etc/redhat-release
+#\n# exit will remove container because we used "--rm" argument for docker run command\nexit
+#\n# next slide please ###

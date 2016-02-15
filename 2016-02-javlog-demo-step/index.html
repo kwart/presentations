@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>From local tests to clouds</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+#  demo-step demo
+
+*Josef Cacek, GitHub: kwart, @jckwart*
+
+???
+
+Welcome to the presentation about live demoing...
+
+---
+class: center, middle
+
+# WHY?
+
+## Because you should avoid typing when presenting (even during live demos).
+
+---
+
+## Docker demo
+
+```bash
+# search images in Docker public registry (Docker hub)
+docker search wildfly
+
+# run container from an image
+docker run -it jboss/wildfly
+
+# create a new image with bundled application
+docker build --rm -t kwart/wildfly-with-test - <<EOT
+  FROM jboss/wildfly
+  ADD https://github.com/kwart/secured-webapp-template/releases/download/single-jsp-app-default-domain/secured-webapp.war \
+    /opt/jboss/wildfly/standalone/deployments/test.war
+  USER root
+  RUN chown jboss:jboss /opt/jboss/wildfly/standalone/deployments/test.war
+  USER jboss
+EOT
+
+# run the image and map host port 80 to containers port 8080
+docker run -it -p 80:8080 kwart/wildfly-with-test
+
+# list the image layers
+docker history kwart/wildfly-with-test
+```
+
+---
+
+## Docker demo - Red Hat Enterprise Linux
+
+```bash
+# run RHEL image from Red Hat public registry
+docker run -it --rm registry.access.redhat.com/rhel7.2
+
+# Check the OS version in the container:
+cat /etc/redhat-release
+
+# and we could continue by installing EAP for instance
+# subscription-manager register --username=you@example.com --password=xxx
+# subscription-manager attach --pool=11223344556677889900aabbccddeeff
+# subscription-manager repos --enable jb-eap-6-for-rhel-7-server-rpms
+# yum -y groupinstall jboss-eap6
+```
+
+---
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
