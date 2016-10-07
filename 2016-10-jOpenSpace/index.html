@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple clouds for Java developers</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .red { color: red; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+background-image: url(sun-bg.png)
+
+# Simple clouds
+## for Java developers
+
+Josef Cacek / Red Hat / JBoss
+
+---
+# Have you ever wanted to ...
+## ... write once and run everywhere?
+--
+
+### ... and have a simple API for cloud control?
+
+--
+
+```java
+Cloud cloud = MyLord.giveMeACloud();
+
+try (Machine machine = cloud.startAMachineForMe()) {
+    machine.doTheHardWo*k();
+    machine.giveMeResults();
+}
+```
+
+--
+# Solution is .red.bold[Sunstone]
+
+
+???
+* Chtěli jste někdy napsat vaše programy jednou a běhat je kdekoliv?
+* třeba i na různých cloudech a kontejerech pomocí jednoduchého API?
+* Například takto
+  * Můj Pane, sešli mi mrak
+  * nechť z něho kápne nějaká výpočetní síla
+  * a pak pro mne zase vysuš zem
+* přesně takové řešení máme a jmenuje se Sunstone
+
+---
+
+# Sunstone library
+
+*Small opensource library which helps to **control virtual machines in cloud and container** environments.*
+
+* Github: [wildfly-extras/sunstone](https://github.com/wildfly-extras/sunstone)
+
+--
+
+### Why &amp; How?
+* developed to simplify WildFly testing
+* configured through properties
+* current: 0.10.0-SNAPSHOT
+  * waiting for Apache JClouds 2.0 public release
+
+???
+
+Sunstone je malá knihovna pro práci s cloudy a kontejnery.
+
+* původně vznikla jako interní projekt v Red Hatu, teď probíhá vývoj na githubu
+* současná implementace využívá Apache JClouds, což způsobuje problém s veřejnými releasy
+  * dokud jsme používali Sunstone interně, tak jsme si dělali i vlastní releasy JClouds
+  * teď musíme čekat na final release JClouds 2.0 a než bude, můžete používat SNAPSHOT dostupný v Sonatype repozitáři
+---
+
+# Sunstone library
+
+### Supported clouds
+
+* [Amazon EC2](https://github.com/wildfly-extras/sunstone/blob/master/ec2-README.md)
+* [Microsoft Azure](https://github.com/wildfly-extras/sunstone/blob/master/azure-README.md) and, as a technical preview, [Microsoft Azure (ARM)](https://github.com/wildfly-extras/sunstone/blob/master/azure-arm-README.md)
+* [OpenStack](https://github.com/wildfly-extras/sunstone/blob/master/openstack-README.md)
+* [Docker](https://github.com/wildfly-extras/sunstone/blob/master/docker-README.md)
+* [Bare Metal](https://github.com/wildfly-extras/sunstone/blob/master/baremetal-README.md) (not really a cloud provider per se, but useful anyway)
+
+--
+
+.pull-left[
+
+### Modules
+- core
+- wildfly
+- arquillian
+]
+.pull-right[
+
+### Vision
+- keep it simple and understandable
+- share early
+- iterate fast
+- value feedback in all forms
+]
+
+???
+
+- keep it simple and understandable
+  - do one thing and do it well
+  - design compact and sharp API
+  - document features, changes, provide examples
+- share early
+  - both the library itself and our own usecases
+  - maintain a list of usages so people know where to steal from
+- iterate fast
+  - but avoid breaking compatibility as much as possible (leave that to a major release)
+    - instead, deprecate and describe migration path; then remove deprecated elements in a major release
+- value feedback in all forms
+  - e-mail / IRC / in person is good, issue in GitHub is better, pull request is best
+
+---
+## Back to the example ...
+```java
+Cloud cloud = MyLord.giveMeACloud();
+try (Machine machine = cloud.startAMachineForMe()) {
+    machine.doTheHardWork();
+    machine.giveMeResults();
+}
+```
+
+--
+
+### Using Sunstone API
+
+```java
+try (CloudProvider cloudProvider = CloudProvider.create("my-provider")) {
+    try (Node node = cloudProvider.createNode("wildfly")) {
+        // make HTTP request
+        doHttpCall(new URL("http", node.getPublicAddress(), 8080, ""));
+        node.exec(
+                "tar",
+                "-czvf",
+                "/tmp/wildfly-logs.tgz",
+                "/opt/jboss/wildfly/standalone/log").assertSuccess();
+        node.copyFileFromNode("/tmp/wildfly-logs.tgz",
+                Paths.get("/tmp/wildfly-" + cloudProvider.getCloudProviderType().getLabel() + ".tgz"));
+    }
+}
+```
+---
+### Sunstone configuration
+
+```properties
+# Cloud provider - an entrypoint to given cloud
+cloud.provider.my-provider.type=docker
+cloud.provider.my-provider.docker.endpoint=http://localhost:2375/
+
+# Node - a single virtual machine in the cloud 
+node.wildfly.waitForPorts=8080
+node.wildfly.docker.image=jboss/wildfly:10.0.0.Final
+```
+---
+
+class: center, middle
+background-image: url(sun-bg.png)
+
+# Sunstone Demo
+
+???
+
+# Pros
+* simple API
+* Java 8
+* you can help with adding of fixing a feature you need
+  * daily snapshots
+* mighty property-based configuration
+  * templating
+  * overriding
+
+# Cons
+* no public "final" release
+
+---
+## Apache jclouds
+
+>  **multi-cloud** toolkit for the Java platform
+that gives you the freedom to create applications that are **portable** across clouds
+while giving you **full control to use cloud-specific features**
+
+--
+
+### Abstraction
+
+* Compute
+* Blobstore
+* Load balancer
+* Specific APIs
+
+???
+
+* highly modular
+* independent on Vendor SDKs or third party client libraries
+* REST calls
+
+# Pros
+* backed by Apache
+  * code has to follow guidelines
+  * reviews with with high quality comments
+* you can help with adding of fixing a feature you need
+  * daily snapshots
+
+# Cons
+* backed by Apache
+  * delays in release cycle
+* not full-featured
+
+---
+
+### Example - jclouds Compute 
+
+```java
+ComputeService compute = ContextBuilder.newBuilder("aws-ec2")
+    .credentials("identity", "credential")
+    .buildView(ComputeServiceContext.class)
+    .getComputeService();
+
+Template template = compute.templateBuilder()
+    .osFamily(OsFamily.UBUNTU)
+    .minRam(2048)
+    .options(inboundPorts(22, 80))
+    .build();
+
+compute.createNodesInGroup("jclouds", 1, template);
+```
+---
+
+## Native libraries
+
+* Amazon - AWS
+  * [SDK for Java](https://aws.amazon.com/sdk-for-java/)
+* Microsoft Azure
+  * [Java SDK](https://azure.microsoft.com/en-us/documentation/articles/java-download-azure-sdk/)
+* Google - GCE
+  * [Google API Java Client](https://github.com/google/google-api-java-client)
+* Docker
+  * [docker-java](https://github.com/docker-java/docker-java), [docker-client](https://github.com/spotify/docker-client)
+
+
+???
+
+## Pros
+* usually develop from directly by Cloud vendor
+* should be actual and full-featured
+
+## Cons
+* if you write your app for more clouds, you have to write the logic for each cloud separatelly
+* price of change in such app multiplies with number of supported clouds
+
+---
+
+class: center, middle
+background-image: url(sun-bg.png)
+
+# Questions?
+
+josef.cacek@gmail.com  
+https://github.com/kwart/  
+@jckwart  
+
+???
+
+Thank you for attention
+
+    </textarea>
+    <script src="remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9'
+        });
+    </script>
+  </body>
+</html>
