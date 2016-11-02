@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WildFly 10.1</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .red { color: red; }
+      .white { color: white; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .remark-slide-number {
+        bottom: 20px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+layout: true
+background-image: url(wildfly_deck_base.jpg)
+
+---
+background-image: url(wildfly_deck_title.jpg)
+class: center, middle,  white
+
+
+# .font200[Cool features in]
+
+# &nbsp;
+# &nbsp;
+
+# .font200[10.1]
+
+.font200[
+Josef Cacek / Red Hat / JBoss EAP QE
+]
+
+???
+
+Welcome on November JBug in which I will present new features in WildFly 10.1
+
+Abstract:
+
+WildFly 10.1, the fast open-source Java EE application server, was released in September 2016 and it comes with set of cool new features.
+* We will discuss the HTTP/2 out-of-the box support - you don't need to hack your Java 8 boot classpath anymore!
+* Related topic to be covered is the TLS certificate auto-generation, which helps to quickly begin with secured client-server communication.
+* We will demo, how to setup WildFly Cluster in Microsoft Azure environment using AZURE_PING discovery protocol.
+* And last but not least, we will look into a new WildFly load-balancer profile in managed domains configuration.
+
+---
+
+# Who is Josef Cacek?
+
+* Principal Quality Engineer / JBoss EAP
+  * Security
+  * Clouds
+* Experienced Hobby Runner
+* Happy Father
+* Organ Player
+
+.pull-right[
+# &nbsp;
+josef.cacek@gmail.com  
+https://github.com/kwart/  
+@jckwart
+]
+---
+
+# Agenda
+
+* HTTP/2 support
+* TLS certificate auto-generation
+* Clustering in MS Azure cloud
+* Load-balancer profile
+
+--
+
+### And maybe a bonus
+* *Easy TLS*
+
+---
+# About WildFly profiles (just recap)
+
+* **`default`** - basic profile without messaging and clustering features
+* **`full`** - includes messaging support (JMS)
+* **`ha`** - includes clustering support (Infinispan, failover, ...)
+  * `ha` = High Availability
+* **`full-ha`** - all features
+---
+# Details about demo applications
+* single `index.jsp`
+  * `contentType=text/plain`
+* configuration in `WEB-INF/web.xml`
+* available on GitHub - https://github.com/kwart/secured-webapp-template/releases
+
+???
+
+* nowadays are modern single page applications, so let's use some
+
+---
+## checksecure-confidential.war
+
+### index.jsp
+```jsp
+<%@ page language="java" pageEncoding="UTF-8" contentType="text/plain;charset=utf-8" session="false"%>
+Secure=<%= request.isSecure() %>
+Scheme=<%= request.getScheme() %>
+Protocol=<%= request.getProtocol() %>
+```
+--
+
+### WEB-INF/web.xml
+```xml
+<web-app>
+    <security-constraint>
+    	<web-resource-collection>
+    		<web-resource-name>All confidential</web-resource-name>
+    		<url-pattern>/*</url-pattern>
+    	</web-resource-collection>
+    	<user-data-constraint>
+    		<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    	</user-data-constraint>
+    </security-constraint>
+</web-app>
+```
+
+---
+## counter-distributable.war
+
+### index.jsp
+```jsp
+<%@ page language="java" pageEncoding="UTF-8" contentType="text/plain;charset=utf-8"%>
+<%
+    Integer requestCount = (Integer)session.getAttribute("requestCount");
+    if (requestCount == null) {
+        requestCount = 0;
+    }
+    session.setAttribute("requestCount", ++requestCount);
+%>
+Host=<%= System.getProperty("jboss.node.name") %>
+Request count=<%= requestCount %>
+```
+--
+
+### WEB-INF/web.xml
+```xml
+<web-app>
+    <distributable/>
+</web-app>
+```
+
+---
+class: center, middle
+
+# HTTP/2 & generated TLS certificate
+
+???
+* HTTP 1.0 1996
+  * single request/response per connection
+  * Host header optional
+  * limited support for caching
+* HTTP 1.1 1999
+  * multiple requests and responses per connection (Persistent connections)
+  * required Host header (virtual hosts support)
+  * conditional caching headers
+  * Digest and proxy authentication
+* SPDY 2009
+  * single connection for multiple req/resp in parallel
+  * Gzip compressed headers
+  * content push
+  * introduces request priorities
+  * requires TLS
+  * not a standard 
+* HTTP 2.0 2015
+  * TLS optional (HTTP Upgrade as an alternative)
+  * TLS requires stronger cryptography
+  * new Header compression scheme HPACK
+---
+
+# HTTP/2
+
+1. **binary**, instead of textual
+1. is fully **multiplexed**, instead of ordered and blocking
+1. therefore, use **one connection** for parallelism
+1. uses **header compression** to reduce overhead
+1. allows servers to “**push**” responses proactively into client caches
+
+.pull-right[
+*Source: [TechFactsWorld](http://www.technfactsworld.com/2015/12/what-is-http2.html)*
+]
+
+--
+
+## Specifications
+
+* RFC-7540 Hypertext Transfer Protocol version 2
+* RFC-7541 Header Compression for HTTP/2
+
+???
+
+Links:
+* http://www.slideshare.net/lmacvittie/http2-changes-everything
+* http://www.technfactsworld.com/2015/12/what-is-http2.html
+
+---
+
+# HTTP/2 support in WildFly 9 and 10.0
+
+* disabled by default
+* hacking Java boot path for TLS support
+* requires change with every Java update
+???
+
+* HTTP listener support has to be enabled
+* hacking Java boot path to support ALPN (application layer protocol negotiation)
+* every Java update needs ALPN library update
+--
+
+* [Howto](http://undertow.io/blog/2015/03/26/HTTP2-In-Wildfly.html)
+  * Add correct Jetty ALPN Jar for your JDK version
+  * Add ALPN to the boot class path
+  * Get a TLS certificate and create a keystore and truststore
+  * Configure HTTPs connector in Wildfly
+
+???
+
+## WFLY 9 release notes
+
+Note that using HTTP/2 requires using Java 8 with a specialized setup procedure. This is because the HTTP/2 standard requires a TLS stack that supports ALPN, and a stock Java install does not include support for it. The extra setup steps will go away once Java 9 is released, which is expected to include ALPN support. Since HTTP/2 is also a goal for Java EE8, it is also expected to be made available in a future Java SE 8 update, likely after Java 9 is released.
+
+---
+
+class: center, middle
+
+# HTTP/2 
+## just works
+# in WildFly 10.1
+
+---
+
+# HTTP/2 out-of-the-box support in WildFly 10.1
+
+* enabled by default
+* HTTPs listener preconfigured
+  * with auto generated TLS certificate
+* no need to hack Java boot path
+
+???
+
+[Proposal on wildfly-dev](http://wildfly-development.1055759.n5.nabble.com/HTTP-2-out-of-the-box-in-Wildfly-10-1-td5717003.html)
+
+- Add support for lazily generated self signed certificates, and include this in the default config. This would mean that we would have a working HTTPS connector in the default config, although the first request would be a bit slow as it would need to generate a new self signed certificate for localhost. This allows for SSL out of the box, without any impact on startup time or any need for an installer to generate the certificate.
+
+- I have dealt with the ALPN issue in Undertow using a reflection based hack. I have created some code that parses and modifies the SSL Server/Client hello messages to add/read APLN information, and I then use reflection to update the HandshakeHash maintained by the engine so the engines internal hash state used to generate the Finished frames matches the data that was actually sent over the wire.
+
+---
+
+## Configuration / standalone.xml
+
+```xml
+<security-realm name="ApplicationRealm">
+    <server-identities>
+        <ssl>
+            <keystore path="application.keystore" relative-to="jboss.server.config.dir" 
+                keystore-password="password" alias="server" key-password="password" 
+                generate-self-signed-certificate-host="localhost"/>
+        </ssl>
+    </server-identities>
+    <!-- ... -->
+</security-realm>
+```
+--
+
+```xml
+<subsystem xmlns="urn:jboss:domain:undertow:3.1">
+    <!-- ... -->
+    <server name="default-server">
+        <http-listener name="default" socket-binding="http" 
+            redirect-socket="https" enable-http2="true"/>
+        <https-listener name="https" socket-binding="https"
+            security-realm="ApplicationRealm" enable-http2="true"/>
+    </server>
+    <!-- ... -->
+</subsystem>
+```
+
+---
+
+# Demo
+
+### Server
+```bash
+# Copy demo application which requires HTTPs
+cp single-jsp/checksecure-confidential.war wildfly-10.1.0.Final/standalone/deployments
+
+# Run WildFly 10.1
+wildfly-10.1.0.Final/bin/standalone.sh
+```
+
+### Client
+```bash
+# Have a fun with HTTP/2!
+nghttp -v http://localhost:8080/
+nghttp -v https://localhost:8443/
+
+curl https://localhost:8443/
+curl --insecure https://localhost:8443/
+```
+---
+
+# Recap HTTP/2 & TLS certificate autogeneration 
+
+* HTTP/2 enabled by default
+* Performance gain
+--
+
+* HTTPs enabled by default
+  * TLS certificate autogenerated
+  * **For development/testing only!**
+
+???
+
+The HTTPs with generated self-signed certificate is an easy target of 
+Man-in-the-middle attacks.
+
+---
+class: center, middle
+
+# WildFly Cluster in MS Azure
+
+---
+
+# What's the problem with MS Azure?
+
+
+* WildFly clustering uses UDP multicasting to discovery nodes
+* multicast doesn't work in Azure 
+
+???
+
+**JGroups** - component for controlling clusters (nodes discovery, messaging
+
+--
+
+## How WildFly 10.1 solves it?
+
+* introduces **AZURE_PING** node discovery protocol
+  * uses Azure storage blobs
+
+???
+Similar solution existed - more general FILE_PING or S3_PING for Amazon EC2.
+
+---
+
+# Get WildFly cluster working with AZURE_PING?
+
+1. create a new **storage** account with a container for AZURE_PING files
+1. prepare **Virtual Machines** in Azure cloud
+  * create a new virtual network on Azure
+  * start VM in the new virtual network
+  * install Java and WildFly
+1. start WildFly with **Azure HA** profile
+  * `docs/examples/configs/standalone-azure-ha.xml`
+
+???
+
+Configure mod_cluster load balancing to use a proxy list instead of advertising
+
+* managed domains doesn't have
+* default load balancing configuration
+  * mod_cluster advertising is based on UDP multicasting
+
+
+---
+
+# Example prepare steps - using Azure CLI
+
+```bash
+azure login
+
+# We'll use Azure Classic mode (Azure Service Management) for this demo
+azure config mode asm
+
+# create new storage account
+azure storage account create --type LRS --location "East US" jbugczdemo
+
+# get access key to the new storage
+STORAGE_KEY=$(azure storage account keys list --json jbugczdemo | jq -Mr .primaryKey)
+
+# create a container in the storage account
+azure storage container create --account-name jbugczdemo --account-key "$STORAGE_KEY" democontainer
+
+# Create a virtual network
+azure network vnet create --location "East US" -n jbugczsubnet jbugcznet
+
+# create VM from a public image
+IMGNAME=b39f27a8b8c64d52b05eac6a62ebad85__Ubuntu-16_04-LTS-amd64-server-20161011-en-us-30GB
+azure vm create --location "East US" --ssh 22 --vm-size Basic_A1 \
+  --virtual-network-name jbugcznet \
+  jbugcz1 $IMGNAME wildfly JBugCZ20161102=
+
+# create endpoint (i.e. open public port) for the VM
+azure vm endpoint create jbugcz1 8080
+```
+---
+
+background-image: url(azure_portal_jbugcz1.png)
+
+???
+Or if you like more the Windows users way, you can use Azure Portal UI
+to do the above steps.
+
+---
+
+# Demo / Azure cluster / 2 nodes
+```bash
+# copy ready-to-use sample profile to configuration directory
+cp wildfly-10.1.0.Final/docs/examples/configs/standalone-azure-ha.xml \
+  wildfly-10.1.0.Final/standalone/configuration/
+
+# Deploy demo application
+cp single-jsp/counter-distributable.war wildfly-10.1.0.Final/standalone/deployments
+
+# find proper binging IP address
+MY_IP=$(ip route get 8.8.8.8 | awk '{print $NF; exit}')
+
+# run WildFly with Azure HA profile
+wildfly-10.1.0.Final/bin/standalone.sh -c standalone-azure-ha.xml \
+  -b $MY_IP -bprivate $MY_IP \
+  -Djboss.jgroups.azure_ping.storage_account_name=jbugczdemo \
+  -Djboss.jgroups.azure_ping.storage_access_key=$STORAGE_KEY \
+  -Djboss.jgroups.azure_ping.container=jbugczcontainer
+```
+--
+
+### Test it:
+* open/reload http://jbugcz1.cloudapp.net:8080/counter-distributable/
+* restart WildFly on jbugcz1
+
+???
+# don't forget to prepare environment
+```
+# as root
+sudo su -
+apt install -y openjdk-8-jdk unzip nghttp2-client
+wget http://download.jboss.org/wildfly/10.1.0.Final/wildfly-10.1.0.Final.zip
+
+./wildfly-start.sh
+```
+
+* https://manage.windowsazure.com/
+
+---
+
+class: center, middle
+
+# Load balancing
+
+---
+
+# Load balancers for WildFly
+
+***based on http://modcluster.io/***
+
+* Apache httpd
+* Undertow
+
+???
+* Apache httpd used to be the primary load balancer for the AS
+* With Undertow you don't need this extra piece of software
+  * static balancer
+  * mod_cluster filter
+  
+---
+
+# Load balancer profiles in WildFly 10.1
+
+* **minimal** server configuration with Undertow
+  * mod-cluster filter used
+* **standalone** server
+  * `docs/examples/configs/standalone-load-balancer.xml`
+* managed **domain**
+  * already present as `load-balancer` profile in `domain.xml`
+
+---
+
+# Demo / Managed domain with load balancer
+
+```bash
+# add a management user - so we can use Management console
+wildfly-10.1.0.Final/bin/add-user.sh -u admin -p admin.1234
+
+MY_IP=$(ip route get 8.8.8.8 | awk '{print $NF; exit}')
+
+# start managed domain
+wildfly-10.1.0.Final/bin/domain.sh -b $MY_IP -bprivate $MY_IP
+```
+???
+```
+cd ~/test/wf101
+./load-balancer-domain.sh
+```
+--
+
+### Management console configuration
+
+* http://localhost:9990/
+  * stop `main-server-group` in Runtime part of configuration
+  * add `balancer` group (`load-balancer` profile) with 1 server
+  * add `nodes` group (`ha` profile) with 2 servers
+  * deploy `counter-distributable.war` to `nodes` group
+
+???
+
+```
+firefox http://localhost:9990/
+```
+
+---
+
+# Load-balancing on Azure
+
+* Azure doesn't support UDP multicast
+* static load-balancer address has to be configured on cluster nodes
+
+---
+
+# Demo / Load-balancing on Azure
+
+```bash
+# use Azure HA profile
+cp wildfly-10.1.0.Final/docs/examples/configs/standalone-azure-ha.xml \
+  wildfly-10.1.0.Final/standalone/configuration/
+
+# reconfigure the Azure HA profile to use static address of load balancer
+wildfly-10.1.0.Final/bin/jboss-cli.sh <<EOT
+  embed-server -c=standalone-azure-ha.xml
+  /subsystem=modcluster/mod-cluster-config=configuration:write-attribute(name=advertise,value=false)
+  /socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=proxy1:add( \
+      host=10.32.0.6, port=8090)
+  /subsystem=modcluster/mod-cluster-config=configuration:list-add(name=proxies,value=proxy1)
+EOT
+
+# start WildFly
+wildfly-10.1.0.Final/bin/standalone.sh -c standalone-azure-ha.xml \
+  -b $MY_IP -bprivate $MY_IP \
+  -Djboss.jgroups.azure_ping.storage_account_name=jbugczdemo \
+  -Djboss.jgroups.azure_ping.storage_access_key=$STORAGE_KEY \
+  -Djboss.jgroups.azure_ping.container=jbugczcontainer
+
+```
+
+???
+
+```
+ssh wildfly@jbugcz-lb.cloudapp.net
+sudo su -
+./azure-wildfly-loadbalancer.sh
+```
+
+```
+ssh wildfly@jbugcz1.cloudapp.net
+sudo su -
+./azure-load-balanced.sh
+```
+
+```
+firefox http://jbugcz-lb.cloudapp.net:8080/counter-distributable/
+```
+
+---
+class: center, middle
+
+## Bonus
+
+# TLS made easy
+
+## http://letsencrypt.org
+
+---
+
+# Let's Encrypt - Free Automatic Certificate Authority (CA)
+--
+
+```bash
+DOMAIN=jcacek-wildfly.cacek.cz
+
+# generate Certificate by using embedded http server of the letsencrypt client
+letsencrypt certonly --standalone -d $DOMAIN
+
+# import private key to a keystore
+openssl pkcs12 -export -out /opt/keystore.p12 \
+  -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem \
+  -inkey /etc/letsencrypt/live/$DOMAIN/privkey.pem \
+  -password pass:pass.123
+
+# change the SSL configuration in WildFly
+wildfly-10.1.0.Final/bin/jboss-cli.sh <<EOT
+  embed-server
+  /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:remove
+  /core-service=management/security-realm=ApplicationRealm/server-identity=ssl:add( \
+    keystore-password=pass.123, keystore-path="/opt/keystore.p12", \
+    keystore-provider=PKCS12, protocol=TLS)
+EOT
+
+cp single-jsp/checksecure-confidential.war wildfly-10.1.0.Final/standalone/deployments
+
+# Run WildFly
+wildfly-10.1.0.Final/bin/standalone.sh -b 0.0.0.0
+```
+???
+```
+ssh wildfly@jcacek-wildfly.cloudapp.net
+sudo su -
+./lets-encrypt-wildfly.sh
+```
+
+```
+firefox https://jcacek-wildfly.cacek.cz:8443/
+curl -L http://jcacek-wildfly.cacek.cz:8080/checksecure-confidential/
+```
+---
+
+# Let's Encrypt - security policy
+
+It's not possible to use default domain names in clouds (i.e. `*.cloudapp.net` for Azure).
+
+**Workaround:** Add CNAME DNS record from your domain pointing to the Azure domain
+
+???
+```
+host -t CNAME jcacek-wildfly.cacek.cz
+```
+
+---
+class: center, middle
+
+# Questions?
+
+josef.cacek@gmail.com  
+https://github.com/kwart/  
+@jckwart  
+
+???
+
+Thank you for attention
+
+    </textarea>
+    <script src="remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:10',
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>
