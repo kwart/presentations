@@ -105,6 +105,15 @@ josef.cacek@gmail.com
 https://github.com/kwart/  
 @jckwart
 ]
+
+???
+I work as a quality engineer for JBoss application server.  
+My main responsibilities are Security components and Cloud environments.
+
+Beside the work, I like distance running,  
+I have 4 children - so sometimes I'm happy with them sometime not so much. 
+And I'm also an organ player.
+
 ---
 
 # Agenda
@@ -129,6 +138,9 @@ https://github.com/kwart/
 * **`full-ha`** - all features
 ---
 # Details about demo applications
+
+* standard Java EE web applications (WARs) 
+  * not related to the new features
 * single `index.jsp`
   * `contentType=text/plain`
 * configuration in `WEB-INF/web.xml`
@@ -139,9 +151,12 @@ https://github.com/kwart/
 * nowadays are modern single page applications, so let's use some
 
 ---
-## checksecure-confidential.war
+### checksecure-confidential.war
 
-### index.jsp
+Prints security related information from the incoming `HttpServletRequest` object.
+The application requires encrypted channel (i.e. TLS).
+
+**`index.jsp`**
 ```jsp
 <%@ page language="java" pageEncoding="UTF-8" contentType="text/plain;charset=utf-8" session="false"%>
 Secure=<%= request.isSecure() %>
@@ -150,7 +165,7 @@ Protocol=<%= request.getProtocol() %>
 ```
 --
 
-### WEB-INF/web.xml
+**`WEB-INF/web.xml`**
 ```xml
 <web-app>
     <security-constraint>
@@ -166,9 +181,12 @@ Protocol=<%= request.getProtocol() %>
 ```
 
 ---
-## counter-distributable.war
+### counter-distributable.war
 
-### index.jsp
+Distributable application (ready for use in cluster), which counts users visits.
+The count of visit is stored in `HttpSession` attribute.
+
+**`index.jsp`**
 ```jsp
 <%@ page language="java" pageEncoding="UTF-8" contentType="text/plain;charset=utf-8"%>
 <%
@@ -183,7 +201,7 @@ Request count=<%= requestCount %>
 ```
 --
 
-### WEB-INF/web.xml
+**`WEB-INF/web.xml`**
 ```xml
 <web-app>
     <distributable/>
@@ -194,6 +212,26 @@ Request count=<%= requestCount %>
 class: center, middle
 
 # HTTP/2 & generated TLS certificate
+
+---
+# HTTP - history
+
+* **HTTP 1.0** 1996
+  * single request/response per connection
+* **HTTP 1.1** 1999
+  * multiple requests and responses per connection
+  * virtual hosts support
+* ***SPDY*** 2009 (by Google)
+  * binary, requires TLS
+  * single connection for multiple requests/responses in parallel
+  * Gzip compressed headers
+  * content push
+  * introduces request priorities
+  * not a standard 
+* HTTP 2.0 2015
+  * TLS optional
+  * TLS requires stronger cryptography
+  * new header compression scheme HPACK
 
 ???
 * HTTP 1.0 1996
@@ -230,6 +268,9 @@ class: center, middle
 *Source: [TechFactsWorld](http://www.technfactsworld.com/2015/12/what-is-http2.html)*
 ]
 
+???
+- HTTP2 is semantically the same
+- servlet 4 should bring us support HTTP/2
 --
 
 ## Specifications
@@ -376,11 +417,30 @@ class: center, middle
 
 ---
 
+# What is MS Azure?
+
+* Integrated cloud services
+  * computing
+  * storage
+  * database
+  * analytics, mobile, networking, ...
+
+# &nbsp;
+
+.center[
+*Cloud computing platform and infrastructure created by Microsoft for building,  
+deploying, and managing applications and services  
+through a global network of Microsoft-managed data centers.*
+]
+
+---
+
 # What's the problem with MS Azure?
 
 
-* WildFly clustering uses UDP multicasting to discovery nodes
-* multicast doesn't work in Azure 
+* UDP multicast
+  * doesn't work in Azure networks
+  * it's used for cluster nodes discovery
 
 ???
 
@@ -486,6 +546,9 @@ sudo su -
 # the same for node 2
 ```
 
+**Explain:** why it's not starting very fast?
+* I've used Basic Azure VM instance size to keep the demo cheap (paying for computation hour and storage)
+
 --
 
 ### Test it:
@@ -549,6 +612,11 @@ cd ~/test/wf101
 
 ./firefox-load-balancer.sh
 ```
+
+**Explain:** why it's not starting very fast?
+* It's starting host controller and 2 WildFly servers
+* We'll reconfigure it to start 3 servers
+
 --
 
 ### Management console configuration
@@ -659,13 +727,14 @@ wildfly-10.1.0.Final/bin/standalone.sh -b 0.0.0.0
 ```
 ???
 ```
-ssh wildfly@jcacek-wildfly.cloudapp.net
+./ssh-azure-letsencrypt.sh
 sudo su -
 ./lets-encrypt-wildfly.sh
 ```
 
 ```
-firefox https://jcacek-wildfly.cacek.cz:8443/
+./firefox-lets-encrypt.sh
+
 curl -L http://jcacek-wildfly.cacek.cz:8080/checksecure-confidential/
 ```
 ---
