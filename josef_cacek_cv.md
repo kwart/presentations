@@ -1,6 +1,6 @@
 # Josef Cacek
 
-Java developer with extensive knowledge of Java EE focusing on security components in the Java ecosystem. Open-source software enthusiast and contributor or author in several projects. 
+Java developer with extensive knowledge of Java EE focusing on security components in the Java ecosystem. Open source software enthusiast and contributor or author in several projects.
 
 Specialties: 
 * Java
@@ -39,6 +39,22 @@ Specialties:
 
 * Programming a product aimed at IT-Controlling – Valuemation;
 * Software testing.
+
+## Open source
+
+Actively developing on GitHub ([profile](https://github.com/kwart)) and SourceForge.net ([profile](https://sourceforge.net/u/kwart/profile/)).
+
+### Author
+* [Sunstone](https://github.com/wildfly-extras/sunstone/)
+* [JSignPdf](http://jsignpdf.sourceforge.net/)
+* [totp-me](http://totpme.sourceforge.net/)
+* [EBookME](http://ebookme.sourceforge.net/) (original author: Tomas Darmovzal)
+
+### Contributor
+* [WildFly](http://wildfly.org/)
+* [Apache jclouds](http://jclouds.apache.org/)
+* [pro-grade](http://pro-grade.sourceforge.net/)
+* [OpenOffice.org](http://www.openoffice.org/)
 
 ## Education
 
