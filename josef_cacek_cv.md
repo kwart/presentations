@@ -21,6 +21,22 @@ Specialties:
 * Developing tests for certifications of JBoss EAP in containers and clouds;
 * Responsible for Common Criteria Certification testing of the JBoss EAP.
 
+#### Technologies used
+
+* **QE:** JUnit, Arquillian, TestNG, Checkstyle
+  * **Performance:** Apache JMeter, JMH
+  * **Static analysis:** Coverity, FindBugs, Codacy
+* **Security:** SASL, JAAS, PKI, SSL/TLS, Kerberos, Security managers, JASPIC, JACC, XACML, FIPS, Common criteria
+* **Java EE:** Servlets/JSP, EJB, JMS, WS, JPA
+* **Tools:** CI (Jenkins, Travis), Maven, Git, Ant, Bash, Docker, LDAP, jdb, Eclipse MAT, VisualVM
+* **Clouds:** MS Azure, Amazon EC2
+
+#### Certifications awarded
+
+* JBoss Application Administrator
+* JBoss Developer (RHCJD)
+* Red Hat Certified Engineer - RHEL 7 (RHCSA+RHCE)
+
 ### ANF Data / Siemens / LFRZ / Atos
 
 *Senior Java Developer*  
@@ -33,12 +49,39 @@ Specialties:
   * Developing and designing Java web applications for public sector customers;
   * Providing Java know-how among projects.
 
+#### Technologies used
+
+* **Security:** JAAS, PKI, SSL/TLS, XACML
+* **Java EE:** Servlet/JSP, EJB, WS, JMS
+* **QE:** JUnit, Apache JMeter
+* **Libraries/Frameworks:** Struts, Spring, Hibernate, AppFuse, iText, Apache FOP
+* **Tools:** JBoss AS, Tomcat, SVN, ClearCase, Ant, Bash
+* **Databases:** Oracle, MySQL, MSSQL, IBM DB2
+* **Web:** HTML, JS, CSS, Ajax
+
+#### Certifications awarded
+
+* Java EE 5 Web Component Developer (SCWCD)
+* Sun Certified Programmer For The Java Platform SE 6 (SCJP)
+
 ###  USU Software
 
 *Programmer and Tester (2000 - 2004)*
 
 * Programming a product aimed at IT-Controlling – Valuemation;
 * Software testing.
+
+#### Technologies used
+
+* **Java EE:** Servlet
+* **QE:** JUnit, Rational Team Test, Windows Script Host (for Java DCOM bridge testing)
+* **Tools:** CVS, StarTeam, Ant, XSLT
+* **Databases:** Oracle, MSSQL, IBM DB2
+
+#### Certifications awarded
+
+* Java EE 5 Web Component Developer (SCWCD)
+* Sun Certified Programmer For The Java Platform SE 6 (SCJP)
 
 ## Open source
 
