@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cool features in WildFly 10.1</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .red { color: red; }
+      .white { color: white; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .remark-slide-number {
+        bottom: 20px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+layout: true
+background-image: url(wildfly_deck_base.jpg)
+
+---
+background-image: url(wildfly_deck_title.jpg)
+class: center, white
+
+# .font200[Security basics in]
+
+---
+
+# Domains vs Realms
+
+## Security domain
+
+* used mainly for defining security of deployed **applications**
+* standard authentication based on JAAS
+  * `javax.security.auth.spi.LoginModule` implementations
+  * application can come up with custom login module(s).
+
+--
+
+# Security realm
+* mainly for configuration security of
+  * server **management interfaces**
+  * **remoting**
+* authentication based on provided implementations of `javax.security.auth.callback.CallbackHandler`
+
+---
+
+# Domains vs Realms
+
+A **security domain** can delegate authentication to a security realm by using the **`"RealmDirect"`** login module.
+
+A **security realm** can delegate authentication to a security domain by using **`"jaas"`** authentication configuration
+
+---
+
+# Domains vs Realms - show me the code!
+
+```
+/core-service=management/security-realm=TestRealm:add
+/core-service=management/security-realm=TestRealm/authentication=properties:add(\
+  path=application-users.properties, relative-to=jboss.server.config.dir)
+
+/subsystem=security/security-domain=TestDomain:add(cache-type=default)
+/subsystem=security/security-domain=TestDomain/authentication=classic:add
+/subsystem=security/security-domain=TestDomain/authentication=classic/\
+  login-module=UsersRoles:add(code=UsersRoles, flag=required, module-options=[\
+    ("usersProperties"=>"/opt/jboss-users.properties"),
+    ("rolesProperties"=>"/opt/jboss-roles.properties")])
+
+```
+???
+
+Realm authn:
+* properties
+* jaas
+* kerberos
+* ldap
+* truststore
+
+Realm identity:
+* ssl
+* kerberos
+
+---
+
+# JAAS Authentication
+
+Uses **`LoginModule`** implementations to fill a **`Subject`** with **`Principals`** (and `Group`s).
+
+--
+
+```java
+public interface LoginModule {
+
+    void initialize(Subject subject, CallbackHandler callbackHandler,
+                    Map<String,?> sharedState,
+                    Map<String,?> options);
+
+    boolean login() throws LoginException;
+
+    boolean commit() throws LoginException;
+
+    boolean abort() throws LoginException;
+
+    boolean logout() throws LoginException;
+}
+```
+???
+
+Methods return `true` if succeeded, or false if this {@code LoginModule} should be ignored.
+
+login() throws LoginException if the authentication fails
+
+---
+
+# JAAS Authentication
+
+## Login configuration
+
+// TODO flags
+
+
+---
+class: center, middle
+
+# Questions?
+
+josef.cacek@gmail.com  
+https://github.com/kwart/  
+@jckwart  
+
+???
+
+Thank you for attention
+
+    </textarea>
+    <script src="remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:10',
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>
