@@ -78,11 +78,6 @@ Specialties:
 * **Tools:** CVS, StarTeam, Ant, XSLT
 * **Databases:** Oracle, MSSQL, IBM DB2
 
-#### Certifications awarded
-
-* Java EE 5 Web Component Developer (SCWCD)
-* Sun Certified Programmer For The Java Platform SE 6 (SCJP)
-
 ## Open source
 
 Actively developing on GitHub ([profile](https://github.com/kwart)) and SourceForge.net ([profile](https://sourceforge.net/u/kwart/profile/)).
