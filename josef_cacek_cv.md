@@ -96,4 +96,4 @@ Actively developing on GitHub ([profile](https://github.com/kwart)) and SourceFo
 
 ## Education
 
-* Master's degree at Masaryk University, Faculty of Informatics (1998 - 2004)
+* Master's degree at Masaryk University, Faculty of Informatics (1998 - 2004) - Brno / Czech Republic
