@@ -89,10 +89,10 @@ Actively developing on GitHub ([profile](https://github.com/kwart)) and SourceFo
 * [EBookME](http://ebookme.sourceforge.net/) (original author: Tomas Darmovzal)
 
 ### Contributor
-* [WildFly](http://wildfly.org/)
-* [Apache jclouds](http://jclouds.apache.org/)
-* [pro-grade](http://pro-grade.sourceforge.net/)
-* [OpenOffice.org](http://www.openoffice.org/)
+* [WildFly](http://wildfly.org/) - commits in [wildfly-core](https://github.com/wildfly/wildfly-core/commits?author=kwart) and [wildfly](https://github.com/wildfly/wildfly/commits?author=kwart)
+* [Apache jclouds](http://jclouds.apache.org/) - commits in [jclouds-labs](https://github.com/jclouds/jclouds-labs/commits?author=kwart) and [jclouds](https://github.com/jclouds/jclouds/commits?author=kwart)
+* [pro-grade](http://pro-grade.sourceforge.net/) - [commits](https://github.com/pro-grade/pro-grade/commits?author=kwart)
+* [OpenOffice.org](http://www.openoffice.org/) - preparing and building first public Czech versions for MS Windows
 
 ## Education
 
