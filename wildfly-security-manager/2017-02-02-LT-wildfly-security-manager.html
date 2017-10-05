@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>⚡Talk - WildFly Security Manager</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# WildFly Security Manager
+
+## in WildFly 10+ / JBoss EAP 7+
+
+---
+
+## Run WildFly/EAP with Security Manager
+
+The **`-secmgr`** argument of `jboss-modules.jar` enables the Security Manager.
+
+```bash
+bin/standalone.sh -secmgr
+bin/domain.sh -secmgr
+
+# similar for other jboss-modules based binaries
+# - jboss-cli
+# - appclient
+# - ...
+```
+
+--
+
+
+
+--
+
+### Do not ...
+
+* **Don't specify `java.security.manager`** system property
+* Don't provide a policy file (`java.security.policy`)
+
+---
+
+## Security Policy in WildFly
+
+* per-module policy definition
+
+--
+
+### AS modules
+* permissions granting based on `<permissions/>` element in `module.xml`
+* `AllPermission` by default (missing `<permissions/>`)
+
+--
+
+### Deployments
+
+* behavior specified by JEE 7 platform specification (JSR-342)
+* permissions granting based on entries in `META-INF/permissions.xml` (in deployment)
+* no permissions granted by default
+
+---
+
+## Example - `module.xml` with permissions
+
+```xml
+<module xmlns="urn:jboss:module:1.2" name="org.jboss.test.secman.limited">
+    <permissions>
+        <grant permission="java.lang.RuntimePermission" 
+            name="secman.test.*" />
+
+        <grant permission="java.util.FilePermission"
+            name="/tmp/-" 
+            actions="read,write" />
+    </permissions>
+
+    <resources>
+        <resource-root path="modperm.jar" />
+    </resources>
+</module>
+```
+
+---
+
+## Example - `META-INF/permissions.xml`
+
+* or vendor specific `META-INF/jboss-permissions.xml`
+
+```xml
+<permissions xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/permissions_7.xsd"
+         version="7">
+    <permission>
+        <class-name>java.lang.RuntimePermission</class-name>
+        <name>getClassLoader</name>
+    </permission>
+    <permission>
+        <class-name>java.util.PropertyPermission</class-name>
+        <name>user.dir</name>
+        <actions>read</actions>
+    </permission>
+    <permission>
+        <class-name>java.io.FilePermission</class-name>
+        <name>&lt;&lt;ALL FILES&gt;&gt;</name>
+        <actions>read</actions>
+    </permission>
+</permissions>
+```
+
+---
+
+## /subsystem=security-manager
+
+* very narrow configuration
+* list of **maximum** and **minimum** - valid for all deployments
+* Permissions specified by
+  * **`"class"`** 
+  * `"name"`
+  * `"actions"`
+  * `"module"`
+
+--
+
+### Default values
+
+```
+[standalone@localhost:9990 /] /subsystem=security-manager/deployment-permissions=default \
+:read-resource
+{
+    "outcome" => "success",
+    "result" => {
+        "maximum-permissions" => [{"class" => "java.security.AllPermission"}],
+        "minimum-permissions" => undefined
+    }
+}
+
+```
+---
+
+## maximum-permissions
+* **upper limit** of grantable permissions (for deployment)
+* if deployment asks more (in `permissions.xml`) than the specified set, deployment fails
+
+--
+
+## minimum-permissions
+* **always granted** permissions
+* deployments don't need to ask for them (in `permissions.xml`)
+
+---
+
+## WildFly Security Manager testing
+
+* `testsuite/integration/secman` in AS TS - always run with Security Manager
+* possibility to run whole AS TS with Security Manager enabled
+  * ongoing effort to place correct `permissions.xml` into test deployments
+
+---
+
+### Implementation - jboss-modules
+* Enables Security Manager - handles `-secmgr` argument
+  * Enforces "correct" `SecurityManager` type
+* Policy implementation - `ModulesPolicy`
+  * with property expansion support (`ModulesXmlParser`, `PolicyExpander`)
+* Module holds `PermissionFactories`
+ * used for lazy instantiaton of the permission objects on first use
+
+---
+
+### Implementation - wildfly-core
+* `ModuleSpecification` - holds list of PermissionFactories for module
+
+---
+
+### Implementation - wildfly
+* module `security-manager` with extension and subsystem
+  * deployment processor parses `permissions.xml` and fills PermissionFactories in `ModuleSpecification`
+
+
+### WildFly 11.x+ / EAP 7.1+
+
+* security-manager module moved to WildFly Core
+
+---
+
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>

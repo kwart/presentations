@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>⚡Talk - Code quality - upstream first</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Code quality
+
+## upstream first
+---
+
+## Motivation
+
+* great free tools available for opensource projects
+  * many of them integrated with GitHub
+* more checks in upstream projects means less problems in product
+
+---
+
+## Analyze sources - Checkstyle
+
+* http://checkstyle.sourceforge.net/
+
+--
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-checkstyle-plugin</artifactId>
+    <version>${version.checkstyle.plugin}</version>
+    <configuration>
+        <configLocation>wildfly-checkstyle/checkstyle.xml</configLocation>
+        <consoleOutput>true</consoleOutput>
+        <failsOnError>true</failsOnError>
+        <useFile/>
+    </configuration>
+    <dependencies>
+        <dependency>
+            <groupId>org.wildfly.checkstyle</groupId>
+            <artifactId>wildfly-checkstyle-config</artifactId>
+            <version>${version.org.wildfly.checkstyle-config}</version>
+        </dependency>
+    </dependencies>
+    <executions>
+        <execution>
+            <id>check-style</id>
+            <phase>compile</phase>
+            <goals>
+                <goal>checkstyle</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+
+```
+
+---
+### Checkstyle - force developers to create JavaDoc
+
+--
+
+```xml
+<execution>
+    <id>check-style-client-javadoc</id>
+    <phase>compile</phase>
+    <goals>
+        <goal>checkstyle</goal>
+    </goals>
+    <configuration>
+        <configLocation>checkstyle-javadoc.xml</configLocation>
+        <includes>org/wildfly/security/auth/client/**\/*.java</includes>
+        <includeTestSourceDirectory>false</includeTestSourceDirectory>
+    </configuration>
+</execution>
+```
+
+--
+
+`checkstyle-javadoc.xml`
+
+```xml
+<module name="Checker">
+  <module name="TreeWalker">
+    <module name="JavadocMethod">
+      <property name="scope" value="public"/>
+      <property name="allowUndeclaredRTE" value="true"/>
+      <property name="allowMissingParamTags" value="true"/>
+      <property name="allowMissingReturnTag" value="true"/>
+      <property name="allowMissingPropertyJavadoc" value="true"/>
+    </module>        
+  </module>
+</module>
+
+```
+---
+
+## Compile time analysis / Google error-prone
+
+* http://errorprone.info/
+* Bug pattern categories:
+  * Enabled by default:
+      * ERROR (e.g. Dead Exceptions)
+      * WARNING (e.g. missing @Override)
+  * Experimental
+      * ERROR
+      * WARNING
+      * SUGGESTION
+---
+## Google error-prone - demo
+
+* http://errorprone.info/
+
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <version>3.3</version>
+  <configuration>
+	<compilerId>javac-with-errorprone</compilerId>
+	<forceJavacCompilerUse>true</forceJavacCompilerUse>
+	<source>8</source>
+	<target>8</target>
+  </configuration>
+  <dependencies>
+	<dependency>
+	  <groupId>org.codehaus.plexus</groupId>
+	  <artifactId>plexus-compiler-javac-errorprone</artifactId>
+	  <version>2.8</version>
+	</dependency>
+	<dependency>
+	  <groupId>com.google.errorprone</groupId>
+	  <artifactId>error_prone_core</artifactId>
+	  <version>2.0.17</version>
+	</dependency>
+  </dependencies>
+</plugin>
+
+```
+
+---
+
+## GitHub integrations
+
+* https://github.com/integrations
+* Bunch of categories - check these first:
+  * Code quality
+  * Code review
+  * Continuous integration
+  * Security
+---
+
+# Continuous integration / Travis CI
+
+*Build, run tests, deploy*
+
+* GitHub repository owner just needs to enable integration
+  * single click
+* build runs
+  * either in Docker container (default)
+  * or in full VM
+* Time limit: 50min for a build
+
+---
+
+## Codacy
+* https://www.codacy.com
+* Check code style, security, duplication, complexity and coverage on every change
+
+---
+
+## Codefactor.io
+* https://www.codefactor.io/
+* Automated Code Review for GitHub
+  * similar to Codacy, but without Java static analysis support
+
+---
+
+## Coverity scan
+
+* https://scan.coverity.com/
+* Coverity own checks + FindBugs checks
+* Limited:
+  * project has to be manually approved (takes 2-3 days)
+  * only 12 scans per week for free
+  * not available for pull requests, just pushes on a single branch
+  * [integration with Travis CI](https://scan.coverity.com/travis_ci) via addon
+
+---
+
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
