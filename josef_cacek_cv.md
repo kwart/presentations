@@ -12,9 +12,14 @@ Specialties:
 
 ## Experience
 
-### Red Hat 
+### Hazelcast
 
-*Principal Quality Assurance Engineer (2015 - Present)*  
+*Quality Engineer (2017 - present)*
+
+
+### Red Hat
+
+*Principal Quality Assurance Engineer (2015 - 2017)*  
 *Senior Quality Assurance Engineer (2012 - 2015)*
 
 * Testing security components in JBoss Enterprise Application Platform (EAP); mainly focused on WildFly Elytron project and its integration to the application server
