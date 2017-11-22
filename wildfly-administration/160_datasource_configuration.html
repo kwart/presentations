@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WildFly administration</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+      .red { color: red; }
+      .white { color: white; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .remark-slide-number {
+        bottom: 20px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+layout: true
+background-image: url(wildfly_deck_base.jpg)
+
+---
+class: center, middle
+
+# .font200[Datasources configuration]
+
+## JBOSS1 - WildFly Administration
+
+---
+
+## JDBC
+
+* Java Database Connectivity API
+* JDBC drivers
+  * client-side adapters
+  * convert requests from Java programs to a database protocol
+---
+
+## JDBC Datasources
+
+* represents connections to databases
+* allows to configure database systems out of applications
+* configured through the datasource subsystem
+* Adding new database as a datasource usually requires two separate steps:
+  * installing JDBC Driver(s)
+  * define datasource referencing the JDBC driver
+
+### Non-XA vs XA Datasources
+* use Non-XA for transactions working with a single resource
+  * e.g. single database
+* use XA when more resources can be part of a transaction
+  * e.g. 2 databases or DB+JMS
+
+???
+
+* applications reference DS by a name / JNDI lookup
+
+---
+
+## Step 1: Install JDBC driver
+
+* installation types
+  * as a standard **deployment**
+      * recommended mainly in domain mode
+      * without a need to install module
+  * as a **module** in `$JBOSS_HOME/modules`
+
+--
+* deployed JDBC 4-compliant drivers are automatically configured
+  * based on `META-INF/services/java.sql.Driver` in the JAR file
+
+--
+
+### List Installed Drivers
+
+```adoc
+/subsystem=datasources:installed-drivers-list
+```
+
+---
+
+class: center,middle
+
+# DEMO - Install driver in Management console
+
+???
+* deploy postgresql.jar through management console
+* verify it in JBoss CLI: `/subsystem=datasources:installed-drivers-list`
+
+---
+
+## Step 2: Add datasource
+
+* helper commands available in the CLI:
+
+```bash
+data-source add --name=DATASOURCE_NAME --jndi-name=JNDI_NAME --driver-name=DRIVER_NAME \
+  --connection-url=CONNECTION_URL
+
+xa-data-source add --name=XA_DATASOURCE_NAME --jndi-name=JNDI_NAME --driver-name=DRIVER_NAME \
+  --xa-datasource-class=XA_DATASOURCE_CLASS
+```
+
+???
+* Not only the adding, but also
+  * testing connections
+  * disable/enable DS
+  * flushing connections in pool
+  * ...
+
+--
+### Example
+
+```bash
+data-source add --name=MySqlDS --jndi-name=java:jboss/MySqlDS \
+ --driver-name=mysql --connection-url=jdbc:mysql://localhost:3306/jbossdb \
+ --user-name=admin --password=admin --validate-on-match=true --background-validation=false \
+ --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker \
+ --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter
+```
+---
+
+class: center,middle
+
+# DEMO - Configuring Datasource in Management console
+
+???
+* `docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -it --rm postgres:10.1-alpine`
+* Configuration -> Subsystems -> Datasources -> Non-XA -> Add
+  * `jdbc:postgresql://172.17.0.2:5432/`
+  * `postgres` / `postgres`
+* verify also in the JBoss CLI: `/subsystem=datasources/data-source=PostgresDS:test-connection-in-pool`
+
+---
+
+## Connection Testing and Validation
+
+* Manual Connection Testing
+```bash
+/subsystem=datasources/data-source=DATASOURCE_NAME:test-connection-in-pool
+```
+
+--
+* Connection Validation
+  * 2 validation types
+      * `validate-on-match` - connection checked every time when get from pool
+      * `background-validation` - validated periodically in a background thread
+  * 2 validation mechanisms
+       * checker class
+       * check SQL
+
+???
+
+* https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.0/html/configuration_guide/datasource_management
+
+---
+
+## Connection pools
+
+* defined for datasources
+* reuse resources
+* allow to open connections before it's requested from application
+
+--
+
+```bash
+/subsystem=datasources/data-source=PostgresDS:write-attribute(name=min-pool-size, value=5)
+
+/subsystem=datasources/data-source=PostgresDS:write-attribute(name=max-pool-size, value=10)
+```
+---
+# JPA deployment descriptor - `persistence.xml`
+
+```xml
+<persistence version="2.1"
+    xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+    <persistence-unit name="primary">
+        <jta-data-source>java:jboss/datasources/GreeterQuickstartDS</jta-data-source>
+        <properties>
+            <!-- Properties for Hibernate -->
+            <property name="hibernate.hbm2ddl.auto" value="create-drop" />
+            <property name="hibernate.show_sql" value="false" />
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+---
+
+## Datasource as a deployment
+
+* It's still possible (but deprecated) to use `*-ds.xml` to deploy a Datasource.
+* Don't use it in production
+
+```xml
+<datasources xmlns="http://www.jboss.org/ironjacamar/schema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.jboss.org/ironjacamar/schema http://docs.jboss.org/ironjacamar/schema/datasources_1_0.xsd">
+    <datasource jndi-name="java:jboss/datasources/GreeterQuickstartDS"
+        pool-name="greeter-quickstart" enabled="true" use-java-context="true">
+        <connection-url>jdbc:h2:mem:greeter-quickstart;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1</connection-url>
+        <driver>h2</driver>
+        <security>
+            <user-name>sa</user-name>
+            <password>sa</password>
+        </security>
+    </datasource>
+</datasources>
+```
+---
+
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:10',
+        highlightStyle: 'monokai',
+        highlightLanguage: 'remark',
+        highlightLines: true,
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>
