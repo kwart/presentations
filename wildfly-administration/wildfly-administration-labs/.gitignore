@@ -1,0 +1,7 @@
+wildfly-*
+*.war
+
+target/
+.project
+.classpath
+.settings

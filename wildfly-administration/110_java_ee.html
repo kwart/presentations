@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WildFly administration</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+      .red { color: red; }
+      .white { color: white; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .remark-slide-number {
+        bottom: 20px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+layout: true
+background-image: url(wildfly_deck_base.jpg)
+
+---
+class: center, middle
+
+# .font200[Java EE]
+
+## JBOSS1 - WildFly Administration
+
+---
+
+## Java editions
+
+* Java SE - Standard Edition
+
+--
+* Java EE - Enterprise Edition
+
+--
+* Java ME - Micro Edition
+
+???
+* https://stackoverflow.com/a/2857791/653069
+* JCP, JSR, specifikace a jejich verze
+* http://www.oracle.com/technetwork/java/javaee/javaee7-whitepaper-1956203.pdf
+
+---
+## Application servers vs Servlet containers
+
+--
+* **servlet container** - only the servlet API (+ JSP, JSTL)
+  * Tomcat
+  * Jetty
+  * Undertow
+
+--
+* **application server** -  whole Java EE - Servlets, EJB, JMS, CDI, JTA, ...
+  * WildFly / JBoss EAP
+  * Glassfish
+  * Weblogic
+  * WebSphere
+
+--
+
+&nbsp;
+
+.center[
+*It is usually possible to run most of the JavaEE technologies on a servlet-container,  
+but it's necessary to install implementations of non-web technologies.*
+]
+---
+## Java EE versions
+
+* J2EE 1.2 (1999)
+* J2EE 1.3 (2001)
+* J2EE 1.4 (2003)
+* Java EE 5 (2006)
+* Java EE 6 (2009)
+* Java EE 7 (2013)
+* Java EE 8 (2017)
+
+???
+https://docs.jboss.org/author/display/WFLY/Getting+Started+Guide
+
+https://www.jcp.org/en/jsr/detail?id=342
+
+Appendix EE.C
+
+---
+## History of WildFly
+* 1999 started by Marc Fleury
+* 2002 JBoss AS 3 - Tomcat as the web server
+* 2004 JBoss AS 4
+* 2006 Red Hat acquires JBoss, Inc, JBoss AS 5 Beta1
+* 2008 JBoss AS 5
+* 2010 JBoss AS 6
+* 2012 JBoss AS 7.1
+* 2014 WildFly 8 - Undertow as the web server
+* 2015 WildFly 9
+* 2016 WildFly 10
+* 2017 WildFly 11
+
+
+???
+* https://en.wikipedia.org/wiki/WildFly
+* https://www.redhat.com/en/about/press-releases/jboss-final
+* 7.0 not certified with full profiles
+* 7.2 tagged but never released - used as a base for EAP releases
+* EAP
+
+---
+## Community project vs Red Hat product
+
+--
+### Project - WildFly
+* free
+* short release periods
+* cutting edge features
+* community support
+
+--
+
+### Product - JBoss EAP
+* paid licenses
+* stable features
+* not so often releases
+* regular patches
+* long term Red Hat support 
+
+--
+
+Both licensed under LGPL.
+???
+
+* versioning
+* release cycles
+
+---
+## Highlights
+* secure by default 
+  * binds to loopback
+  * no default management user
+
+--
+* resources
+  * documentation
+  * quickstarts
+
+--
+* community - http://wildfly.org/gethelp/
+ - JBoss forum and Stack overflow
+ - HipChat
+ - mailing lists
+
+???
+
+* documentation: community + product
+* for developers: Eclipse plugins and also own IDE (JBDS)
+
+---
+
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:10',
+        highlightStyle: 'monokai',
+        highlightLanguage: 'remark',
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>

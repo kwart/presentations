@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WildFly administration</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+      .red { color: red; }
+      .white { color: white; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .remark-slide-number {
+        bottom: 20px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+layout: true
+background-image: url(wildfly_deck_base.jpg)
+
+---
+class: center, middle
+
+# .font200[Domain configuration]
+
+## JBOSS1 - WildFly Administration
+
+---
+
+## Managed domain
+
+* one of key features of WildFly
+* allows to manage multiple WildFly instances from a single point
+
+.center[
+![Managed Domain](https://access.redhat.com/webassets/avalon/d/Red_Hat_JBoss_Enterprise_Application_Platform-7.0-Configuration_Guide-en-US/images/8722b1d89f332fb2c466cbb65d72a495/62.png)
+
+*Source: JBoss EAP 7.0 - [About Managed Domains](https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.0/html/configuration_guide/domain_management#about_managed_domains)*
+]
+
+---
+### Managed domain - Terminology:
+* **Domain** - set of centrally managed WildFly servers
+* **Host Controller** - process started by `domain.sh` script
+* **Domain Controller** - central management poing - one of the host hontrollers
+* **Server Group** - named set of server instances which share configuration
+* **Server** - actual WildFly server instance - started by Host Controller
+
+???
+* https://docs.jboss.org/author/display/WFLY/Operating+modes
+
+---
+## Host Controller
+* started by user - `domain.sh`
+* manages WildFly servers on the host (starting, stopping)
+* doesn't handle applications itself
+* configured by `domain/configuration/host.xml`; contains
+  * list of its managed servers
+  * own identity
+  * configuration how to contact a domain controller
+  * host specific configuration (interfaces, paths, JVM)
+
+???
+* https://docs.jboss.org/author/display/WFLY/Operating+modes
+
+When the domain.sh or domain.bat script is run on a host, a process known as a Host Controller is launched. The Host Controller is solely concerned with server management; it does not itself handle application server workloads. The Host Controller is responsible for starting and stopping the individual application server processes that run on its host, and interacts with the Domain Controller to help manage them.
+
+Each Host Controller by default reads its configuration from the domain/configuration/host.xml file located in the unzipped WildFly installation on its host's filesystem. The host.xml file contains configuration information that is specific to the particular host. Primarily:
+
+* the listing of the names of the actual WildFly instances that are meant to run off of this installation.
+* configuration of how the Host Controller is to contact the Domain Controller to register itself and access the domain configuration. This may either be configuration of how to find and contact a remote Domain Controller, or a configuration telling the Host Controller to itself act as the Domain Controller.
+* configuration of items that are specific to the local physical installation. For example, named interface definitions declared in domain.xml (see below) can be mapped to an actual machine-specific IP address in host.xml. Abstract path names in domain.xml can be mapped to actual filesystem paths in host.xml.
+
+---
+
+## Domain Controller
+* one of host controllers
+* maintain the domain's central management policy (in `domain/configuration/domain.xml`):
+  * profiles and socket binding groups configuration
+  * server groups definitions
+
+???
+* `domain.xml` content similar to `standalone.xml`
+
+One Host Controller instance is configured to act as the central management point for the entire domain, i.e. to be the Domain Controller. The primary responsibility of the Domain Controller is to maintain the domain's central management policy, to ensure all Host Controllers are aware of its current contents, and to assist the Host Controllers in ensuring any running application server instances are configured in accordance with this policy. This central management policy is stored by default in the domain/configuration/domain.xml file in the unzipped WildFly installation on Domain Controller's host's filesystem.
+
+A domain.xml file must be located in the domain/configuration directory of an installation that's meant to run the Domain Controller. It does not need to be present in installations that are not meant to run a Domain Controller; i.e. those whose Host Controller is configured to contact a remote Domain Controller. The presence of a domain.xml file on such a server does no harm.
+
+The domain.xml file includes, among other things, the configuration of the various "profiles" that WildFly instances in the domain can be configured to run. A profile configuration includes the detailed configuration of the various subsystems that comprise that profile (e.g. an embedded JBoss Web instance is a subsystem; a JBoss TS transaction manager is a subsystem, etc). The domain configuration also includes the definition of groups of sockets that those subsystems may open. The domain configuration also includes the definition of "server groups":
+
+---
+
+## Server Group
+
+* named set of server sharing the same configuration
+* server group has assigned:
+  * profile
+  * socket binding group
+  * deployments
+  * system properties
+  * jvm settings
+
+### Example
+```xml
+<server-group name="main-server-group" profile="default">
+    <socket-binding-group ref="standard-sockets"/>
+    <deployments>
+        <deployment name="foo.war" runtime-name="foo.war" />
+        <deployment name="bar.ear" runtime-name="bar.ear" />
+    </deployments>
+</server-group>
+```
+
+---
+
+## Server
+
+* application server instance itself
+* has own JVM process
+  * started by Host controller
+* configuration managed by Host controller
+  * synthesis of `domain.xml` and `host.xml`
+
+---
+
+# Configuring domain
+
+## Single-host vs Multi-host
+
+* the default `host.xml` uses a single-host configuration
+  * fine for demoing purposes
+* for real multihost domains start with:
+  * `--host-controller=host-master.xml` for domain controller node
+  * `--host-controller=host-slave.xml` for the other (managed) hosts
+
+---
+### `host.xml` - Domain Controller
+``` xml
+<management>
+    <security-realms>
+        <security-realm name="ManagementRealm">
+            <authentication>
+                <local default-user="$local" skip-group-loading="true"/>
+                <properties path="mgmt-users.properties" relative-to="jboss.domain.config.dir"/>
+            </authentication>
+            <authorization map-groups-to-roles="false">
+                <properties path="mgmt-groups.properties" relative-to="jboss.domain.config.dir"/>
+            </authorization>
+        </security-realm>
+...
+</management>
+<domain-controller>
+    <local/>
+</domain-controller>
+<interfaces>
+    <interface name="management">
+        <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
+    </interface>
+</interfaces>
+```
+
+???
+* both native and http management interfaces are enabled
+* https://docs.jboss.org/author/display/WFLY/Domain+Setup
+
+---
+### `host.xml` - Managed host (slave)
+``` xml
+<host xmlns="urn:jboss:domain:5.0" name="my-host1">
+...
+    <management>
+        <security-realms>
+            <security-realm name="ManagementRealm">
+                <server-identities>
+                    <!-- base64 encoded password for my-host1 -->
+                    <secret value="c2xhdmVfdXMzcl9wYXNzd29yZA=="/>
+                </server-identities>
+...
+    </management>
+    <domain-controller>
+        <remote security-realm="ManagementRealm">
+            <discovery-options>
+                <static-discovery name="primary" protocol="${jboss.domain.master.protocol:remote}" host="${jboss.domain.master.address}" port="${jboss.domain.master.port:9999}"/>
+            </discovery-options>
+        </remote>
+    </domain-controller>
+```
+
+???
+* the `name` attribute in `<host>` element was provided manually
+* you can get the `<secret>` value element from `add-user.sh` script
+
+---
+## `host.xml` - Servers
+
+```xml
+<servers>
+    <server name="server-one" group="main-server-group">
+        <jvm name="default"/>
+    </server>
+ 
+    <server name="server-two" group="main-server-group" auto-start="true">
+        <socket-binding-group ref="standard-sockets" port-offset="150"/>
+        <jvm name="default">
+            <heap size="64m" max-size="256m"/>
+        </jvm>
+    </server>
+ 
+    <server name="server-three" group="other-server-group" auto-start="false">
+        <socket-binding-group port-offset="250"/>
+    </server>
+</servers>
+```
+???
+
+* server-one inherits the default socket-group declared in the server-group
+
+---
+
+![Management center](images/mc-runtime-domain.png)
+---
+
+# JBoss CLI in domain mode
+
+```bash
+# subsystems configured in profiles
+/profile=default/subsystem=undertow/server=default-server:read-resource()
+
+# host configuration available through /host=*
+/host=master/interface=public:write-attribute(name=inet-address,value="192.168.1.4")
+/host=master:reload
+
+# servers in a group can be reloaded
+deploy ../single-jsp/counter.war --server-groups=main-server-group
+/server-group=main-server-group:reload-servers
+```
+---
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:10',
+        highlightStyle: 'monokai',
+        highlightLanguage: 'remark',
+        highlightLines: true,        
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>

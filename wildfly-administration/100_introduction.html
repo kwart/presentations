@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WildFly administration</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+      .red { color: red; }
+      .white { color: white; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .remark-slide-number {
+        bottom: 20px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+layout: true
+background-image: url(wildfly_deck_base.jpg)
+
+---
+background-image: url(wildfly_deck_title.jpg)
+class: center, middle,  white
+count: false
+
+.font200[JBOSS1]
+
+# &nbsp;
+# &nbsp;
+# &nbsp;
+
+# .font200[Administration]
+
+???
+
+---
+
+class: center, middle
+
+# .font200[Introduction]
+
+## JBOSS1 - WildFly Administration
+
+---
+
+## About me - Josef Cacek
+
+* Former Red Hatter (2012-2017)
+  * Principal Quality Engineer / JBoss EAP
+* Java developer
+  * Currently working on projects for Hazelcast
+* Experienced Hobby Runner
+
+--
+
+## What about you?
+
+* Wildfly or other Application Server?
+
+--
+* Java?
+
+--
+  * Java EE?
+
+--
+* Linux?
+
+--
+  * Other OS?
+
+---
+
+## Agenda
+
+* Introduction to Java EE 
+
+--
+* WildFly / JBoss EAP
+  * History
+  * Installation
+
+--
+  * Standalone server configuration
+  * Deploying applications
+  * Managed domain configuration
+  * Datasources
+  * Messaging
+
+--
+  * Web applications
+  * EJBs
+  * Security
+  * Patching and Migrations
+  * Clustering and load balancing
+  * Monitoring
+  * Clouds, Microservices
+
+---
+
+class: center, middle
+
+.font200[
+
+***WildFly*** *is a flexible, lightweight,   
+managed application runtime   
+that helps you build   
+**amazing** applications.*
+]
+
+---
+
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:10',
+        highlightStyle: 'monokai',
+        highlightLanguage: 'remark',
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>
