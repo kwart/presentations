@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Project-X 2018 - RTFM.next</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+## Project-X 2018
+
+# RTFM.next
+
+*https://github.com/hazelcast/reference-manual-asciidoc/tree/projectx-2018*
+---
+
+## RTFM.next - Why?
+
+* Reference Manual
+  * the first class information source for Hazelcast users
+* we maintain 2 sets of MarkDown documentation sources
+  * `bfdocs` for single HTML and PDF
+  * `daux` for multipage HTML
+* code snippets don't compile
+  * copy/paste is PITA
+
+???
+
+We are using MarkDown as our documentation's language and Beautiful Docs (bfdocs) as the generator. We used to have Multi HTML, Single HTML and PDF outputs. Due to the issues in the Multi HTML one, we dropped it 2 years ago.
+
+Then, there had been requests about improving the reference manual's usage on the mobile devices. After a research we came up with a generator called Daux.  This only produces a mobile friendly Multi HTML output, which means the Doc Team has been maintaining 2 sets of sources: one for the mobile friendly output, another for the Single HTML and PDF outputs. This mobile friendly output (by Daux) now is used in Hazelcast Jet documentation, Hazelcast Management Center documentation and Hazelcast IMDG OS and EE Release Notes documentation on the web site.
+
+In addition, as a backlog suggestion, the Doc Team has been informed about the AsciiDoc from time to time by our guys.
+
+---
+
+## RTFM.next - What?
+
+* use one set of sources
+* verify the used snippets compile at least
+
+---
+
+## RTFM.next - How?
+
+*Serdar's provided analysis of markup languages and processors.*
+
+* use AsciiDoc(tor) instead of MarkDown
+* move snippets into real source files
+  * they should at least compile
+  * JUnit Test files - execute them before the Doc is generated
+
+--
+
+.center[## AsciiDoc -> DocBook -> {html-single, html, pdf, ...}]
+
+---
+
+### AssiiDoc->DocBook
+
+* [asciidoctor-maven-plugin](https://github.com/asciidoctor/asciidoctor-maven-plugin) - uses `asciidoctorj` processor
+
+--
+
+### DocBook->target format
+
+* [JBoss pressgang](http://pressgang.jboss.org/) based XSL templates
+  * just reconfigured DocBook default templates
+* [maven-jdocbook-plugin](http://maven-jdocbook-plugin.jboss.org/)
+
+---
+
+### Include tested code snippet - Java
+
+```java
+    @Test
+    public void test() {
+        try {
+          // tag::configExample[]
+          Config configApp1 = new Config();
+          configApp1.getGroupConfig().setName("app1").setPassword("app1-pass");
+
+          Config configApp2 = new Config();
+          configApp2.getGroupConfig().setName("app2").setPassword("app2-pass");
+
+          HazelcastInstance h1 = Hazelcast.newHazelcastInstance(configApp1);
+          HazelcastInstance h2 = Hazelcast.newHazelcastInstance(configApp2);
+          HazelcastInstance h3 = Hazelcast.newHazelcastInstance(configApp2);
+
+          // end::configExample[]
+        } finally {
+            Hazelcast.shutdownAll();
+        }
+    }
+```
+
+--
+
+#### AsciiDoc
+```bash
+[source,java]
+----    
+include::{sourcedir}/ConfigTest.java[tag=configExample]
+----
+```
+
+---
+
+### Include snippet - line nr. based
+
+```bash
+[source,xml]
+----    
+include::{resourcedir}/GettingStarted-hazelcast.xml[lines=25..51]
+----
+```
+
+---
+
+class: center, middle
+
+# That's it.
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
