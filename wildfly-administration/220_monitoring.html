@@ -79,7 +79,7 @@ ls -l /core-service=platform-mbean/type=memory
 ## JMX
 
 * add `bin/client/jboss-client.jar` to classpath
-* URL: `service:jmx:http-remoting-jmx://127.0.0.1:9990`
+* URL: `service:jmx:remote+http://127.0.0.1:9990`
   * management interface
 * bunch of tools available, e.g. GUI:
   * jConsole
@@ -89,6 +89,9 @@ ls -l /core-service=platform-mbean/type=memory
 jboss.msc:name=jboss-as,type=container 
   run dumpServicesByStatus("START_FAILED")
 ```
+???
+
+jmc -vmargs -Xbootclasspath/a:jboss-eap-7.1/bin/client/jboss-client.jar
 
 ---
 
