@@ -195,6 +195,36 @@ class: center,middle
 
 /subsystem=datasources/data-source=PostgresDS:write-attribute(name=max-pool-size, value=10)
 ```
+
+---
+## Datasource statistics
+
+* datasource subsystem contains support for runtime statistics
+  * pool (ActiveCount, AvailableCount, MaxGetTime, TotalUsageTime, ...)
+  * jdbc (PreparedStatementCache*)
+
+???
+* https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.1/html/configuration_guide/datasource_management#datasource_statistics
+* https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.1/html/configuration_guide/reference_material#reference_of_datasource_statistics
+
+--
+
+### Enable statistics for a datasource
+
+```bash
+/subsystem=datasources/data-source=ExampleDS:write-attribute(name=statistics-enabled,value=true)
+```
+--
+### View statistics
+
+* go to `Runtime` / `Datasources` subsystem in Management console
+* or use CLI
+
+```bash
+/subsystem=datasources/data-source=ExampleDS/statistics=pool:read-resource(include-runtime=true)
+/subsystem=datasources/data-source=ExampleDS/statistics=jdbc:read-resource(include-runtime=true)
+```
+
 ---
 # JPA deployment descriptor - `persistence.xml`
 
@@ -212,6 +242,7 @@ class: center,middle
     </persistence-unit>
 </persistence>
 ```
+
 ---
 
 ## Datasource as a deployment
