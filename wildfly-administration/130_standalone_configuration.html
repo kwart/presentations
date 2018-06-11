@@ -68,12 +68,11 @@ class: center, middle
 
 ???
 
-**configuration** - Configuration files for the standalone server that runs off of this installation. All configuration information for the running server is located here and is the single place for configuration modifications for the standalone server.
-**deployments** End user deployment content can be placed in this directory for automatic detection and deployment of that content into the server's runtime.  
+* **configuration** - Configuration files for the standalone server that runs off of this installation. All configuration information for the running server is located here and is the single place for configuration modifications for the standalone server.
+* **deployments** End user deployment content can be placed in this directory for automatic detection and deployment of that content into the server's runtime.  
 NOTE: The server's management API is recommended for installing deployment content. File system based deployment scanning capabilities remain for developer convenience.
-*lib/ext* Location for installed library jars referenced by applications using the Extension-List mechanism (MANIFEST.MF - required by EE spec) - see [this thread](http://wildfly-development.1055759.n5.nabble.com/wildfly-dev-Are-standalone-lib-and-standalone-lib-ext-folders-still-relevant-td5712322.html)
-*tmp** location for temporary files written by the server (e.g. `tmp/auth` - Special location used to exchange authentication tokens with local clients so they can confirm that they are local to the running AS process)
-
+* **lib/ext** Location for installed library jars referenced by applications using the Extension-List mechanism (MANIFEST.MF - required by EE spec) - see [this thread](http://wildfly-development.1055759.n5.nabble.com/wildfly-dev-Are-standalone-lib-and-standalone-lib-ext-folders-still-relevant-td5712322.html)
+* **tmp** location for temporary files written by the server (e.g. `tmp/auth` - Special location used to exchange authentication tokens with local clients so they can confirm that they are local to the running AS process)
 --
 
 ### After the first execution
@@ -89,8 +88,8 @@ NOTE: The server's management API is recommended for installing deployment conte
 ```
 
 ???
-**data** -Persistent information written by the server to survive a restart of the server
-**log** standalone server log files 
+* **data** -Persistent information written by the server to survive a restart of the server
+* **log** standalone server log files 
 
 
 ---

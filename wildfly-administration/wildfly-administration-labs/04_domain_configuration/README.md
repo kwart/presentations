@@ -70,3 +70,11 @@ Use management console on master host to deploy `hello` application:
   * Deployments -> Unassigned Content -> Assign -> `main-server-group`
 3. Enable the deployment
   * Deployments -> Server groups -> main-server-group -> Enable `hello.war`
+
+### Verify the application runs
+
+The `master` host controller (domain controller) doesn't have running servers, so let's check
+if the application is running on slaves:
+
+* http://172.17.0.3:8080/hello/
+* http://172.17.0.4:8080/hello/
