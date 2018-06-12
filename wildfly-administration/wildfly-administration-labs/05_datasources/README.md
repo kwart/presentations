@@ -55,11 +55,19 @@ data-source add --name=GreeterQuickstartDS \
 /subsystem=datasources/data-source=GreeterQuickstartDS:test-connection-in-pool
 ``` 
 
+* Enable datasource statistics
+```
+/subsystem=datasources/data-source=GreeterQuickstartDS:write-attribute(name=statistics-enabled, value=true)
+reload
+``` 
+
 ## Task 3: Deploy and test sample application
 
 **What:** Deploy sample application which will use the datasource
 
 **How:**
-* copy `quickstart/greeter/target/greeter.war` to WildFly deployment directory
+* compile Greeter quickstart in `wildfly-quickstarts/greeter` - run `mvn install`
+* copy `wildfly-quickstarts/greeter/target/greeter.war` to WildFly deployment directory
 * open application in the browser and play with it
   * http://localhost:8080/greeter/
+* check the runtime statistics within Management console (Runtime->Subsystem->Datasources)
