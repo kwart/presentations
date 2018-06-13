@@ -55,6 +55,74 @@ class: center, middle
 
 ---
 
+## Messaging
+
+* Queue
+  * Producer / Consumer
+* Topic
+  * Publisher / Subscriber
+
+---
+
+## Web server / Undertow
+
+* servers
+* virtual hosts
+* handlers
+* filters
+* changing root context
+
+---
+
+## Monitoring
+
+* runtime statistics in CLI/Management console
+  * deployments
+  * datasources
+  * ...
+* JMX
+  * JConsole (use `[JBOSS_HOME]/bin/jconsole.sh` script)
+  * Java Mission Control (jmc) for Oracle JDK
+* JBoss Operations Network / RHQ
+
+---
+
+## Security
+
+* WildFly Security Manager
+* Legacy Security
+  * Security Domains used for application security (JAAS authentication)
+  * Security Realms used for management security
+* Elytron  
+
+---
+
+## Patching and Migrations
+
+* patching adds new layer(s) to JBoss modules
+```bash
+bin/jboss-cli.sh 'patch apply /path/to/patch-version.zip'
+```
+* Windup tool helps with migrations
+
+---
+
+## Clustering and load balancing
+
+* Undertow as a load-balancer
+  * load-balancer server profile
+* HA profiles
+  * failover support for distributable applications
+
+---
+
+## WildFly in cloud environments
+
+* cloud native discovery protocols
+  * S3 ping
+  * Azure ping
+* WildFly Swarm
+
 ---
 class: center, middle
 

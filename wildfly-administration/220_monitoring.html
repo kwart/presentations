@@ -91,7 +91,15 @@ jboss.msc:name=jboss-as,type=container
 ```
 ???
 
+Enable FlightRecorder in standalone.conf
+```
+JAVA_OPTS="$JAVA_OPTS -XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints"
+```
+
+Run Java mission control
+```
 jmc -vmargs -Xbootclasspath/a:jboss-eap-7.1/bin/client/jboss-client.jar
+```
 
 ---
 
