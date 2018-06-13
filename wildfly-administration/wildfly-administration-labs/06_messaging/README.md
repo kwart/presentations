@@ -14,6 +14,10 @@ jms-queue add --queue-address=testQueue --entries=queue/test,java:jboss/exported
 # You can verify the newly created queue by reading the resource:
 /subsystem=messaging-activemq/server=default/jms-queue=testQueue:read-resource()
 
+# Disable message buffering/caching on clients, to 
+# let the :list-messages and :remove-messages work properly
+/subsystem=messaging-activemq/server=default/connection-factory=RemoteConnectionFactory \
+    :write-attribute(name=consumer-window-size,value=0)
 ```
 
 ## Task 2: Use the Queue
