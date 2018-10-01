@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Takový to, když dáš data z trezoru na síť</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .red { color: red; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .italic {
+        font-style: italic;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .white {
+        color: white;
+      }
+      .font80 {
+        font-size: 80%;
+      }
+      th {
+        padding-right: 10px;
+        padding-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: middle, white
+background-image: url(safe.jpg)
+
+## Takový to
+# Když dáš data z trezoru na síť
+
+Josef Cacek / Hazelcast
+
+---
+
+# Emailový hit posledních týdnů
+
+```
+From: <cacek.josef@seznam.cz>
+To: <cacek.josef@seznam.cz>
+
+Ahoj!
+Jsem členem mezinárodní hackerské skupiny.
+
+Jak jste asi pravděpodobně uhodli, váš účet z domény@domain.com byl napaden, protože Poslal jsem vám e-mail z vašeho účtu.
+
+V období od 5. července 2018 do 21. září 2018 jste byli infikováni virem, který jste vytvořili, prostřednictvím navštívených webových stránek pro dospělé.
+Zatím máme přístup k vašim vzkazům, účtům sociálních médií a poslům.
+Máme však úplné skládky těchto dat.
+
+Jsme si vědomi svých malých a velkých tajemství ... jo, máte je.
+Zaznamenali jsme a zaznamenávali vaše akce na pornografických webových stránkách. Váš vkus je tak divný, víte ..
+
+Ale klíčovou věcí je, že jsme někdy zaznamenali vás s vaší webovou kamerou a synchronizovali nahrávky s tím, co jste sledovali!
+Myslím, že nemáte zájem ukázat toto video svým přátelům, příbuzným a vašemu intimnímu ...
+
+Přeneste 250$ do naší Bitcoin peněženky: 139XY4ZjWYqHMJvGCySuzXq7o6tGccKKrJ
+Garantuji, že po tom budeme smazat všechny vaše "data": D
+
+Po přečtení této zprávy se spustí časovač. Máte 48 hodin na zaplacení výše uvedené částky.
+
+Vaše údaje budou vymazány po převodu peněz.
+V opačném případě budou všechny vaše záznamy a videozáznamy automaticky zaslány všem vašim kontaktům, které jsou na vašem zařízení nalezeny v okamžiku infekce.
+
+Měli byste vždy myslet na vaši bezpečnost. Doufáme, že vás tento případ naučí udržovat tajemství.
+Opatruj se.
+```
+---
+
+## Ve zkratce
+
+* hacknuli jsme vám počítač
+* email jako důkaz
+* nakazil jste se na pornostránkách
+  * při brouzdání jsme vás natočili web kamerou
+  * vy teda máte divnej vkus, bylo to nechutný
+* zaplaťte $250 v výkupné na náš ₿ účet, jinak vše pošleme vašim kontaktům
+
+???
+* posíláme email z vašeho mailu
+* lhůta 48h
+
+---
+
+## SMTP social engineering
+
+```
+$ host -t MX seznam.cz
+seznam.cz mail is handled by 10 mx1.seznam.cz.
+seznam.cz mail is handled by 20 mx2.seznam.cz.
+
+$ telnet mx1.seznam.cz 25
+HELO mx1.seznam.cz
+MAIL FROM: <cacek.josef@seznam.cz>
+RCPT TO: <cacek.josef@seznam.cz>
+DATA
+From: Josef Cacek <cacek.josef@seznam.cz>
+To: Josef Cacek <cacek.josef@seznam.cz>
+Subject: You've been hacked
+
+Say Hello.
+So, "Hello".
+.
+```
+
+---
+
+background-image: url(email-by-you.png)
+
+---
+
+background-image: url(policie-smtp.png)
+
+???
+* I Policie už v tom má jasno
+* oslí můstek - Not secured - TLS
+
+---
+
+# TLS
+
+* cryptographic protocol
+* secures network communication
+* features
+  * privacy / encryption
+  * authentication
+  * message integrity
+* properties
+  * cipher suites
+  * extensions
+
+???
+
+Transport Layer Security (TLS) is a cryptographic protocols which secures communication over a network.
+
+* privacy - using encryption
+* ensures identity
+
+Several versions of the protocols.
+
+## Establishing TCP
+```
+rcv SYN 
+snd SYN,ACK
+rcv ACK
+```
+
+---
+
+# TLS 1.2 handshake
+
+```plain
+      Client                                               Server
+
+      ClientHello                  -------->
+                                                      ServerHello
+                                                     Certificate*
+                                               ServerKeyExchange*         
+                                              CertificateRequest*
+                                   <--------      ServerHelloDone
+      Certificate*
+      ClientKeyExchange
+      CertificateVerify*
+      [ChangeCipherSpec]
+      Finished                     -------->
+                                               [ChangeCipherSpec]
+                                   <--------             Finished
+      Application Data             <------->     Application Data
+
+```
+
+???
+https://tools.ietf.org/html/rfc5246
+
+---
+
+# TLS 1.3 handshake
+
+```plain
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + key_share*
+     | + signature_algorithms*
+     | + psk_key_exchange_modes*
+     v + pre_shared_key*       -------->
+                                                  ServerHello  ^ Key
+                                                 + key_share*  | Exch
+                                            + pre_shared_key*  v
+                                        {EncryptedExtensions}  ^  Server
+                                        {CertificateRequest*}  v  Params
+                                               {Certificate*}  ^
+                                         {CertificateVerify*}  | Auth
+                                                   {Finished}  v
+                               <--------  [Application Data*]
+     ^ {Certificate*}
+Auth | {CertificateVerify*}
+     v {Finished}              -------->
+       [Application Data]      <------->  [Application Data]
+```
+
+???
+
+* **Support v Java 11**
+* Latency - TCP+TLS overhead, TLS 1.3, DTLS
+* https://tools.ietf.org/html/rfc8446
+* 0-RTT https://tools.ietf.org/html/rfc8446#section-2.3
+
+```plain
+   When clients and servers share a PSK (either obtained externally or
+   via a previous handshake), TLS 1.3 allows clients to send data on the
+   first flight ("early data").  The client uses the PSK to authenticate
+   the server and to encrypt the early data.
+
+   As shown in Figure 4, the 0-RTT data is just added to the 1-RTT
+   handshake in the first flight.  The rest of the handshake uses the
+   same messages as for a 1-RTT handshake with PSK resumption.
+```
+
+---
+
+Ministerstvo | HTTPs | AutoRedirect | TLSv1.2 | TLSv1.3 | !RC4 | !TLSv1 | EV-cert
+:--- |  :---: | :---: | :---: | :---: | :---:  | :---:  | :---:  
+Doprava *mdcr.cz* | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png)
+Finance *mfcr.cz*| ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png)
+Kultura *mkcr.cz* | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png)
+Místní rozvoj *mmr.cz* | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png)
+Obrana *army.cz* | ![NOK](nok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png)
+Práce a soc. věcí *mpsv.cz* | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![NOK](nok.png)
+Průmysl *mpo.cz* | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png)
+Spravedlnost *justice.cz* | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png)
+Školství *msmt.cz* | ![NOK](nok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![NOK](nok.png)
+Vnitra *mvcr.cz* | ![NOK](nok.png)![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png)
+Zahraničí *mzv.cz* | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png)
+Zdravotnictví *mzcr.cz* | ![OK](ok.png)![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png) | ![NOK](nok.png)
+Zemědělství *eagri.cz* | ![NOK](nok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![NOK](nok.png)
+Životní prostředí *mzp.cz* | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![NOK](nok.png)
+
+*TLS na webech ministerstev* https://javlog.cacek.cz/2018/09/zabezpeceni-webu-ministerstev.html
+
+???
+
+TLS 1.0 vulnerable to 
+* the BEAST attack - exploit targeted at the Cipher Block Chaining (CBC) encryption as implemented in TLS 1.0 and earlier protocol versions. The problem are predictable IVs, which allows the attacker to effectively reduce the CBC mode to Electronic Code Book (ECB) mode, which is inherently insecure. *(Bulletproof SSL and TLS)*
+* padding oracle attack
+The BEAST can be avoided by using stream cipher - but the only one in TLS 1.0 is RC4.
+
+RC4 is broken. No practical attack is (publicly) known. It's best to avoid RC4 and use new TLS 1.2 protocol offerings.
+
+```
+cat ~/test/ministerstva-hostnames.txt |while read i; do chromium-browser http://$i/; done
+if openssl s_client -tls1_2 -connect www.mzcr.cz:443 </dev/null; then echo OK; fi
+cat ~/test/ministerstva-hostnames.txt |while read i; do if openssl s_client -tls1_2 -connect $i:443 </dev/null >/dev/null 2>&1;; then echo $i; fi; done
+```
+
+---
+
+# X.509 chyby v implementaci
+
+*https://gist.github.com/mimoo/6dc64b287f83c7b696fbcf3523222f83*
+
+--
+* KeyUsage
+
+???
+* KeyUsage a Extended Key Usage extensions - omezuje použití veřejného klíče: digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign,cRLSign,encipherOnly,decipherOnly     
+
+--
+* Validity Dates
+
+--
+* Critical Extensions
+
+???
+* Critical ext.: x509 certificate is an evolving standard, exactly like TLS, through extensions. To preserve backward compatibility, not being able to parse an extension is often considered OK, that is unless the extension is considered critical (important).
+
+--
+* Hostname Validation
+
+???
+* OOTB HTTPs LDAPS
+* Customer (a national bank) asking for disabling host verification for LDAP
+
+--
+* Basic Constraints
+
+???
+* BasicConstraints extension určuje zda jde o CA certifikát a jestliže ano, pak kolik max CA může následovat před listem (non CA serverovým certifikátem)
+
+--
+* Name Constraint
+
+???
+* NameConstraint extension omezuje použití CA certifikátu - např jen pro určité domény.
+
+--
+
+
+**The Most Dangerous Code in the World: Validating SSL Certificates in Non-Browser Software**  [paper](https://www.cs.utexas.edu/~shmat/shmat_ccs12.pdf)
+
+*The main lesson of this paper is that using SSL in non-browser
+software is a surprisingly challenging task. We demonstrated that
+even applications that rely on standard SSL libraries such as JSSE,
+OpenSSL, GnuTLS, etc. often perform SSL certificate validation
+incorrectly or not at all. These vulnerabilities are pervasive in critical
+software, such as Amazon FPS and PayPal libraries for transmitting
+customers’ payment details from merchants to payment
+gateways; integrated shopping carts; Amazon EC2, Rackspace, and
+other clients for remote administration of cloud storage and virtual
+cloud infrastructure; Chase mobile banking on Android; and many
+other popular programs. Their SSL connections are completely insecure
+against a man-in-the-middle attack.*
+
+---
+
+## CT exposer
+
+* https://github.com/chris408/ct-exposer 
+* Discover sub-domains by searching through Certificate Transparency logs
+
+```bash
+$ python3 ct-exposer.py -d teslamotors.com
+[+]: Downloading domain list...
+[+]: Download of domain list complete.
+[+]: Parsed 76 domain(s) from list.
+
+[+]: Domains found:
+205.234.27.243	adfs.teslamotors.com
+104.92.115.166	akamaisecure.qualtrics.com
+211.147.80.202	cn.auth.teslamotors.com
+211.147.88.104	cnvpn.teslamotors.com
+209.10.208.24	energystorage.teslamotors.com
+209.11.133.110	epc.teslamotors.com
+149.14.82.93	euvpn.teslamotors.com
+209.11.133.50	extconfl.teslamotors.com
+209.11.133.35	extissues.teslamotors.com
+209.10.208.31	fleetview.teslamotors.com
+...
+```
+
+???
+* https://chris408.com/post/certificate-transparency-logs-and-how-they-are-a-gold-mine-to-bug-hunters/
+* http://www.certificate-transparency.org/what-is-ct
+
+---
+
+## Cloudflare's Encrypted SNI
+
+* SNI - Server name indication TLS extension
+  * umožňuje klientovi poslat serverové hostname během TLS handshaku
+  * server pak zvolí certifikát v závislosti na daném jméně
+* ESNI - Encrypted SNI
+  * servers public key published in a new DNS record (ESNI)
+  * extension to TLS version 1.3 and above
+
+???
+
+* CloudFlare - DNS over HTTPs or UDP TLS (DTLS), Encrypted SNI, https://1.1.1.1/
+* The server publishes a public key on a well-known DNS record, which can be fetched by the client before connecting.
+* The client’s ESNI extension will then include, not only the actual encrypted SNI bits, but also the client’s public key share, the cipher suite it used for encryption and the digest of the server’s ESNI DNS record. On the other side, the server uses its own private key share, and the public portion of the client’s share to generate the encryption key and decrypt the extension.
+  
+---
+background-image: url(sni.png)
+
+---
+background-image: url(server-certs.png)
+
+---
+
+class: middle, white
+background-image: url(safe.jpg)
+
+# Questions?
+
+josef.cacek@gmail.com  
+`https://github.com/kwart/`  
+@jckwart  
+
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9'
+        });
+    </script>
+  </body>
+</html>
