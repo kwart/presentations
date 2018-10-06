@@ -336,10 +336,25 @@ against a man-in-the-middle attack.*
 
 ---
 
+## Certificate Transparency
+
+* Public logs of certificates
+* Early detection of misissued certificates, malicious certificates, and rogue CAs.
+* Faster mitigation after suspect certificates or CAs are detected.
+* Better oversight of the entire TLS/SSL system.
+
+???
+* Make it impossible/difficult for a CA to issue a SSL certificate for a domain without the certificate being visible to the owner of that domain.
+* Provide an open auditing and monitoring system that lets any domain owner or CA determine whether certificates have been mistakenly or maliciously issued.
+* Protect users (as much as possible) from being duped by certificates that were mistakenly or maliciously issued.
+
+---
+
 ## CT exposer
 
-* https://github.com/chris408/ct-exposer 
+* https://github.com/chris408/ct-exposer
 * Discover sub-domains by searching through Certificate Transparency logs
+* great tool for bug hunters
 
 ```bash
 $ python3 ct-exposer.py -d teslamotors.com
@@ -398,7 +413,6 @@ background-image: url(safe.jpg)
 josef.cacek@gmail.com  
 `https://github.com/kwart/`  
 @jckwart  
-
 
     </textarea>
     <script src="../remark-0.13.min.js">
