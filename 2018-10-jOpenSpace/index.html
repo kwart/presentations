@@ -163,7 +163,7 @@ Several versions of the protocols.
 
 ## Establishing TCP
 ```
-rcv SYN 
+rcv SYN
 snd SYN,ACK
 rcv ACK
 ```
@@ -178,7 +178,7 @@ rcv ACK
       ClientHello                  -------->
                                                       ServerHello
                                                      Certificate*
-                                               ServerKeyExchange*         
+                                               ServerKeyExchange*
                                               CertificateRequest*
                                    <--------      ServerHelloDone
       Certificate*
@@ -243,7 +243,7 @@ Auth | {CertificateVerify*}
 ---
 
 Ministerstvo | HTTPs | AutoRedirect | TLSv1.2 | TLSv1.3 | !RC4 | !TLSv1 | EV-cert
-:--- |  :---: | :---: | :---: | :---: | :---:  | :---:  | :---:  
+:--- |  :---: | :---: | :---: | :---: | :---:  | :---:  | :---:
 Doprava *mdcr.cz* | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png)
 Finance *mfcr.cz*| ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png)
 Kultura *mkcr.cz* | ![OK](ok.png) | ![OK](ok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png) | ![NOK](nok.png) | ![OK](ok.png)
@@ -263,7 +263,7 @@ Zemědělství *eagri.cz* | ![NOK](nok.png) | ![NOK](nok.png) | ![OK](ok.png) | 
 
 ???
 
-TLS 1.0 vulnerable to 
+TLS 1.0 vulnerable to
 * the BEAST attack - exploit targeted at the Cipher Block Chaining (CBC) encryption as implemented in TLS 1.0 and earlier protocol versions. The problem are predictable IVs, which allows the attacker to effectively reduce the CBC mode to Electronic Code Book (ECB) mode, which is inherently insecure. *(Bulletproof SSL and TLS)*
 * padding oracle attack
 The BEAST can be avoided by using stream cipher - but the only one in TLS 1.0 is RC4.
@@ -278,48 +278,7 @@ cat ~/test/ministerstva-hostnames.txt |while read i; do if openssl s_client -tls
 
 ---
 
-# X.509 chyby v implementaci
-
-*https://gist.github.com/mimoo/6dc64b287f83c7b696fbcf3523222f83*
-
---
-* KeyUsage
-
-???
-* KeyUsage a Extended Key Usage extensions - omezuje použití veřejného klíče: digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign,cRLSign,encipherOnly,decipherOnly     
-
---
-* Validity Dates
-
---
-* Critical Extensions
-
-???
-* Critical ext.: x509 certificate is an evolving standard, exactly like TLS, through extensions. To preserve backward compatibility, not being able to parse an extension is often considered OK, that is unless the extension is considered critical (important).
-
---
-* Hostname Validation
-
-???
-* OOTB HTTPs LDAPS
-* Customer (a national bank) asking for disabling host verification for LDAP
-
---
-* Basic Constraints
-
-???
-* BasicConstraints extension určuje zda jde o CA certifikát a jestliže ano, pak kolik max CA může následovat před listem (non CA serverovým certifikátem)
-
---
-* Name Constraint
-
-???
-* NameConstraint extension omezuje použití CA certifikátu - např jen pro určité domény.
-
---
-
-
-**The Most Dangerous Code in the World: Validating SSL Certificates in Non-Browser Software**  [paper](https://www.cs.utexas.edu/~shmat/shmat_ccs12.pdf)
+**The Most Dangerous Code in the World: Validating SSL Certificates in Non-Browser Software** [Paper 2012](https://www.cs.utexas.edu/~shmat/shmat_ccs12.pdf)
 
 *The main lesson of this paper is that using SSL in non-browser
 software is a surprisingly challenging task. We demonstrated that
@@ -334,16 +293,69 @@ cloud infrastructure; Chase mobile banking on Android; and many
 other popular programs. Their SSL connections are completely insecure
 against a man-in-the-middle attack.*
 
+???
+Paper 2012 - conclusion - překvapivě složitý úkol
+
+--
+## X.509 chyby v implementaci
+
+*https://gist.github.com/mimoo/6dc64b287f83c7b696fbcf3523222f83*
+
+* KeyUsage
+* Validity Dates
+* Critical Extensions
+* Hostname Validation
+* Basic Constraints
+* Name Constraint
+
+???
+* KeyUsage a Extended Key Usage extensions - omezuje použití veřejného klíče: digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign,cRLSign,encipherOnly,decipherOnly
+* Critical ext.: x509 certificate is an evolving standard, exactly like TLS, through extensions. To preserve backward compatibility, not being able to parse an extension is often considered OK, that is unless the extension is considered critical (important).
+* Host validation
+  * OOTB HTTPs LDAPS
+  * Customer (a national bank) asking for disabling host verification for LDAP
+* BasicConstraints extension určuje zda jde o CA certifikát a jestliže ano, pak kolik max CA může následovat před listem (non CA serverovým certifikátem)
+* NameConstraint extension omezuje použití CA certifikátu - např jen pro určité domény.
+
+---
+
+## OpenSSL as a MITM TLS/SSL proxy (with Let's encrypt cert)
+
+```
+mkfifo /tmp/tls-{request,response}
+
+openssl s_server -quiet -cert cert.pem -key privkey.pem -accept 1177 < /tmp/tls-response \
+  | tee -a /tmp/tls-request \
+  | stdbuf -i0 -o0 -e0 tr -c "[:print:]" "[ *]"
+
+openssl s_client -quiet -connect target.example.com:1177 < /tmp/tls-request \
+  | tee -a /tmp/tls-response \
+  | stdbuf -i0 -o0 -e0 tr -c "[:print:]" "[ *]"
+```
+
+???
+* named pipes (FIFOs) used as interface between s_client and s_server
+
 ---
 
 ## Certificate Transparency
 
 * Public logs of certificates
-* Early detection of misissued certificates, malicious certificates, and rogue CAs.
-* Faster mitigation after suspect certificates or CAs are detected.
-* Better oversight of the entire TLS/SSL system.
+  * publicly auditable
+  * append only
+* Roles
+  * Logs
+  * Monitors
+  * Auditors
+* Early detection of misissued certificates
+* Faster mitigation after suspect certificates or CAs are detected
+* Better oversight of the entire TLS/SSL system
 
 ???
+* Roles
+  * Logs - anyone can send entry to a log
+  * Monitors - publicly run servers that periodically contact all of the log servers and watch for suspicious certificates. Watches can be defined for domain names.
+  * Auditors - lightweight software component (e.g. in a browser); verifies that logs are behaving correctly. If a log is not behaving properly, then the log will need to explain itself or risk being shut down. Second, they can verify that a particular certificate appears in a log.
 * Make it impossible/difficult for a CA to issue a SSL certificate for a domain without the certificate being visible to the owner of that domain.
 * Provide an open auditing and monitoring system that lets any domain owner or CA determine whether certificates have been mistakenly or maliciously issued.
 * Protect users (as much as possible) from being duped by certificates that were mistakenly or maliciously issued.
@@ -396,12 +408,23 @@ $ python3 ct-exposer.py -d teslamotors.com
 * CloudFlare - DNS over HTTPs or UDP TLS (DTLS), Encrypted SNI, https://1.1.1.1/
 * The server publishes a public key on a well-known DNS record, which can be fetched by the client before connecting.
 * The client’s ESNI extension will then include, not only the actual encrypted SNI bits, but also the client’s public key share, the cipher suite it used for encryption and the digest of the server’s ESNI DNS record. On the other side, the server uses its own private key share, and the public portion of the client’s share to generate the encryption key and decrypt the extension.
-  
+
 ---
 background-image: url(sni.png)
 
 ---
 background-image: url(server-certs.png)
+
+---
+
+# Recap
+
+* SMTP social engineering
+* TLS
+* weby ministerstev
+* X.509 implementace - most dangerous coe in the world
+* Certificate Transparency
+* Encrypted SNI - safer porn browsing?
 
 ---
 
@@ -412,7 +435,7 @@ background-image: url(safe.jpg)
 
 josef.cacek@gmail.com  
 `https://github.com/kwart/`  
-@jckwart  
+@jckwart
 
     </textarea>
     <script src="../remark-0.13.min.js">
