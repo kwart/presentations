@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hazelcast IBitSet</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .red { color: red; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .italic {
+        font-style: italic;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .white {
+        color: white;
+      }
+      .red {
+        color: red;
+      }
+      .font80 {
+        font-size: 80%;
+      }
+      th {
+        padding-right: 10px;
+        padding-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+background-image: url(bitset.jpg)
+
+---
+class: middle, red, center
+
+# Hazelcast IBitSet
+
+## as an alternative to Redis BITFIELD
+
+---
+
+## A scary story before we start
+
+--
+* Once upon a time Sergey's friend wanted to blacklist/whitelist phone numbers in his application
+
+--
+* He tried really hard with Hazelcast, but he wasn't able to fit into the memory
+ 
+ 
+--
+
+### ... so he has chosen REDIS
+
+---
+
+## Redis offering
+
+```
+ BITCOUNT
+ BITOP [AND OR XOR NOT]
+ BITPOS 
+ BITFIELD
+```
+---
+
+## IBitSet interface
+
+* vector of bits that grows as needed
+* all bits initially set to `false`
+
+```java
+public interface IBitSet {
+
+    boolean get(int bitIndex);
+
+    void set(int bitIndex);
+
+    void clear(int bitIndex);
+
+    void clear();
+
+    int cardinality();
+
+    int size();
+
+    void and(BitSet bitSet);
+
+    void and(String setName);
+
+    void or(String setName);
+}
+```
+
+???
+* not partitioned data structure
+* one sync backup similar to IAtomicLong
+* backed by java.util.BitSet
+---
+
+## MicroBenchmark - ACLs based on ISet vs. IBitSet
+
+```java
+hz = Hazelcast.newHazelcastInstance(config);
+for (int i=0; i<5; i++) {
+    String name = "acl"+i;
+    ISet<Integer> iset = hz.getSet(name);
+    IBitSet bitSet = hz.getBitSet(name);
+    for (int j=0; j<1024; j++) {
+        if ((j % (i+1))==0) {
+            iset.add(j);
+            bitSet.set(j);
+        }
+    }
+}
+
+@Benchmark
+public static void setBasedAcl(ExecutionPlan plan) {
+    ISet set = plan.hz.getSet("acl0");
+    for (int i=1; i<5; i++) {
+        set.retainAll(plan.hz.getSet("acl"+i));
+    }
+}
+
+@Benchmark
+public static void bitSetBasedAcl(ExecutionPlan plan) {
+    IBitSet bitSet = plan.hz.getBitSet("acl0");
+    for (int i=1; i<5; i++) {
+        bitSet.and("acl"+i);
+    }
+}
+
+```
+---
+background-image: url(ACLs.png)
+
+---
+
+## MicroBenchmark results
+
+```
+Do not assume the numbers tell you what you want them to tell.
+
+Benchmark            Mode  Cnt      Score     Error  Units
+App.bitSetBasedAcl  thrpt   25  32692.913 ± 945.345  ops/s
+App.setBasedAcl     thrpt   25   3603.585 ± 319.373  ops/s
+
+```
+
+???
+* magnitude level shift
+
+---
+## Memory (on-heap) Size comparison
+
+```
+Entries       Full IBitSet    Full ISet       1-entry IBitSet     1-entry ISet 
+2^3           64              5,176           64                  4,392
+2^10          184             123,064         184                 4,392
+2^20          131,128         125,829,304     131,128             4,392
+2^30          134,217,784     tooooooo many   134,217,784         4,392
+```
+
+*Sizes are in bytes.*
+
+???
+* back to Sergeys usecase - if phone numbers have 9 digits, then owner+backup would take 250 MB in all cases
+
+---
+
+class: middle
+
+# Questions?
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9'
+        });
+    </script>
+  </body>
+</html>
