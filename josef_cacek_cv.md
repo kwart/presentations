@@ -14,8 +14,13 @@ Specialties:
 
 ### Hazelcast
 
-*Quality Engineer (2017 - present)*
+*Security Engineer (2019 - present)*
+*Software Engineer (2018 - 2019)*
+*Quality Engineer (2017 - 2018)*
 
+* Implementing new security features;
+* Identifying and fixing security issues;
+* Improving Hazelcast IO subsystem.
 
 ### Red Hat
 
