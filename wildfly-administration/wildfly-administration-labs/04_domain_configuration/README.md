@@ -13,7 +13,7 @@ Use 3 terminal windows - one for each container:
 
 ### First terminal - start domain controller - master host
 ```bash
-docker run -it --rm --name wildfly-master kwart/alpine-ext:wildfly-11
+docker run -it --rm --name wildfly-master kwart/wildfly
 
 # Following steps are executed in the running container
 
@@ -33,7 +33,7 @@ wildfly/bin/domain.sh --host-config=host-master.xml -b $MY_IP -bmanagement $MY_I
 Run following steps in 2nd terminal
 
 ```
-docker run -it --rm --name wildfly-slave1 kwart/alpine-ext:wildfly-11
+docker run -it --rm --name wildfly-slave1 kwart/wildfly
 
 # configure slave name - sed is used here to simplify automation
 sed -i 's#<host #<host name="slave1" #' wildfly/domain/configuration/host-slave.xml

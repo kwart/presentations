@@ -1,5 +1,6 @@
-FROM kwart/alpine-ext:wildfly-11
+FROM kwart/wildfly
 
 COPY *.war /opt/wildfly/standalone/deployments/
+COPY modify-ha-config.cli /opt/wildfly/
 
-COPY standalone-ha.xml /opt/wildfly/standalone/configuration/
+RUN /opt/wildfly/bin/jboss-cli.sh --file=/opt/wildfly/modify-ha-config.cli

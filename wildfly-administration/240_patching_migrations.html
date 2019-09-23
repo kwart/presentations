@@ -71,6 +71,34 @@ patch apply /path/to/jboss-eap-7.0.6.patch.zip
 
 ---
 
+## Migration between JBoss EAP versions
+
+* JBoss Server Migration Tool
+  * shipped with EAP
+* migration paths
+  * from previous major version (e.g. EAP 6.4-> EAP 7.2)
+  * from previous minor version (e.g. EAP 7.1-> EAP 7.2)
+
+--
+
+### Usasge
+
+```
+$EAP_HOME/bin/jboss-server-migration.sh --source EAP_PREVIOUS_HOME
+```
+
+???
+
+https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.2/html-single/using_the_jboss_server_migration_tool/index#about_the_server_migration_tool
+
+Migrating to JBoss EAP 7.2
+The JBoss Server Migration Tool ships with JBoss EAP 7.2, so there is no separate download or installation required. This tool supports migration to JBoss EAP 7.2 from the previous major release of the product, which is JBoss EAP 6.4, and from the previous minor release of the product, which is JBoss EAP 7.1.
+
+`jboss-server-migration` script is located in the `EAP_HOME/bin` directory
+
+The Rool can migrate **any module** installed in the source server as long as that module is not already installed on the target server. Module migration can be done **explicitly by request**, or **implicitly** because another module or migrated server configuration depends on it.
+---
+
 ## Windup
 
 * https://github.com/windup/windup

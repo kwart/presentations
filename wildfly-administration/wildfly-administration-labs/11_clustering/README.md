@@ -7,17 +7,16 @@
 **How:**
 
 * We will run servers with `counter` and `counter-distributable` 
-  applications. They differe just in the content of `web.xml` deployment
-  descriptor. Both applications are simple request counters for given user.
+  applications. They differ just in the content of `web.xml` deployment
+  descriptor. Both applications are simple request counters for the given user.
 
 * Build both applications with `mvn install`
 
 * To make deploying in cluster simpler, we will prepare a new docker image
   with the applications. There is already a `Dockerfile`, which defines
-  the format of new image.
-  * there is also custom `standalone-ha.xml` prepared to be put into
-    the new docker image. It just resolves disabled multicast in Docker
-    by using JGroups `FILE_PING` protocol and static proxy list in `mod_cluster`
+  the format of the new image.
+  * there is also a JBoss CLI script `modify-ha-config.cli` which replaces multicast JGroups discovery (`MPING` protocol)
+    by file-based discovery mechanism (`FILE_PING` protocol). It also uses static IP configuration in `mod_cluster`
     Undertow filter.
 * To prepare the Docker image run:
 ```
@@ -48,14 +47,14 @@ docker run -v /tmp:/tmp -it --rm wildfly-cluster
 wildfly/bin/standalone.sh -c standalone-ha.xml -b $MY_IP -bprivate $MY_IP
 ```
 
-* Open the **local** application adresses in browser:
+* Open the **local** application addresses in browser:
   * http://localhost:8080/counter/
   * http://localhost:8080/counter-distributable/
 * reload each application page few times and check which server handles the request
   * Stop the handling server (Ctrl-C)
 
 **Expected result:**
-Both application should still work, but the one which is not distributable
+Both applications should still work, but the one which is not distributable
 starts the counter from zero.
 The distributable application shares the session state across the cluster
-and counter should should still grow.
+and counter should still grow.

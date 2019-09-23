@@ -9,7 +9,7 @@
 * We will use WildFly server running in a docker container:
 ```
 # start docker container
-docker run -it --rm kwart/alpine-ext:wildfly-11
+docker run -it --rm kwart/wildfly
 
 # add a new Management user to WildFly
 wildfly/bin/add-user.sh -u admin -p password

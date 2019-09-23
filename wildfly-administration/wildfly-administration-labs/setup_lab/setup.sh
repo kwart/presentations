@@ -14,6 +14,5 @@ wget https://jdbc.postgresql.org/download/postgresql-42.1.4.jar
 wget https://github.com/kwart/ldap-server/releases/download/2017-09-04/ldap-server.jar
 popd
 
-# docker pull jboss/wildfly:11.0.0.Final
 docker pull postgres:10.1-alpine
-docker pull kwart/alpine-ext:wildfly-11
+docker pull kwart/wildfly
