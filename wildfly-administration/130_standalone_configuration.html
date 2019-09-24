@@ -58,7 +58,7 @@ class: center, middle
 ## Standalone folder structure
 
 ```bash
-└── wildfly-11.0.0.Final
+└── wildfly-X.Y.Z.Final
     └── standalone
         ├── configuration
         ├── deployments
@@ -77,7 +77,7 @@ NOTE: The server's management API is recommended for installing deployment conte
 
 ### After the first execution
 ```bash
-└── wildfly-11.0.0.Final
+└── wildfly-X.Y.Z.Final
     └── standalone
         ├── configuration
 *       ├── data
@@ -111,8 +111,20 @@ Versions up to JBoss AS 6 had many config files.
 --
 * network interfaces
 
+???
+* Network access control - use principle of the least privilege. Loopback by default for all interfaces
+  * public - deployed apps
+  * management - management console
+  * private - cluster internal communication (usually within a LAN)
+
 --
 * management interfaces 
+
+???
+* Management configuration
+  * protocol used
+  * authentication
+  * auditing
 
 --
 * extensions
@@ -135,7 +147,9 @@ Versions up to JBoss AS 6 had many config files.
 
 ???
 
-It's not necessary to have them listed in XML when deployment scanner is used.
+* Deployments
+  * user applications
+  * It's not necessary to have them listed in XML when deployment scanner is used.
 
 ---
 
@@ -162,6 +176,9 @@ It's not necessary to have them listed in XML when deployment scanner is used.
 ???
 HA profiles - also IIOP is added
 
+--
+* **Load Balancer** - Undertow based reverse proxy for HA scenarios
+
 ---
 
 ## Start a custom profile
@@ -177,6 +194,7 @@ HA profiles - also IIOP is added
   * `standalone-full.xml`
   * `standalone-ha.xml`
   * `standalone-full-ha.xml`
+  * `standalone-load-balancer.xml`
 
 ---
 
