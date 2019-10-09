@@ -1,6 +1,0 @@
-embed-server --server-config=standalone-ha.xml
-/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=proxy1:add(host="${loadbalancer.host:172.17.0.2}", port=8090)
-/subsystem=modcluster/proxy=default:write-attribute(name=advertise, value=false)
-/subsystem=modcluster/proxy=default:list-add(name=proxies, value=proxy1)
-/subsystem=jgroups/stack=tcp/protocol=MPING:remove()
-/subsystem=jgroups/stack=tcp/protocol=FILE_PING:add(add-index=0)
