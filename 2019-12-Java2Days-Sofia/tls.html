@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Keep Your Secrets Secret - TLS for Java developers</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code { margin-right: 100px; }
+      .red { color: red; }
+      .white { color: white; }
+      .grey { color: grey; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 37%;
+      }
+      .pull-right {
+        float: right;
+        width: 60%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .clear {
+        width: 100%;
+      }
+      .clear ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .font150 {
+        font-size: 150%;
+      }
+      .font80 {
+        font-size: 80%;
+      }
+      .h450 {
+        height: 450px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+layout: true
+background-image: url(background.png)
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+# Keep Your Secrets Secret
+
+# &nbsp;
+
+# TLS for Java developers
+
+???
+### Prepare
+* terminal - tcpdump
+* Wireshark - cleanup password
+* send mail to jsignpdf@gmail.com
+* cleanup /etc/hosts
+* set-up pointing device
+* set-up 2 monitors
+
+---
+
+## Josef Cacek
+
+* Security engineer / Java developer at Hazelcast
+* Father
+* Runner
+* Open-source contributor
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+
+# Summary
+
+---
+class: middle, center
+
+# I. Choose the protocol and its parameters wisely!
+
+---
+class: middle, center
+
+# II. Measure what it costs you using the TLS.
+
+---
+class: middle, center
+
+# III. Don't forget the checks,
+# which you don't get for free in Java.
+
+---
+class: middle, center
+
+# Bonus:
+# Know your tools.
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+# Demo and Motivation
+
+---
+
+## Demo
+
+### I. Choose the protocol and its parameters wisely!
+
+* Protected application running at https://hazelcast-test.cacek.cz/
+* attacker captures the communication
+* they are able to decrypt it, if they get access to the server's private key
+
+---
+
+## Motivation
+
+### II. Measure what it costs you using the TLS.
+
+* know the TLS price
+* what are your preferences?
+  * throughput
+  * latency
+  * CPU load
+
+
+### Hazelcast performance testing
+
+* tool: Hazelcast Simulator *(github.com/hazelcast/hazelcast-simulator)*
+* test configuration:
+  * 2 servers
+  * 4 clients
+  * TLS enabled in client-to-member communication
+---
+
+background-image: url(tls-images/report-all.png)
+
+### Plain vs TLS
+
+???
+
+This is a throughput graph - how many Map operations is done per second.
+
+* top curves are for plain Hazelcast Client protocol communication
+* from the middle down they are TLS protected communications
+* you can see great diversity of performance 
+
+One half ... to one tenth of the original throughput.
+
+---
+
+## Demo
+
+### III. Don't forget the checks, which you don't get for free in Java.
+
+* What can happen if you don't enable hostname validation?
+* Java Mail API tutorial - https://kodejava.org/how-do-i-receive-mail-using-pop3/
+  * Receive mails using POP3+TLS
+* Man in the middle intercepting
+  * with a valid certificate for another hostname
+
+???
+* Send a [sample mail](mailto:jsignpdf@gmail.com)
+
+--
+
+#### MITM in Raspberry Pi 3
+
+```bash
+iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -t nat -A PREROUTING -i wlan0 -p tcp -m tcp --dport 995 -j REDIRECT --to-ports 8443
+
+sslsplit -S logs -A hazelcast-test.pem ssl 0.0.0.0 8443 tcp 0.0.0.0 8080
+```
+
+???
+Originally the Demo should use this Raspberry Pi as a WiFi hotspot and intercept all the TLS communication on port 995.
+
+sslsplit:
+* in this case serving one certificate to all intercepted requests
+* there is another mode which uses a custom CA which generates and signs certificates on the fly. The problem is you would need to add the custom CA to your Java keystore to intercept the communication successfuly.
+
+We will use a local variant of the demo.
+
+### Run demo
+```
+vi mitm-995-local.sh
+./mitm-995-local.sh
+```
+
+Run the program in Eclipse
+
+---
+
+background-image: url(tls-images/mitm-pop3-wireshark.png)
+
+---
+
+background-image: url(tls-images/pop3_checkserveridentity.png)
+
+---
+
+## Demo
+
+### Bonus: Know your tools
+
+* Debug TLS connections  
+```bash
+java -Djavax.net.debug=ssl:handshake ...
+```
+* Dump TCP traffic E.g. HTTPS:  
+```bash
+sudo tcpdump -i any -s0 -w https-traffic.pcap 'port 443'
+```
+* Analyze the capture in WireShark
+* OpenSSL tool - swiss knife for the TLS
+
+???
+
+OpenSSL - not only library
+* client
+* server
+* ca
+* OCSP responder
+* TSA
+* manipulate certificates and keystores 
+
+---
+background-image: url(background_deck.png)
+class: middle
+
+## I. Choose the protocol and its parameters wisely!
+
+
+???
+Now will come another round.
+
+This time with some recommendations.
+
+---
+class: middle
+
+# Prefer TLS 1.3, when you can.
+
+## Use TLS 1.2 and (EC)DHE key exchange in all other cases.
+
+???
+
+Let's do a small recap.  
+TLSv1.3 is a major rewrite of the specification. 
+
+## Transport Layer Security
+
+* cryptographic protocol
+* wraps application protocol to a secure packaging
+* versions
+  * SSL 2.0, SSL 3.0 *(deprecated in 2011/2015)*
+  * TLS 1.0 (1999)- RFC-2246 *(to be deprecated in 2020)*
+  * TLS 1.1 (2006)- RFC-4346 *(to be deprecated in 2020)*
+  * **TLS 1.2** (2008)- RFC-5246
+  * **TLS 1.3** (2018)- RFC-8446
+
+TLS builds on the earlier SSL specifications (1994, 1995, 1996) developed by Netscape Communications for adding the HTTPS protocol to their Navigator web browser.
+* SSL 1.0	Unpublished	
+* SSL 2.0	1995	Deprecated in 2011 (RFC 6176)
+* SSL 3.0	1996	Deprecated in 2015 (RFC 7568)
+
+
+IETF=The Internet Engineering Task Force (organization behind RFCs)
+
+---
+
+## Forward secrecy
+
+&nbsp;
+
+.center[
+*Feature of key agreement protocols that gives assurances that session keys will not be compromised even if the private key of the server is compromised.*
+]
+
+&nbsp;
+
+* mandatory in TLS 1.3
+* choose ciphersuites wisely in older versions
+  * avoid RSA key exchange
+
+???
+
+What we want from our TLS configuration is a **Forward Secrecy** of **Key exchange**.
+
+* https://security.stackexchange.com/questions/145855/how-to-enforce-perfect-forward-secrecy-using-jvm-properties
+* https://stackoverflow.com/questions/14034508/dh-vs-dhe-and-ecdhe-and-perfect-forward-secrecy
+* https://www.digicert.com/ssl-support/ssl-enabling-perfect-forward-secrecy.htm
+
+---
+
+## Role of Ciphersuites in the TLS
+
+### Ciphersuite
+* named set of cryptographic primitives
+* client and server agrees on it
+* defines how security will be implemented
+
+*TLS is a framework, Ciphersuite selects how security will be implemented.*
+
+???
+
+https://www.feistyduck.com/library/bulletproof/online/ch-protocol.html#cipher-suites
+
+* TLS allow great flexibility - it's rather a framework for creating cryptographic protocols
+* A suite is defined roughly by the following attributes:
+  * Authentication method
+  * Key exchange method
+  * Encryption algorithm
+  * Encryption key size
+  * Cipher mode (when applicable)
+  * MAC algorithm (when applicable)
+  * PRF (TLS 1.2)
+  * Hash function used for the Finished message (TLS 1.2)
+  * Length of the verify_data structure (TLS 1.2)
+
+--
+
+### Example
+
+E.g. **`"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"`**
+
+* authentication: `ECDSA`
+* key exchange: `ECDHE`
+* cipher (encryption algorithm, key-size, mode): `AES-256-GCM`
+* pseudorandom function: `SHA-384`
+
+---
+
+### JSSE classes and interfaces
+
+.center[
+
+![JSSE classes and interfaces](tls-images/jsse-classes-and-interfaces.png)
+
+.grey.font80[*Source: https<nolink>://docs.oracle.com/javase/10/security/java-secure-socket-extension-jsse-reference-guide.htm*]
+
+]
+
+???
+How can we achieve the Forward Secrecy in java?
+
+---
+
+### SSLContext initialization
+
+```java
+KeyStore keyStore = KeyStore.getInstance("PKCS12");
+KeyStore trustStore = KeyStore.getInstance("PKCS12");
+
+try (InputStream kis = new FileInputStream("keystore.p12");
+            InputStream tis = new FileInputStream("truststore.p12")) {
+    keyStore.load(kis, password);
+    trustStore.load(tis, "s3crEt".toCharArray());
+    KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+    kmf.init(keyStore, password);
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    tmf.init(trustStore);
+    SSLContext sslContext = SSLContext.getInstance("TLS");
+    sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+    //... getServerSocketFactory, createSSLEngine, ...
+}
+```
+
+---
+## Setting protocols and ciphersuites
+
+```java
+SSLSocket sslSocket = (SSLSocket) sslContext.getSocketFactory()
+        .createSocket("pop.gmail.com", 995);
+sslSocket.setEnabledProtocols(new String[] {"TLSv1.2", "TLSv1.3"});
+sslSocket.setEnabledCipherSuites(new String[] {
+        "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", 
+        "TLS_AES_256_GCM_SHA384"});
+```
+
+.pull-right[
+**call method**
+* `String[] getSupportedCipherSuites()`
+* `String[] getEnabledCipherSuites()`
+* **`void setEnabledCipherSuites(String[])`**
+* `String[] getSupportedProtocols()`
+* `String[] getEnabledProtocols()`
+* **`void setEnabledProtocols(String[])`**
+]
+
+.pull-left[
+**From class**
+* `SSLEngine`
+* `SSLSocket`
+* `SSLServerSocket`
+]
+
+---
+
+## Recommendations for a cipher string
+
+* Check OWASP TLS Cipher String Cheat Sheet
+* https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/TLS_Cipher_String_Cheat_Sheet.md
+
+???
+* OWASP Foundation - the free and open software security community
+
+Open Web Application Security Project
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+## II. Measure what it costs you using the TLS.
+
+---
+class: middle
+
+# Measure!
+
+## Prefer TLS 1.3 and new Java releases.
+
+---
+
+## Full Handshake in TLS 1.2
+
+```plain
+      Client                                               Server
+
+      ClientHello                  -------->
+                                                      ServerHello
+                                                     Certificate*
+                                               ServerKeyExchange*
+                                              CertificateRequest*
+                                   <--------      ServerHelloDone
+      Certificate*
+      ClientKeyExchange
+      CertificateVerify*
+      [ChangeCipherSpec]
+      Finished                     -------->
+                                               [ChangeCipherSpec]
+                                   <--------             Finished
+      Application Data             <------->     Application Data
+```
+
+---
+
+## Full Handshake in TLS 1.3
+
+```plain
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + key_share*
+     | + signature_algorithms*
+     | + psk_key_exchange_modes*
+     v + pre_shared_key*       -------->
+                                                  ServerHello  ^ Key
+                                                 + key_share*  | Exch
+                                            + pre_shared_key*  v
+                                        {EncryptedExtensions}  ^  Server
+                                        {CertificateRequest*}  v  Params
+                                               {Certificate*}  ^
+                                         {CertificateVerify*}  | Auth
+                                                   {Finished}  v
+                               <--------  [Application Data*]
+     ^ {Certificate*}
+Auth | {CertificateVerify*}
+     v {Finished}              -------->
+       [Application Data]      <------->  [Application Data]
+```
+
+---
+
+## Hazelcast IMDG
+
+```java
+HazelcastInstance hz = HazelcastClient.newHazelcastClient();
+
+Map<Integer, User> userCache = hz.getMap("users");
+User user = userCache.get(id);
+if (user == null) {
+    user = dbUtil.loadUser(id);
+    userCache.put(id, user);
+}
+```
+
+&nbsp;
+
+Goals:
+* performance
+* simplicity
+
+
+???
+
+* Hazelcast IMDG
+  * open-source in-memory data grid
+  * main use-cases - distributed cache which scales  
+      * not limited by heap limits or single JVM
+* TLS as an Enterprise feature
+  
+---
+
+## Hazelcast TLS performance tests
+
+.pull-right.center[
+![Test config](tls-images/perf_test_config.png)
+]
+
+* configuration
+  * `Hazelcast: 2 members + 4 clients`
+  * `Java (Zulu/OpenJDK): 8 v 11 v 13`
+  * `TLS engine: JSSE v BoringSSL`
+  * `TLS protocol: TLSv1.2 v TLSv1.3`
+* TLS enabled for client-member connections
+* scenario: `Map` operations executed by clients on cluster members
+
+---
+
+background-image: url(tls-images/report-TLSv1.2.png)
+
+.font80[
+TLS 1.2  
+Hazelcast
+
+`IMap.put 10%`  
+`IMap.get 80%`  
+`IMap.set 10%`
+]
+
+???
+BoringSSL shines only in Java 8, but its performance dropped when used in newer Java.
+
+
+* 8 BoringSSL
+* 13 JSSE
+* 11 JSSE
+* 13 BoringSSL
+* 11 BoringSSL
+* 8 JSSE
+
+---
+
+background-image: url(tls-images/report-TLSv1.3.png)
+
+.font80[
+TLS 1.3  
+Hazelcast
+
+`IMap.put 10%`  
+`IMap.get 80%`  
+`IMap.set 10%`
+]
+
+???
+
+OpenJSSE was explicitly enabled TLS1.3 backport in Java.
+
+BoringSSL doesn't work with TLS 1.3 in Java 8.
+
+
+* 13 JSSE
+* 11 JSSE
+* 13 BoringSSL
+* 11 BoringSSL
+* 8 JSSE `-XX:+UseOpenJSSE`
+
+---
+
+background-image: url(tls-images/latency.png)
+
+### TLS handshake latencies test
+
+???
+* logaritmic scale on latency axis
+* small differences across ciphersuites
+* big differences across Java and TLS impl versions
+
+---
+
+## Native TLS libraries - OpenSSL / BoringSSL
+
+* available through `netty-tcnative` - https://netty.io/wiki/forked-tomcat-native.html
+* Maven Dependencies:
+  * `io.netty:netty-handler`
+  * `io.netty:netty-tcnative` *(dynamicallly linked OpenSSL)*
+  * `io.netty:netty-tcnative-boringssl-static` *(statically linked BoringSSL)*
+
+--
+&nbsp;
+
+```java
+import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
+import javax.net.ssl.SSLEngine;
+
+SslContext context = SslContextBuilder.forClient()
+    .trustManager(new File("ca.crt"))
+    .sslProvider(SslProvider.OPENSSL)
+    .build();
+SSLEngine sslEngine = context.newEngine(UnpooledByteBufAllocator.DEFAULT);
+```
+
+???
+Forked Tomcat Native.
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+## III. Don't forget the checks,
+## which you don't get for free in Java.
+
+---
+class: middle
+
+## Enable hostname validation.
+### Check certificate validity and revocation status when appropriate.
+
+---
+
+## Hostname validation and Server Name Indication
+
+* X.509 certificates may contain Subject Alternative Names (SAN) extension
+  * Several RFCs specify how to check hostnames and IP addresses against SAN entries
+* hostname checking in Java
+  * out-of-the-box: HTTPS and LDAPS client
+  * custom options e in some API (e.g. Java Mail)
+  * manually through `SSLParameters` (`SSLSocket`, `SSLEngine`)  
+
+
+```java
+SSLParameters params = sslEngine.getSSLParameters();
+
+// Use Server Name Indication
+params.setServerNames(Arrays.asList(new SNIHostName("www.google.com")));
+
+// Enable hostname validation (available algorithms: LDAPS, HTTPS)
+params.setEndpointIdentificationAlgorithm("HTTPS");
+
+sslEngine.setSSLParameters(params);
+```
+
+???
+RFCs:
+* HTTP-TLS 2818
+* LDAP-TLS 2830
+* General 6125
+
+---
+
+## Certificate status
+
+* revocation checks can be enabled by Security and System properties
+  * CRL DP
+  * OCSP
+  * OCSP stapling
+* validity is not checked for self-signed certificates
+  * manual check: `((X509Certificate) certificate).checkValidity()`
+
+---
+background-image: url(tls-images/cert_validity_checking.png)
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+## Bonus: Know your tools
+
+---
+class: middle
+
+# Prefer PKCS12 over JKS / JCEKS.
+
+## Automate certificates 
+
+---
+
+## Keystore types
+
+* PKCS12
+  * open standard format and algorithms
+  * keystore default type from Java 9
+* JKS and JCEKS 
+  * proprietary
+  * implementations are not compatible accross vendors
+* Security evaluation of Java Keystores:
+  * https://minimalblue.com/data/papers/NDSS2018_mind_your_keys.pdf
+
+---
+
+## Let's Encrypt, certbot &amp; ACME
+
+* Let's Encrypt - Free Certificate Authority (CA)
+* ACME - Automatic Certificate Management Environment
+* `certbot` - ACME protocol client
+
+&nbsp;
+
+**Java integration**
+
+```bash
+DOMAIN=java2days.cacek.cz
+
+# Obtain Certificate from Let's Encrypt CA
+certbot certonly --standalone -d $DOMAIN
+
+# Import private key and certificates to a keystore
+openssl pkcs12 -export -out /opt/keystore-$DOMAIN.p12 \
+  -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem \
+  -inkey /etc/letsencrypt/live/$DOMAIN/privkey.pem \
+  -password pass:pass.123
+```
+
+???
+
+* PoC integration embedded Jetty + with ACME client from WildFly AS
+  * in 1 day
+* https://github.com/wildfly-security/wildfly-elytron/tree/1.10.4.Final/x500/cert/acme
+
+---
+
+class: center, middle
+background-image: url(star-wars-sword.png)
+
+# Use .red[Transport Layer Security], Luke,
+
+# &nbsp;
+# &nbsp;
+
+# and pick wisely.
+
+---
+class: center, middle
+
+# .font200[Thank you]
+
+.grey.font150.center[
+`github.com/kwart`  
+`twitter.com/jckwart`  
+`javlog.cacek.cz`
+]
+
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+//        ratio: '16:10',
+        ratio: '16:9',
+        highlightLanguage: 'remark',
+        highlightLines: true,
+        slideNumberFormat: '',
+        countIncrementalSlides: false
+      });
+    </script>
+<!--
+        highlightStyle: 'monokai',
+-->
+  </body>
+</html>

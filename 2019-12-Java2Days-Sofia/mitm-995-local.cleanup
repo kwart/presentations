@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# cleanup
+sudo killall openssl
+rm /tmp/tls-{request,response}
+sudo sed -i '/pop.gmail.com/d' /etc/hosts

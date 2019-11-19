@@ -1,0 +1,100 @@
++OK Gpop ready for requests from 176.74.156.168 x12mb22486732wmi
+CAPA
++OK Capability list follows
+USER
+RESP-CODES
+EXPIRE 0
+LOGIN-DELAY 300
+TOP
+UIDL
+X-GOOGLE-RICO
+SASL PLAIN XOAUTH2 OAUTHBEARER
+.
+USER jsignpdf
++OK send PASS
+PASS ******cut******
++OK Welcome.
+STAT
++OK 1 4740
+NOOP
++OK
+RETR 1
++OK message follows
+Delivered-To: jsignpdf@gmail.com
+Received: by 2002:a05:6830:4b8:0:0:0:0 with SMTP id l24csp1994467otd;
+        Tue, 3 Dec 2019 14:06:51 -0800 (PST)
+X-Received: by 2002:a02:885:: with SMTP id 127mr76326jac.53.1575410811220;
+        Tue, 03 Dec 2019 14:06:51 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1575410811; cv=none;
+        d=google.com; s=arc-20160816;
+        b=uHcBDAxcWehM3YMn7BYOqZT+Fn+LJbJGrRTF2pGVZd4KfNDHNh093b5er30fFlOdNv
+         DiD5mpKqvuC6en8gweWD7gUABpuTcGvpj7qwbU9TK/W1VRjOcLM20MLYBMM3B+1ikpAV
+         zkamYNhBedHG+WU7Pl5IwYOF12PnOrd8XG1Ah9JjgD+NGhLwogzvlRoSZkT2gLGXfbYk
+         F6Ldik1IySYGlFytMyMvABCPalKm4ul9ZiASC/yf/+EI7M7ViZ95EsvvfeAzXmK2mERB
+         RzNXXNThlgt0V6CuolqSeYkW0EuPCS94pGDw+29Ai0wI72aUP4MopSly9/jGuHpWvwPd
+         HeWg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :dkim-signature;
+        bh=NCG7qPSlDWWu/WkNIPToBQVqKk1VFHpuJoVfovMVEwc=;
+        b=lAAfg1PqgSdi557H42cze5WD0haoG4J58CIoSWkfYjYP7k6cEsP3PNsUFvyEW7om/V
+         jYbMrEUoCoA3WBFKt7kLf+5Lws3hAxSeg0FJDQhSz065+t03fnisRuJnYFFyEW7WGYkG
+         2K3IzKI4anhETiUqLAswj0+yTm+dhZ2moUlqCxrdW8FcTC2OsmAg4zPGt6qzqcQqShsG
+         pNLUJYnpows5gxLDqJgSiewnYdRB+CDN/L/gLk8D75FUXRunUKp9Y9oNSUVOGzBc6m7W
+         nXOeWx4zObrfjrM1xHk8vHniQoIvoFBnFFbcp3/ZCMyOS16DG4GxnDZ46E3euOpAb/U0
+         f6+Q==
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20161025 header.b=FOtzhXyz;
+       spf=pass (google.com: domain of josef.cacek@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=josef.cacek@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+Return-Path: <josef.cacek@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id v13sor2917486ilg.71.2019.12.03.14.06.51
+        for <jsignpdf@gmail.com>
+        (Google Transport Security);
+        Tue, 03 Dec 2019 14:06:51 -0800 (PST)
+Received-SPF: pass (google.com: domain of josef.cacek@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@gmail.com header.s=20161025 header.b=FOtzhXyz;
+       spf=pass (google.com: domain of josef.cacek@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=josef.cacek@gmail.com;
+       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=NCG7qPSlDWWu/WkNIPToBQVqKk1VFHpuJoVfovMVEwc=;
+        b=FOtzhXyz39FuAgJyVrKHbiOo04okTjDLaj/fS4r5g7RN/CgnLWonkpmsvlECZZ8LFo
+         bAyeAHMzcZ+t/1OkM0g+CsCh7/5S6MiDjCzzyoHSvSWjR6U0802IATSUWxwVF3wcLiGZ
+         a0E25AOVHi7rUy395+k7+tGLM8tYip+f8+qiUuwpKNhg68RFowJNwMZOnPi+3zfkHBTQ
+         l1x2WtzURzFFKnXEHZ34ANVPsSyA9WtN9+np03xiH59SZPynMkS+bar141JtNzKdC/Xl
+         P59ge12Ugs7zJjEu6KtZLt7ji/mb+6ImIrlRQYFjA2Pkfoe9AbNHte1buLrtybWLL+u/
+         aCQg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=NCG7qPSlDWWu/WkNIPToBQVqKk1VFHpuJoVfovMVEwc=;
+        b=iTYoD+X60U76Xly30N181A1oxRJ5NxOe8DJ4T/LZ1li0Z85sdFI7rlctKHovLe4hrM
+         zUhWIP+YoG1APfH1VQpGXvQVrnadX8JNqAjYAifXuZbQH+Pkc7Cb58ct2XwDxFuFZQno
+         2f0LlURwI3VtQEyFbHE0xHEUpI1lW4xiWSObCgGRSa/8utQG+I3QatHRtga7S7JV2ZDT
+         r/LHNS75DCtJVkq7GHaiDH4vqRwFN3Fef8X5OlYBQDJMiWx7ZV02kpT2TRdL6BcvcDRR
+         sQ5PZz8oNI9Pjkk+qUNMzzVlgbk6VaWfXt8g0+mXOmjVRMhsGo4x++251Dq8lOqxjY/X
+         18Cw==
+X-Gm-Message-State: APjAAAV2AnLO7KywLnakKV8n1UkmNSDf3tAuessqUrqatL6Kyvo/j+QY
+	L7Dp5cuLbsKK1mBZO4GfF2VEXoik5OZGYZ0NqEgyA6bL
+X-Google-Smtp-Source: APXvYqx0WqP7S01LD9JR++e8a3NsHOLAu/dOx2W+tf1nlVx0tzVSjJ/c1rznUqeJkMtL1posQH/bhsNiQqlh55cm9b4=
+X-Received: by 2002:a92:7f0a:: with SMTP id a10mr467934ild.110.1575410810763;
+ Tue, 03 Dec 2019 14:06:50 -0800 (PST)
+MIME-Version: 1.0
+References: <CA+6Tb2omMp4EDUn5DbcW1v6jBNuM=ZU-ZF+Bz5zQC5tddTuv_g@mail.gmail.com>
+In-Reply-To: <CA+6Tb2omMp4EDUn5DbcW1v6jBNuM=ZU-ZF+Bz5zQC5tddTuv_g@mail.gmail.com>
+From: Josef Cacek <josef.cacek@gmail.com>
+Date: Tue, 3 Dec 2019 23:06:39 +0100
+Message-ID: <CA+6Tb2rN9-Fqd1GwQGerCnFNfLTw21DiYGTuVvSq-AUZ1M7xqQ@mail.gmail.com>
+Subject: Secret message
+To: jsignpdf@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+
+This is much more secret than any other secret.
+.
+QUIT
++OK Farewell.

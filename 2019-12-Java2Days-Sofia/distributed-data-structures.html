@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Standard Java structures distributed</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code { margin-right: 100px; }
+      .red { color: red; }
+      .white { color: white; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .font150 {
+        font-size: 150%;
+      }
+      .h450 {
+        height: 450px;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+layout: true
+background-image: url(background.png)
+
+---
+background-image: url(background_deck.png)
+class: middle
+
+# Standard Java structures distributed
+
+???
+
+### Abstract
+
+Java offers a wide set of data structure implementations ready for developers. Collections are a great and powerful example.
+
+These standard data structures are limited by borders of a single JVM. They depend on available memory within one server. They don't scale during high loads.
+
+In-memory data grids (IMDG) may help to solve this problem. They offer distributed versions of Java data structures. Data is spread across multiple servers. Data grids provide failover features and prevent data loss when a server crashes. And you can simply scale them up and down. Let's go through the most popular Java native IMDG implementations and compare distributed data structures provided.
+
+---
+
+## Who is Josef Cacek
+
+* Security Engineer / Java Developer
+* Runner
+* Father
+
+---
+
+## Agenda
+
+* About caching
+* Why distributed
+* In-memory data grids
+* Standard data structures distributed
+
+---
+
+## Have you ever used `HashMap` for caching?
+
+???
+
+Hands up, who never used the `HashMap` for caching?
+
+Me too. It's OK when you know about its limitations and you accept them
+
+---
+
+# Story about the caching
+
+???
+
+* I was working on web applications - like registers:
+  * maintaining list of objects
+  * querying them and making reports from them
+* the Company had a central Oracle database
+* some SQL queries in the application were really complex
+* so we cached results of queries which were most time consuming
+
+--
+
+### I can cache myself ... there is the `HashMap`
+
+--
+
+```java
+Map<Long, User> cache = new HashMap<>();
+
+public User getUserById(Long id) {
+  User user = cache.get(id);
+  if (user == null) {
+    user = dbTool.loadUser(id);
+    cache.put(id, user);
+  }
+  return user;
+}
+```
+
+---
+
+## This works!
+
+--
+
+# Until it doesn't.
+
+---
+
+
+## What can go wrong?
+
+--
+
+* thread safety - concurrent access to the `HashMap`
+* cache is not limited - no clean up
+* cache may contain stale entries - no expiration mechanism
+* solution doesn't scale
+
+???
+
+* `Collections.synchronizedMap()`
+    * From Java 5 you can use the `ConcurrentHashMap`
+* solution limited by a memory of one running JVM
+
+--
+
+### How can we solve it "at home"?
+
+* better synchronization - use a `ConcurrentMap`
+* implement size limit and check it during inserts
+* run a cleanup job periodically
+
+???
+* complexity growing:
+  * tracking age of the entries
+  * scheduling extra jobs
+
+--
+* **scaling is hard!**
+
+???
+
+* what we throw away if we reach the limit?
+
+---
+class: center, middle
+background-image: url(star-wars-sword.png)
+
+# Use .red[in-memory data grid], Luke!
+
+# &nbsp;
+# &nbsp;
+
+# It scales!
+
+---
+
+## What is the In-Memory Data Grid then?
+
+.center.font150[
+# &nbsp;
+
+*Distributed system,*  
+*which holds data structures in RAM*  
+*among multiple servers.*
+]
+
+???
+.center[*Distributed partitioned hash map with every cluster node owning a portion of the overall data*]
+.right[-- Ignite]
+
+---
+
+## Why distributed cache?
+
+* Scalability
+* Robustness
+* Performance
+
+???
+* Scalability - just start another server to increase the available memory;
+* Robustness - in default configuration every stored piece of data has its primary location within the cluster and a backup on another server
+* Performance - data lives in memory, usually in the same data center (so network hops are cheap enough);
+
+Scale of latencies:
+* https://static.dzone.com/dz1/dz-files/DZone_PerformanceAndMonitoring_1_infographic.pdf
+* https://people.eecs.berkeley.edu/~rcs/research/interactive_latency.html
+
+Why IMDG:
+* local cache, clustered cache, remote cache
+* clustering for your application
+* geographical backup
+
+* Massive heap
+* High availability
+* Scalability
+* Data distribution
+* Clients for popular progamming languages
+* Distributed computing
+
+
+---
+
+## Bunch of Java friendly IMDGs is out there
+
+* Apache Ignite
+* Hazelcast IMDG
+* Infinispan
+* ...
+
+---
+
+background-image: url(topologies.png)
+
+???
+## Topologies / Deployment types
+
+* Embedded: Great for microservices and ops simplification
+* Client-server: Great for scale-up or scale-ou deployments with cluster lifecycle decoupled from app servers; Use for non-Java clients.
+
+---
+
+background-image: url(distributed_replicated.png)
+
+???
+## Data partitioning / cache modes
+
+* Distributed
+  * not so fast access as in replicated scenarios
+  * if member fails data has to be rebalanced
+  * relatively fast write access
+  * **scales well**
+* Replicated
+  * faster read access
+  * zero cost of failinig member
+  * expensive write access
+  * **doesn't scale**
+
+---
+
+background-image: url(hybrid_topology.png)
+
+## Hybrid topology
+
+???
+
+* you can also have cluster members which doesn't hold any data
+  * lite members in Hazelcast terminology
+  * client nodes in Ignite terminology
+
+---
+
+## java.util.Map&lt;K, V&gt;
+
+* object that maps keys to values
+* can't contain duplicate keys
+
+### Example
+
+```java
+Map<String, Integer> cityInhabitants = new ConcurrentHashMap<>();
+
+cityInhabitants.put("Istanbul", 15_067_724);
+cityInhabitants.put("London", 9_126_366);
+cityInhabitants.put("Prague", 1_308_632);
+
+//...
+
+System.out.println("London population: " + cityInhabitants.get("London"));
+
+```
+---
+
+## Map in Embedded Infinispan
+
+```java
+DefaultCacheManager manager = new DefaultCacheManager(
+        GlobalConfigurationBuilder.defaultClusteredBuilder().build());
+Configuration configuration = new ConfigurationBuilder()
+    .clustering()
+    .cacheMode(CacheMode.DIST_SYNC)
+    .build();
+manager.defineConfiguration("cityInhabitants", configuration);
+
+Map<String, Integer> cityInhabitants = manager1.getCache("cityInhabitants");
+```
+
+???
+
+A CacheManager is the primary mechanism for retrieving a Cache instance, and is often used as a starting point to using the Cache.
+
+CacheManagers are heavyweight objects, and we foresee no more than one CacheManager being used per JVM (unless specific configuration requirements require more than one; but either way, this would be a minimal and finite number of instances).
+
+# Eviction and Expiration
+
+* supported, but vendor specific
+
+---
+
+## Map in Embedded Hazelcast IMDG
+
+```java
+HazelcastInstance hz = Hazelcast.newHazelcastInstance();
+Map<String, Integer> cityInhabitants = hz.getMap("cityInhabitants");
+```
+
+???
+
+Each vendor provides its specific extension of the Map API.
+Check the specific return types of methods used to retrieve the Map
+
+---
+
+## Cache in Embedded Apache Ignite
+
+```java
+Ignite ignite = Ignition.start();
+IgniteCache<String, Integer> cityInhabitants = ignite.getOrCreateCache("cityInhabitants");
+```
+
+--
+* The `IgniteCache` .red[doesn't implement] `java.util.Map`!
+
+--
+* The `IgniteCache` .red[implements] `java.util.Map`!
+
+---
+
+# JCache specification (JSR-107)
+
+* Cache is a Map-like structure
+* standard API - independent on vendor implementations
+
+???
+
+JCache uses the top-level package name of javax.cache, and defines the following five core interfaces:
+
+* Cache. This defines access to the actual cache, which is a map-like data structure that stores key-value pairs.
+* Entry. This defines access to the key-value pairs stored in the cache.
+* CacheManager. This defines how caches are managed.
+* CachingProvider. This defines how CachingManagers are managed.
+* ExpiryPolicy. This defines how expiration is handled for entries.
+
+--
+
+### Maven dependency
+
+```xml
+<dependency>
+    <groupId>javax.cache</groupId>
+    <artifactId>cache-api</artifactId>
+    <version>${version.jcache}</version>
+</dependency>
+```
+
+---
+
+background-image: url(map_neq_cache.png)
+
+.center[
+# !=
+]
+
+???
+There are two defined mechanisms in which an entry can be stored in a cache. The default mechanism is called store-by-value, in which the key-value pairs are stored in the cache, and new copies of the entries are made and returned when accessed from the cache. The other (optional) mechanism is store-by-reference, in which the cache stores and returns reference to application-provided key-value pairs. This lets updates to the application-provided key-value pairs to be seen in subsequent accesses without having to update the cache entries themselves.
+
+---
+
+class: middle, center
+
+## java.util.Set&lt;V&gt;
+
+*A collection that contains no duplicate elements.*
+
+---
+
+class: middle, center
+
+## java.util.List&lt;V&gt;
+
+*Ordered collection - a.k.a. sequence.*
+
+---
+
+## And there is more ...
+
+* Task execution
+* Messaging
+* Transactions
+* Stream and Batch processing
+
+---
+background-image: url(summary_table.png)
+
+## Summary
+
+---
+class: center, middle
+
+# .font200[The End]
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '16:9',
+        highlightLanguage: 'remark',
+        highlightLines: true,
+        countIncrementalSlides: false
+      });
+    </script>
+<!--
+        highlightStyle: 'monokai',
+-->
+  </body>
+</html>
