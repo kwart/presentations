@@ -18,16 +18,23 @@
       .remark-code { margin-right: 100px; }
       .red { color: red; }
       .white { color: white; }
+      .grey { color: grey; }
       .bold { font-weight: bold; }
       .pull-left {
         float: left;
-        width: 47%;
+        width: 37%;
       }
       .pull-right {
         float: right;
-        width: 47%;
+        width: 60%;
       }
       .pull-right ~ p {
+        clear: both;
+      }
+      .clear {
+        width: 100%;
+      }
+      .clear ~ p {
         clear: both;
       }
       .font300 {
@@ -38,6 +45,9 @@
       }
       .font150 {
         font-size: 150%;
+      }
+      .font80 {
+        font-size: 80%;
       }
       .h450 {
         height: 450px;
@@ -53,9 +63,18 @@ background-image: url(background.png)
 background-image: url(background_deck.png)
 class: middle
 
-# Standard Java structures distributed
+# Standard Java data structures distributed
 
+.grey[
+`Josef Cacek / Hazelcast
+]
 ???
+
+### Prepare
+* browser window with latencies scaling - https://static.dzone.com/dz1/dz-files/DZone_PerformanceAndMonitoring_1_infographic.pdf
+* terminal - 6x docker
+* set-up pointing device
+* set-up 2 monitors
 
 ### Abstract
 
@@ -69,9 +88,17 @@ In-memory data grids (IMDG) may help to solve this problem. They offer distribut
 
 ## Who is Josef Cacek
 
-* Security Engineer / Java Developer
-* Runner
+* Security Engineer / Java Developer at Hazelcast
 * Father
+* Runner
+* Open-source contributor
+
+???
+
+* Hazelcast - a company developing open-source in-memory data grid and also a stream processing engine as a second project
+* 4 children
+* enthusiastic runner /  finished several ultramarathons
+* when time and family allow, maintaining several OpenSource projects
 
 ---
 
@@ -82,9 +109,14 @@ In-memory data grids (IMDG) may help to solve this problem. They offer distribut
 * In-memory data grids
 * Standard data structures distributed
 
+???
+* why you should consider using a distributed data-grid
+
 ---
 
-## Have you ever used `HashMap` for caching?
+class: middle
+
+## Have you ever used the `HashMap` for caching?
 
 ???
 
@@ -96,14 +128,19 @@ Me too. It's OK when you know about its limitations and you accept them
 
 # Story about the caching
 
+* web application (CRUD)
+* single SQL database for all systems in the company
+* users want expensive reports to be generated
+
+ 
 ???
 
 * I was working on web applications - like registers:
   * maintaining list of objects
   * querying them and making reports from them
-* the Company had a central Oracle database
+* The Company had a central Oracle database
 * some SQL queries in the application were really complex
-* so we cached results of queries which were most time consuming
+* so we cached results of queries which were the most time consuming
 
 --
 
@@ -125,6 +162,7 @@ public User getUserById(Long id) {
 ```
 
 ---
+class: middle
 
 ## This works!
 
@@ -140,7 +178,7 @@ public User getUserById(Long id) {
 --
 
 * thread safety - concurrent access to the `HashMap`
-* cache is not limited - no clean up
+* caching with no boundaries - no cleanup
 * cache may contain stale entries - no expiration mechanism
 * solution doesn't scale
 
@@ -198,19 +236,41 @@ background-image: url(star-wars-sword.png)
 .right[-- Ignite]
 
 ---
+class: middle
 
 ## Why distributed cache?
 
-* Scalability
-* Robustness
-* Performance
+???
+There are 3 main reasons ....
+
+---
+background-image: url(background_deck.png)
+class: middle
+
+#  Scalability
 
 ???
 * Scalability - just start another server to increase the available memory;
+
+---
+background-image: url(background_deck.png)
+class: middle
+
+#  Robustness
+
+???
 * Robustness - in default configuration every stored piece of data has its primary location within the cluster and a backup on another server
+
+---
+background-image: url(background_deck.png)
+class: middle
+
+#  Performance
+
+???
 * Performance - data lives in memory, usually in the same data center (so network hops are cheap enough);
 
-Scale of latencies:
+The scale of latencies:
 * https://static.dzone.com/dz1/dz-files/DZone_PerformanceAndMonitoring_1_infographic.pdf
 * https://people.eecs.berkeley.edu/~rcs/research/interactive_latency.html
 
@@ -223,11 +283,12 @@ Why IMDG:
 * High availability
 * Scalability
 * Data distribution
-* Clients for popular progamming languages
+* Clients for popular programming languages
 * Distributed computing
 
 
 ---
+background-image: url(background_imdgs.png)
 
 ## Bunch of Java friendly IMDGs is out there
 
@@ -236,15 +297,45 @@ Why IMDG:
 * Infinispan
 * ...
 
+???
+
+* I've picked this free, because they are popular enough and I have a personal biases
+  * I like Apache Foundation and projets they are covering
+  * I like Hazelcast the most of course - we are the fastest :)
+  * I worked for Red Hat before and I used Infinispan (within WildFly AS) even before knowing anything about the Hazelcast
+* sorted alphabetically here and not by my preference
+
+---
+class: middle
+
+## Deployment types
+
+???
+What are the **Topologies / Deployment types** of IMDGs?
+
+
 ---
 
 background-image: url(topologies.png)
 
 ???
-## Topologies / Deployment types
+
+2 basic deployment types
 
 * Embedded: Great for microservices and ops simplification
-* Client-server: Great for scale-up or scale-ou deployments with cluster lifecycle decoupled from app servers; Use for non-Java clients.
+* Client-server: 
+  * Great for scale-up / scale-out deployments 
+  * cluster lifecycle decoupled from app servers
+  * Can be used for non-Java clients.
+
+---
+class: middle
+
+## Cache modes
+
+???
+
+we can also group the usage by locations where we actually store the data
 
 ---
 
@@ -255,14 +346,14 @@ background-image: url(distributed_replicated.png)
 
 * Distributed
   * not so fast access as in replicated scenarios
-  * if member fails data has to be rebalanced
+  * if a member fails data has to be rebalanced
   * relatively fast write access
-  * **scales well**
+  * **scales well** - it's not so important if you start 5 or 50 members, they know where the data belongs
 * Replicated
   * faster read access
-  * zero cost of failinig member
+  * zero cost of failing member
   * expensive write access
-  * **doesn't scale**
+  * **doesn't scale** - every change has to propagate to all members
 
 ---
 
@@ -272,9 +363,14 @@ background-image: url(hybrid_topology.png)
 
 ???
 
-* you can also have cluster members which doesn't hold any data
+* you can also have cluster members which don't hold any data
   * lite members in Hazelcast terminology
   * client nodes in Ignite terminology
+
+---
+class: middle
+
+# Java data structures distributed
 
 ---
 
@@ -297,6 +393,7 @@ cityInhabitants.put("Prague", 1_308_632);
 System.out.println("London population: " + cityInhabitants.get("London"));
 
 ```
+
 ---
 
 ## Map in Embedded Infinispan
@@ -310,18 +407,27 @@ Configuration configuration = new ConfigurationBuilder()
     .build();
 manager.defineConfiguration("cityInhabitants", configuration);
 
-Map<String, Integer> cityInhabitants = manager1.getCache("cityInhabitants");
+Map<String, Integer> cityInhabitants = manager.getCache("cityInhabitants");
+
+cityInhabitants.put("Istanbul", 15_067_724);
+cityInhabitants.put("London", 9_126_366);
+cityInhabitants.put("Prague", 1_308_632);
+
+//...
+
+System.out.println("London population: " + cityInhabitants.get("London"));
 ```
 
 ???
+*Enterprise-like configuration, but I still remember configuring EJBs on JBoss AS in version 3, so this one is easy-peasy*
 
-A CacheManager is the primary mechanism for retrieving a Cache instance, and is often used as a starting point to using the Cache.
+A CacheManager is the primary mechanism for retrieving a Cache instance and is often used as a starting point to using the Cache.
 
 CacheManagers are heavyweight objects, and we foresee no more than one CacheManager being used per JVM (unless specific configuration requirements require more than one; but either way, this would be a minimal and finite number of instances).
 
 # Eviction and Expiration
 
-* supported, but vendor specific
+* supported, but vendor-specific
 
 ---
 
@@ -329,10 +435,21 @@ CacheManagers are heavyweight objects, and we foresee no more than one CacheMana
 
 ```java
 HazelcastInstance hz = Hazelcast.newHazelcastInstance();
+
 Map<String, Integer> cityInhabitants = hz.getMap("cityInhabitants");
+
+cityInhabitants.put("Istanbul", 15_067_724);
+cityInhabitants.put("London", 9_126_366);
+cityInhabitants.put("Prague", 1_308_632);
+
+//...
+
+System.out.println("London population: " + cityInhabitants.get("London"));
 ```
 
 ???
+
+The configuration is more straight forward here.
 
 Each vendor provides its specific extension of the Map API.
 Check the specific return types of methods used to retrieve the Map
@@ -343,14 +460,29 @@ Check the specific return types of methods used to retrieve the Map
 
 ```java
 Ignite ignite = Ignition.start();
+
 IgniteCache<String, Integer> cityInhabitants = ignite.getOrCreateCache("cityInhabitants");
+
+cityInhabitants.put("Istanbul", 15_067_724);
+cityInhabitants.put("London", 9_126_366);
+cityInhabitants.put("Prague", 1_308_632);
+
+//...
+
+System.out.println("London population: " + cityInhabitants.get("London"));
 ```
+
+???
+Maybe you've realized here, I don't use the java.util.Map as a cache type here.
 
 --
 * The `IgniteCache` .red[doesn't implement] `java.util.Map`!
 
+???
+### It doesn't implement Map, it implements JCache
+
 --
-* The `IgniteCache` .red[implements] `java.util.Map`!
+* The `IgniteCache` .red[implements] `javax.cache.Cache`!
 
 ---
 
@@ -393,20 +525,27 @@ background-image: url(map_neq_cache.png)
 There are two defined mechanisms in which an entry can be stored in a cache. The default mechanism is called store-by-value, in which the key-value pairs are stored in the cache, and new copies of the entries are made and returned when accessed from the cache. The other (optional) mechanism is store-by-reference, in which the cache stores and returns reference to application-provided key-value pairs. This lets updates to the application-provided key-value pairs to be seen in subsequent accesses without having to update the cache entries themselves.
 
 ---
+background-image: url(summary_table.png)
 
-class: middle, center
+## More data structures
 
-## java.util.Set&lt;V&gt;
+???
+Similar to creating or getting a distributed Map there are other standard data structures available in the distributed world.
 
-*A collection that contains no duplicate elements.*
+In this table the colors have following meaning
+* green - implements the standard API
+* yellow - doesn't implement or extend the Java API, but it provides similar implementation
+* red - the data structure is not implemented by the IMDG
 
----
 
-class: middle, center
 
-## java.util.List&lt;V&gt;
-
-*Ordered collection - a.k.a. sequence.*
+* java.util.Set&lt;V&gt; - *A collection that contains no duplicate elements.*
+* java.util.List&lt;V&gt; - *Ordered collection - a.k.a. sequence.*
+* java.util.concurrent.locks.Lock - provides more fine-grained locking mechanisms than synchronized methods and statements
+* java.util.concurrent.Semaphore - contains a set of permits; can be used to limit access to some resource just for given number of threads
+* java.util.concurrent.CountDownLatch - allows to wait until a set of operations being performed in other threads completes.
+* java.util.concurrent.BlockingQueue - data structure which fits to producer-consumer scenarios; if bounded then both sides may block, otherwise only consumers
+* java.util.concurrent.AtomicLong - Long implementation with atomic updates
 
 ---
 
@@ -418,6 +557,27 @@ class: middle, center
 * Stream and Batch processing
 
 ---
+
+# Demo time
+
+* All 3 IMDGs offer Docker images, let's use them
+
+```bash
+$ docker run -it --rm apacheignite/ignite:2.7.6
+$ docker run -it --rm hazelcast/hazelcast:3.12.4
+$ docker run -it --rm jboss/infinispan-server:10.0.1.Final
+
+
+
+# Can you find a difference? (wink, wink)
+$ docker images
+REPOSITORY                TAG                 IMAGE ID            CREATED             SIZE
+apacheignite/ignite       2.7.6               ce9ff5b69430        2 months ago        527MB
+hazelcast/hazelcast       3.12.4              32c507fed571        5 weeks ago         116MB
+jboss/infinispan-server   10.0.1.Final        596b3626a09b        5 weeks ago         366MB
+```
+
+---
 background-image: url(summary_table.png)
 
 ## Summary
@@ -425,7 +585,13 @@ background-image: url(summary_table.png)
 ---
 class: center, middle
 
-# .font200[The End]
+# .font200[Thank you]
+
+.grey.font150.center[
+`github.com/kwart`  
+`twitter.com/jckwart`  
+`javlog.cacek.cz`
+]
 
     </textarea>
     <script src="../remark-0.13.min.js">
@@ -435,6 +601,7 @@ class: center, middle
         ratio: '16:9',
         highlightLanguage: 'remark',
         highlightLines: true,
+        slideNumberFormat: '',
         countIncrementalSlides: false
       });
     </script>
