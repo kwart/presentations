@@ -565,14 +565,15 @@ In this table the colors have following meaning
 * All 3 IMDGs offer Docker images, let's use them
 
 ```bash
-$ docker run -it --rm apacheignite/ignite:2.7.6
-$ docker run -it --rm hazelcast/hazelcast:3.12.4
-$ docker run -it --rm jboss/infinispan-server:10.0.1.Final
+docker run -it --rm apacheignite/ignite:2.7.6
+docker run -it --rm hazelcast/hazelcast:3.12.4
+# docker run -it --rm jboss/infinispan-server:10.0.1.Final
 
 
 
 # Can you find a difference? (wink, wink)
-$ docker images
+docker images
+
 REPOSITORY                TAG                 IMAGE ID            CREATED             SIZE
 apacheignite/ignite       2.7.6               ce9ff5b69430        2 months ago        527MB
 hazelcast/hazelcast       3.12.4              32c507fed571        5 weeks ago         116MB
