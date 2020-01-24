@@ -647,6 +647,64 @@ Instead of `kdestroy` can be used native `klist.exe purge` call.
 
 ---
 
+## TLS and Kerberos (JSSE vs Java GSS-API)
+
+* Client-Server authentication
+  * TLS authenticates the server by default
+  * Kerberos authenticates the client by default
+* encryption and data integrity
+* data structures described in ASN.1
+
+???
+https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/tutorials/JGSSvsJSSE.html
+
+
+--
+
+.pull-left[
+### Kerberos
+* Single-sign-On
+* Credentials delegation
+  * server impersonates client when accessing other services
+* Token-based communication
+  * Selective Encryption
+* Transport: UDP, TCP
+]
+
+.pull-right[
+### TLS
+* public key cryptography
+* socket-based API
+* authentication doesn't depend on central server availability
+* doesn't have strict time requirements (clock synchronization)
+* Transport: TCP
+]
+???
+
+https://www.secureblackbox.com/kb/articles/6-Kerberos.rst
+https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/tutorials/JGSSvsJSSE.html
+
+* Kerberos can use public-key cryptography for key exchange too - through PKINIT. https://tools.ietf.org/html/rfc4556
+* KDC is a Single point of failure
+---
+
+## Tools for Debugging Kerberos
+
+* network analyzer: WireShark / tcpdump
+* ASN.1 parser:
+  * `dumpasn1` tool
+  * `org.apache.kerby.asn1.Asn1`
+* system properties
+  * `sun.security.krb5.debug=true`
+  * `sun.security.jgss.debug=true`
+  * `sun.security.spnego.debug=true`
+  * `com.ibm.security.krb5.Krb5Debug=all`
+  * `com.ibm.security.jgss.debug=all`
+  * `java.security.debug=gssloginconfig`
+* `Krb5LoginModule` option `debug=true`
+
+---
+
 ## Sample: Kerberos in JAAS enabled client-server application
 
 **Client**
@@ -774,64 +832,6 @@ class: middle
 * Custom Kerberos authentication in Hazelcast
 * Java GSS-API Client/Server
 
-
----
-
-## TLS and Kerberos (JSSE vs Java GSS-API)
-
-* Client-Server authentication
-  * TLS authenticates the server by default
-  * Kerberos authenticates the client by default
-* encryption and data integrity
-* data structures described in ASN.1
-
-???
-https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/tutorials/JGSSvsJSSE.html
-
-
---
-
-.pull-left[
-### Kerberos
-* Single-sign-On
-* Credentials delegation
-  * server impersonates client when accessing other services
-* Token-based communication
-  * Selective Encryption
-* Transport: UDP, TCP
-]
-
-.pull-right[
-### TLS
-* public key cryptography
-* socket-based API
-* authentication doesn't depend on central server availability
-* doesn't have strict time requirements (clock synchronization)
-* Transport: TCP
-]
-???
-
-https://www.secureblackbox.com/kb/articles/6-Kerberos.rst
-https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/tutorials/JGSSvsJSSE.html
-
-* Kerberos can use public-key cryptography for key exchange too - through PKINIT. https://tools.ietf.org/html/rfc4556
-* KDC is a Single point of failure
----
-
-## Tools for Debugging Kerberos
-
-* network analyzer: WireShark / tcpdump
-* ASN.1 parser:
-  * `dumpasn1` tool
-  * `org.apache.kerby.asn1.Asn1`
-* system properties
-  * `sun.security.krb5.debug=true`
-  * `sun.security.jgss.debug=true`
-  * `sun.security.spnego.debug=true`
-  * `com.ibm.security.krb5.Krb5Debug=all`
-  * `com.ibm.security.jgss.debug=all`
-  * `java.security.debug=gssloginconfig`
-* `Krb5LoginModule` option `debug=true`
 
 ---
 
