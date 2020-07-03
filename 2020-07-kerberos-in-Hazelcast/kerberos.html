@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Keep Your Secrets Secret - Kerberos for Java developers</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code { margin-right: 100px; }
+      .red { color: red; }
+      .white { color: white; }
+      .grey { color: grey; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 37%;
+      }
+      .pull-right {
+        float: right;
+        width: 60%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .clear {
+        width: 100%;
+      }
+      .clear ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .font150 {
+        font-size: 150%;
+      }
+      .font80 {
+        font-size: 80%;
+      }
+      .h450 {
+        height: 450px;
+      }
+      .image-50 img {
+        width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+layout: true
+background-image: url(background.png)
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+# Keep Your Secrets Secret
+
+# &nbsp;
+
+# Kerberos in Hazelcast 4.1
+
+???
+### Prepare
+* browser:
+  * this presentation
+  * https://github.com/kwart/demo-kerberos-in-java
+  * https://tools.ietf.org/html/rfc4120#section-5.4.1
+  * https://docs.oracle.com/en/java/javase/11/docs/api/jdk.security.auth/com/sun/security/auth/module/Krb5LoginModule.html
+  * https://www.ibm.com/support/knowledgecenter/en/SSYKE2_8.0.0/com.ibm.java.security.api.doc/jgss/com/ibm/security/auth/module/Krb5LoginModule.html
+* Wireshark
+* Eclipse IDE
+* terminal (kinit, ..., dumpasn1)
+* set-up pointing device
+* set-up 2 monitors
+* IDSJMK universal ticket
+
+### Abstract
+
+Kerberos is a three-headed dog from Greek mythology and it's also the name of a security protocol developed a few decades ago for authentication. There are for sure other well-established and/or fancy authentication protocols for Single-sign-on nowadays, but Kerberos is still very popular in many companies.
+
+The protocol itself has support in standard Java API. Nevertheless, using the plain Kerberos protocol still leaves a non-trivial part of implementation on application developers.
+
+Don't despair! There is a GSS-API to rescue. And yes, Java has support for it. You can still meet some traps set by sneaky Kerberos dog in front of you, let's discuss them before you fall into them. We will also discuss differences and similarities when compared to TLS. 
+ 
+Attendees will learn how to use GSS-API for authentication and establishing communication with security parameters - such as confidentiality or data integrity. The presentation shows how Active Directory-based authentication can be implemented in Java.
+
+---
+
+## Agenda
+
+* Kerberos protocol basics
+* GSS-API and its Java binding
+* Tools and Debugging
+
+.center[
+# &nbsp;
+# [bit.ly/devconf_2020_kerberos](https://bit.ly/devconf_2020_kerberos)
+]
+---
+
+## Icebreakers
+
+.center[
+# &nbsp;
+
+### I. Are you using Kerberos for authentication?
+]
+---
+
+## Icebreakers
+
+.center[
+# &nbsp;
+
+### II. Do you know JAAS API (LoginModule, ...)?
+]
+
+---
+background-image: url(background_deck.png)
+class: middle
+
+# Basics / Terminology
+
+---
+
+## Kerberos protocol
+
+* Network authentication protocol 
+* roles
+  * Key Distribution Center (KDC)
+  * Client
+  * Server/Service
+* Single-sign-on approach 
+  * old, but still popular in many companies
+* Kerberos v5 - [RFC-4120](https://tools.ietf.org/html/rfc4120)
+
+???
+KDC
+* Authentication Service (AS)
+* Ticket-Granting Service (TGS)
+
+---
+
+background-image: url(kerberos-images/background_ticket.png)
+
+## Protocol key points
+
+* passwords and secret keys are not sent over the network
+  * **tickets** are used instead
+* supports credentials delegation (impersonation)
+* clients and services share their secrets with KDC
+  * symmetric cryptography
+* protection against replay attacks
+  * replay cache
+  * clock skew check
+* server doesn't need to talk to KDC to authenticate clients
+
+
+--
+### Traps
+* time on all 3 parties has to be synchronized
+* KDC is a single point of failure
+* handling service hostnames is error prone
+
+???
+In some cases the hostnames are canonicalized (Reverse DNS lookup is necessary).
+
+```
+Caused by: KrbException: Clock skew too great (37)
+	at sun.security.krb5.KrbApReq.authenticate(KrbApReq.java:302)
+	at sun.security.krb5.KrbApReq.<init>(KrbApReq.java:149)
+	at sun.security.jgss.krb5.InitSecContextToken.<init>(InitSecContextToken.java:108)
+	at sun.security.jgss.krb5.Krb5Context.acceptSecContext(Krb5Context.java:831)
+	... 6 more
+```
+---
+background-image: url(kerberos-images/background_encticket.png)
+
+## Ticket
+
+* data structure - partly encrypted
+* plain
+  * realm name
+  * server name
+* encrypted (using server's secret key)
+  * client name
+  * session key
+  * validity period
+  * flags and additional information
+
+???
+
+The ticket can also contain additional information - e.g. assigned groups/roles.
+
+---
+
+## Protocol overview
+
+* I. Client authenticates in KDC
+* II. Client requests from KDC a ticket for a server
+* III. Client authenticates to the server by presenting a valid ticket
+
+.center[
+![Kerberos protocol](kerberos-images/kerberos-protocol.png)
+]
+---
+
+## Protocol overview - I. Client authenticates in KDC
+
+```plain
+*AS_REQ
+C->K: Hi, C is here. Could we talk together?
+
+
+
+*AS_REP
+K->C: Nice to see you. I remember you. I have 2 packages for you:
+        * your session key - encrypted, of course
+        * ticket to talk to me next time - it's called TGT 
+
+
+
+
+C=Client
+K=Key Distribution Center
+S=Server
+```
+
+???
+Nowadays the preauthentication is usually employed.
+KDC rensponses with error message asking client to prove it really is the Client it says.
+Client encrypts authenticator by its secret key and sends it to the KDC as an attachment in AS_REQ.
+
+
+---
+
+## Protocol overview - II. Client requests ticket for accessing a server
+
+```plain
+*TGS_REQ
+C->K: Hi again, it's me your lovely C.
+      I have this TGT ticket and I know our session key.
+      Give me a ticket for server S. Please!
+
+*TGS_REP
+K->C: Let me check. Sure, here you are. You need these 2 packages
+        * your client-server session key - encrypted by Client/TGS session key, of course
+        * ticket for the server S - it's called the service ticket (ST)
+
+
+
+
+C=Client
+K=Key Distribution Center
+S=Server
+```
+
+---
+
+## Protocol overview - III. Client authenticates to the Server
+
+```plain
+*AP_REQ
+C->S: Hi S, here am I, your dear C.
+      I have this service ticket ST and I know our session key.
+      Talk to me!
+
+*AP_REP
+S->C: Let me check. Sure. I was able to decrypt the ST and verify you know the session key.
+      Now I know the session key too, and you can verify it too. Just if you want.
+
+
+
+
+
+C=Client
+K=Key Distribution Center
+S=Server
+```
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+
+# Tools and APIs
+
+---
+
+## Tools
+
+* Unix/Linux
+  * `kinit` - obtain and cache Kerberos ticket-granting tickets
+  * `klist` - display the entries in the local credentials cache and keytab
+  * `kdestroy` - destroy user's active tickets by removing credentials cache
+  * and more: `kvno`, `kadmin`
+* Windows:
+  * `klist`
+  * other: `ktpass`, `ksetup`
+  * Active Directory module in PowerShell
+
+
+--
+.pull-left[
+**Servers**
+
+* MIT Kerberos
+* MS Active Directory
+* Heimdal
+]
+
+???
+
+`kvno service` - acquires a service ticket for the specified Kerberos principals and prints out the key version numbers
+
+--
+.pull-right[
+**Kerberos related tools in Java runtime on Windows**
+
+* `kinit`, `klist` 
+* `ktab` - manage the principal names and service keys stored in a local keytab
+]
+
+???
+As we saw, on the previous slide, some tools are not a standard part of Windows.
+
+https://docs.oracle.com/en/java/javase/11/tools/security-tools-and-commands.html
+
+---
+## Configuration in `/etc/krb5.conf`
+
+```java
+[libdefaults]
+    default_realm = ACME.COM
+
+[realms]
+    ACME.COM = {
+        kdc = kwartad.eastus.cloudapp.azure.com
+    }
+    TEST.REALM = {
+        kdc = localhost:10088
+    }
+```
+
+---
+
+## Java KDC implementations
+
+* 2 subprojects in the Apache Directory Project
+  * Apache Kerby
+  * ApacheDS
+* can run embedded - testing simplified
+
+???
+
+**ApacheDS** 
+* extensible and embeddable directory server entirely written in Java
+* certified as LDAPv3
+* supports Kerberos 5 and the Change Password Protocol
+
+**Apache Kerby** 
+* Java Kerberos binding
+* rich, intuitive and interoperable implementation, library, KDC and various facilities that integrates PKI, OTP and token (OAuth2) as desired in modern environments such as cloud, Hadoop and mobile.
+
+---
+
+## Apache Kerby / Show me the Code
+
+```java
+SimpleKdcServer kdc = new SimpleKdcServer();
+kdc.setKdcHost("localhost");
+kdc.setKdcRealm("TEST.REALM");
+kdc.setKdcPort(10088);
+kdc.init();
+
+kdc.createPrincipal("jduke", "theduke");
+kdc.start();
+```
+
+**Maven**
+
+```xml
+<dependency>
+    <groupId>org.apache.kerby</groupId>
+    <artifactId>kerb-simplekdc</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
+
+???
+
+```
+* started by Zheng Kai from Intel 
+• proposed to Apache Directory Project
+• few other Intel employees joined the effort
+
+ 2.0.0 08-Jan-2019
+‎ 1.1.1 21-May-2018
+‎ 1.1.0 21-Nov-2017
+‎ 1.0.1 30-Aug-2017
+‎ 1.0.0 10-May-2017
+‎ 1.0.0-RC2 06-Mar-2016
+‎ 1.0.0-RC1 10-Sep-2015
+```
+---
+
+## ApacheDS / Show me the Code
+
+```java
+@CreateDS(name = "HazelcastDS",
+        partitions = {
+            // @CreatePartition ...
+            },
+            additionalInterceptors = { KeyDerivationInterceptor.class })
+@CreateKdcServer(primaryRealm = "HAZELCAST.ORG",
+        kdcPrincipal = "krbtgt/HAZELCAST.ORG@HAZELCAST.ORG",
+        searchBaseDn = "dc=hazelcast,dc=org")
+public static void startKdc() throws Exception {
+    DirectoryService directoryService = DSAnnotationProcessor.getDirectoryService();
+    KdcServer kdc = ServerAnnotationProcessor.getKdcServer(directoryService, 10088);
+}
+```
+
+**Maven**
+
+```xml
+<dependency>
+  <groupId>org.apache.directory.server</groupId>
+  <artifactId>apacheds-all</artifactId>
+  <version>2.0.0.AM25</version>
+</dependency>
+```
+
+???
+https://directory.apache.org/conference-materials.data/kerberos-in-your-jvm-apacheconcore15.pdf
+
+* Part of ApacheDS since 2004
+• Written by one person, Enrique Rodriguez
+• Tightly coupled with LDAP backend
+• reviewed in 2010
+• Client implementation was added in 2011
+* v1.5.7 released in 2010, v2.0.0-M1 2011, AM25 2018
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+# DEMO
+
+## [github.com/kwart/demo-kerberos-in-java](https://github.com/kwart/demo-kerberos-in-java)
+---
+
+## Demo I
+* start Java-based KDC (Kerby) in IDE
+* capture network traffic in Wireshark (port 10088)
+* use native (MIT) Kerberos commands
+```java
+kinit jduke
+klist
+kvno gsstest/localhost
+klist
+```
+* review Kerberos messages in WireShark:
+  * AS_REQ, AS_REP, TGS_REQ, TGS_REP
+
+---
+
+## JAAS authentication against KDC - `Krb5LoginModule`
+
+* vendor specific implementation classes
+  * [`com.sun.security.auth.module.Krb5LoginModule`](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.security.auth/com/sun/security/auth/module/Krb5LoginModule.html)
+  * [`com.ibm.security.auth.module.Krb5LoginModule`](https://www.ibm.com/support/knowledgecenter/en/SSYKE2_8.0.0/com.ibm.java.security.api.doc/jgss/com/ibm/security/auth/module/Krb5LoginModule.html)
+
+--
+* referenced from a JAAS configuration file
+```java
+KerberosLogin {
+  com.sun.security.auth.module.Krb5LoginModule required
+    debug=true;
+};
+```
+--
+* configuration referenced by JAAS API call
+```java
+LoginContext lc = new LoginContext("KerberosLogin",
+    new NamePasswordCbHandler("jduke@TEST.REALM", "theduke".toCharArray()));
+lc.login();
+Subject subj = lc.getSubject();
+```
+
+???
+If authentication succeeds, Subject contains a `KerberosPrincipal` principal and a `KerberosTicket` private credential.
+
+---
+
+## System properties for Kerberos authentication
+
+* path to `krb5.conf` file
+  * `java.security.krb5.conf`
+* realm and KDC host defaults
+  * `java.security.krb5.realm`
+  * `java.security.krb5.kdc` *(doesn't support custom ports)*
+* debug output
+  * `sun.security.krb5.debug=true`
+  * `com.ibm.security.krb5.Krb5Debug=all`
+
+???
+
+realm and kdc has to be set together
+
+The column `:` is used as hostname separator in the `java.security.krb5.kdc`!
+
+---
+
+## GSS-API (RFC 2743)
+
+* Generic Security Service Application Program Interface
+* provides uniform access to security services
+* doesn't provide security itself
+  * delegates to an underlying security mechanism
+
+
+???
+https://tools.ietf.org/html/rfc2743
+
+--
+### Relationship to Kerberos (RFC 4121)
+* Kerberos is dominant GSS-API mechanism
+* GSS-API provides standardized API for Kerberos
+
+
+???
+The Kerberos mechanism in GSS-API https://tools.ietf.org/html/rfc4121
+
+Unlike the GSSAPI, the Kerberos API has not been standardized and various existing implementations use incompatible APIs.
+
+--
+
+### Not enough APIs? Let's SPNEGO (RFC 4178)
+
+* Simple and Protected GSSAPI Negotiation Mechanism
+* pseudo-mechanism - allows negotiation of a real mechanism
+
+???
+
+https://tools.ietf.org/html/rfc4178
+
+```
+ initiator proposes a list of security mechanism(s), in decreasing
+ preference order (favorite choice first), the acceptor (also known as
+ the target) either accepts the initiator's preferred security
+ mechanism (the first in the list) or chooses one of the available
+ mechanisms from the offered list; if neither is acceptable, the
+ acceptor rejects the proposed value(s).  The target then informs the
+ initiator of its choice.
+```
+---
+
+## GSS-API overview
+.pull-left[
+![GSSContext initialization](kerberos-images/gss-init.png)
+]
+
+--
+.pull-right.right[
+![GSS-API transport](kerberos-images/gss-transport.png)
+]
+
+---
+## GSS-API in Java (RFC 2853)
+
+* package `org.ietf.jgss`
+  * `GSSManager`
+  * `GSSContext`
+  * `GSSName`
+  * `GSSCredential`
+  * `MessageProp`
+  * `Oid`
+* retrieves Kerberos credentials from the JAAS `Subject`
+* can also proceed with JAAS authentication by itself
+  * login config entries: `com.sun.security.jgss.krb5.initiate`, `com.sun.security.jgss.krb5.accept`
+  * system property: `javax.security.auth.useSubjectCredsOnly=false`
+
+???
+* `GSSManager` - entry point - factory for other classes
+* `GSSContext` - security context, provides security services
+* `GSSName` - principal
+* `GSSCredential` - credentials
+* `MessageProp` - used for request or report per-message properties
+* `Oid` - Universal Object Identifier
+
+https://tools.ietf.org/html/rfc2853
+
+* relax restrictions on credentials locations
+  * `javax.security.auth.useSubjectCredsOnly=false`
+
+---
+
+## Kerberos in Java on Windows
+
+* you can reuse authentication in Active Directory domain
+  * allow access to session key in Local Security Authority (LSA)
+  ```java
+  Reg Add 
+    HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters 
+    /v AllowTGTSessionKey /t REG_DWORD /d 1
+  ```
+  * PowerShell workaround for missing native `kinit`
+  ```java
+  Import-Module ActiveDirectory
+  ```
+* create playground from a simple template in MS Azure
+  * https://github.com/maxskunkworks/TLG/tree/master/tlg-base-config_3-vm
+
+
+???
+
+Instead of `kdestroy` can be used native `klist.exe purge` call.
+
+* see http://cr.openjdk.java.net/~weijun/special/krb5winguide-2/kwin.html
+
+
+---
+
+## TLS and Kerberos (JSSE vs Java GSS-API)
+
+* Client-Server authentication
+  * TLS authenticates the server by default
+  * Kerberos authenticates the client by default
+* encryption and data integrity
+* data structures described in ASN.1
+
+???
+https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/tutorials/JGSSvsJSSE.html
+
+
+--
+
+.pull-left[
+### Kerberos
+* Single-sign-On
+* Credentials delegation
+  * server impersonates client when accessing other services
+* Token-based communication
+  * Selective Encryption
+* Transport: UDP, TCP
+]
+
+.pull-right[
+### TLS
+* public key cryptography
+* socket-based API
+* authentication doesn't depend on central server availability
+* doesn't have strict time requirements (clock synchronization)
+* Transport: TCP
+]
+???
+
+https://www.secureblackbox.com/kb/articles/6-Kerberos.rst
+https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/tutorials/JGSSvsJSSE.html
+
+* Kerberos can use public-key cryptography for key exchange too - through PKINIT. https://tools.ietf.org/html/rfc4556
+* KDC is a Single point of failure
+---
+
+## Tools for Debugging Kerberos
+
+* network analyzer: WireShark / tcpdump
+* ASN.1 parser:
+  * `dumpasn1` tool
+  * `org.apache.kerby.asn1.Asn1`
+* system properties
+  * `sun.security.krb5.debug=true`
+  * `sun.security.jgss.debug=true`
+  * `sun.security.spnego.debug=true`
+  * `com.ibm.security.krb5.Krb5Debug=all`
+  * `com.ibm.security.jgss.debug=all`
+  * `java.security.debug=gssloginconfig`
+* `Krb5LoginModule` option `debug=true`
+
+---
+
+## Sample: Kerberos in JAAS enabled client-server application
+
+**Client**
+
+* Authenticate to KDC through JAAS `Krb5LoginModule` login
+* request service ticket by initializating `GSSContext`
+  * `initSecContext` returns GSS-API token which includes the service ticket
+* send the token to server as client credentials
+
+--
+
+**Server**
+* Use `Krb5LoginModule` to load keytab file into Subject credentials
+* Receive GSS-API token from client
+* use custom login module and try to accept the GSS-API token in a new `GSSContext`
+
+---
+
+## Sample: Kerberos in JAAS enabled client-server application
+
+**Hazelcast IMDG**
+
+* Apache Licensed In-Memory Data Grid
+* main use-case - distributed cache which scales  
+* not limited by heap or single JVM
+* Goals: performance and simplicity
+
+
+--
+
+* Security is an Enterprise feature
+  * **doesn't support Kerberos** (yet)
+  * supports JAAS login modules
+
+
+--
+**Code sample**
+```java
+HazelcastInstance hz = HazelcastClient.newHazelcastClient();
+
+Map<Integer, User> userCache = hz.getMap("users");
+User user = userCache.get(id);
+if (user == null) {
+    user = dbUtil.loadUser(id);
+    userCache.put(id, user);
+}
+```
+
+???
+
+* unable to use `Krb5LoginModule` because custom Principal implementations have to be used:
+  * identity
+  * role
+  * endpoint
+
+---
+
+## Sample: Client side code
+
+--
+**JAAS login config (automatic GSS-API login)**
+```java
+com.sun.security.jgss.initiate  {
+  com.sun.security.auth.module.Krb5LoginModule required useTicketCache=true;
+};
+```
+
+--
+**Retrieve service token by initializeing GSSContext**
+```java
+GSSManager manager = GSSManager.getInstance();
+GSSName servicePrincipalName = manager.createName(
+      "hazelcast/test.hazelcast.org@HAZELCAST.ORG", null);
+GSSContext gssContext = manager.createContext(
+      servicePrincipalName, KRB5_OID, null, GSSContext.DEFAULT_LIFETIME);
+gssContext.requestMutualAuth(false);
+byte[] token = gssContext.initSecContext(new byte[0], 0, 0);
+```
+
+--
+**Use the token for authentication**
+```java
+ClientConfig clientConfig = new ClientConfig();
+clientConfig.getSecurityConfig().setCredentials(new SimpleTokenCredentials(token));
+clientConfig.getNetworkConfig().addAddress("test.hazelcast.org");
+HazelcastInstance hz = HazelcastClient.newHazelcastClient(clientConfig);
+```
+---
+
+## Sample: Server side code - GSSApiLoginModule
+
+```java
+public boolean login() throws LoginException {
+  // try-catch blocks removed for readability
+  CredentialsCallback cc = new CredentialsCallback();
+  callbackHandler.handle(new Callback[] { cc });
+  TokenCredentials creds = (TokenCredentials) cc.getCredentials();
+
+  byte[] token = creds.getToken();
+  GSSContext gssContext = GSSManager.getInstance().createContext((GSSCredential) null);
+  token = gssContext.acceptSecContext(token, 0, token.length);
+
+  if (!gssContext.isEstablished()) {
+      throw new FailedLoginException("Multi-step negotiation is not supported by this login module");
+  }
+  name = gssContext.getSrcName().toString();
+  return true;
+}
+```
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+# DEMO
+
+## [github.com/kwart/demo-kerberos-in-java](https://github.com/kwart/demo-kerberos-in-java)
+
+---
+
+## Demo II
+
+* Using `Krb5LoginModule` - initiator &amp; acceptor
+* Custom Kerberos authentication in Hazelcast
+* Java GSS-API Client/Server
+
+
+---
+
+## Resources
+
+* https://github.com/kwart/demo-kerberos-in-java
+* https://docs.oracle.com/javase/8/docs/technotes/guides/security/index.html
+* https://web.mit.edu/kerberos/krb5-1.17/doc/
+* [RFC-4120 The Kerberos Network Authentication Service (V5)](https://tools.ietf.org/html/rfc4120)
+* [RFC-2743 GSS-API](https://tools.ietf.org/html/rfc2743)
+* [RFC-2853 GSS-API: Java Bindings](https://tools.ietf.org/html/rfc2853)
+* https://directory.apache.org/kerby/
+* https://en.wikipedia.org/wiki/Generic_Security_Services_Application_Program_Interface
+---
+class: center, middle
+
+# .font200[Thank you]
+
+.grey.font150.center[
+`github.com/kwart`  
+`twitter.com/jckwart`  
+`javlog.cacek.cz`
+]
+
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+//        ratio: '16:10',
+        ratio: '16:9',
+        highlightLanguage: 'remark',
+        highlightLines: true,
+        slideNumberFormat: '',
+        countIncrementalSlides: false
+      });
+    </script>
+<!--
+        highlightStyle: 'monokai',
+-->
+  </body>
+</html>
