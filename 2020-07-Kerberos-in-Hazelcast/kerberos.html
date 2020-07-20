@@ -67,9 +67,6 @@ background-image: url(background.png)
 background-image: url(background_deck.png)
 class: middle
 
-# Keep Your Secrets Secret
-
-# &nbsp;
 
 # Kerberos in Hazelcast 4.1
 
@@ -77,16 +74,7 @@ class: middle
 ### Prepare
 * browser:
   * this presentation
-  * https://github.com/kwart/demo-kerberos-in-java
-  * https://tools.ietf.org/html/rfc4120#section-5.4.1
-  * https://docs.oracle.com/en/java/javase/11/docs/api/jdk.security.auth/com/sun/security/auth/module/Krb5LoginModule.html
-  * https://www.ibm.com/support/knowledgecenter/en/SSYKE2_8.0.0/com.ibm.java.security.api.doc/jgss/com/ibm/security/auth/module/Krb5LoginModule.html
 * Wireshark
-* Eclipse IDE
-* terminal (kinit, ..., dumpasn1)
-* set-up pointing device
-* set-up 2 monitors
-* IDSJMK universal ticket
 
 ### Abstract
 
@@ -103,37 +91,22 @@ Attendees will learn how to use GSS-API for authentication and establishing comm
 ## Agenda
 
 * Kerberos protocol basics
-* GSS-API and its Java binding
-* Tools and Debugging
-
-.center[
-# &nbsp;
-# [bit.ly/devconf_2020_kerberos](https://bit.ly/devconf_2020_kerberos)
-]
----
-
-## Icebreakers
-
-.center[
-# &nbsp;
-
-### I. Are you using Kerberos for authentication?
-]
----
-
-## Icebreakers
-
-.center[
-# &nbsp;
-
-### II. Do you know JAAS API (LoginModule, ...)?
-]
+* GSS-API
+* Hazelcast 4.1 support for Kerberos authentication
 
 ---
 background-image: url(background_deck.png)
 class: middle
 
-# Basics / Terminology
+# Kerberos protocol basics
+
+---
+
+## Once upon a time ...
+
+.center[
+![Kerberos protocol](kerberos-story0.png)
+]
 
 ---
 
