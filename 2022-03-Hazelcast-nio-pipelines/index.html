@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NIO pipelines in Hazelcast</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      a, a:visited, a:link { color: blue; text-decoration: none; }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code { margin-right: 100px; }
+      .red { color: red; }
+      .white { color: white; }
+      .grey { color: grey; }
+      .bold { font-weight: bold; }
+      .pull-left {
+        float: left;
+        width: 37%;
+      }
+      .pull-right {
+        float: right;
+        width: 60%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      .clear {
+        width: 100%;
+      }
+      .clear ~ p {
+        clear: both;
+      }
+      .font300 {
+        font-size: 300%;
+      }
+      .font200 {
+        font-size: 200%;
+      }
+      .font150 {
+        font-size: 150%;
+      }
+      .font80 {
+        font-size: 80%;
+      }
+      .h450 {
+        height: 450px;
+      }
+      .image-50 img {
+        width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+layout: true
+background-image: url(background.png)
+
+---
+
+background-image: url(background_deck.png)
+class: middle
+
+
+# NIO Pipelines in Hazelcast
+
+???
+### Prepare
+* browser:
+  * this presentation
+  * TODO (IDE sample with custom pipelines)
+
+---
+
+## Agenda
+
+* 
+---
+
+## Hazelcast networking
+
+* inspired by netty
+* uses Java NIO
+  * Channels and Buffers
+  * Selectors
+  * Non-blocking I/O
+
+???
+
+---
+
+## Pipeline of handlers
+
+* Inbound and Outbind
+* updatable
+
+???
+
+* 2 independent pipelines for each connection (channel)
+*
+
+---
+
+## NioThread
+
+* holds selector (TODO notes on optimizations and write through)
+
+## NioChannel
+
+## NioInboundPipeline
+
+## NioOutboundPipeline
+
+### HandlerStatus
+
+## ChannelHandlers
+
+### InboundHandler
+* initializes `src` buffer
+* as `dst` is used the `src` from next handler
+
+### OutboundHandler
+* each instance initializes its `dst` buffer
+
+---
+
+## Resources
+
+* https://www.javatpoint.com/java-nio
+
+---
+class: center, middle
+
+# .font200[Thank you]
+
+.grey.font150.center[
+`github.com/kwart`  
+`twitter.com/jckwart`  
+`javlog.cacek.cz`
+]
+
+
+    </textarea>
+    <script src="../remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+//        ratio: '16:10',
+        ratio: '16:9',
+        highlightLanguage: 'remark',
+        highlightLines: true,
+        slideNumberFormat: '',
+        countIncrementalSlides: false
+      });
+    </script>
+<!--
+        highlightStyle: 'monokai',
+-->
+  </body>
+</html>
