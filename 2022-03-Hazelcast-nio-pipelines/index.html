@@ -105,6 +105,19 @@ class: middle
 * 2 independent pipelines for each connection (channel)
 *
 
+
+---
+
+## SocketInterceptor
+
+* just after the connection is established
+* blocking
+* unencrypted communication (from Hazelcast PoV)
+
+???
+
+* used for Kerberos authentication by a customer
+
 ---
 
 ## NioThread
