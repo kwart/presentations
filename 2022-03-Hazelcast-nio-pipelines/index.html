@@ -95,15 +95,135 @@ class: middle
 
 ---
 
+## Server (accept) workflow
+
+???
+
+```
+Daemon Thread [test_betweenTwoClustersWithSocketInterceptorEnabled] (Suspended (breakpoint at line 58 in ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor))	
+	ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor.init(Properties) line: 58	
+	EnterpriseClientExtension.createSocketInterceptor(SocketInterceptorConfig) line: 163	
+	ClusterDiscoveryServiceBuilder.initSocketInterceptor(SocketInterceptorConfig) line: 271	
+	ClusterDiscoveryServiceBuilder.build() line: 91	
+	HazelcastClientInstanceImpl.initClusterDiscoveryService(AddressProvider) line: 299	
+	HazelcastClientInstanceImpl.<init>(String, ClientConfig, ClientFailoverConfig, ClientConnectionManagerFactory, AddressProvider) line: 256	
+	HazelcastClient.constructHazelcastClient(AddressProvider, ClientConfig, ClientFailoverConfig, String, InstanceFuture<HazelcastClientProxy>) line: 458	
+	HazelcastClient.newHazelcastClientInternal(AddressProvider, ClientConfig, ClientFailoverConfig) line: 416	
+	HazelcastClient.newHazelcastFailoverClient(ClientFailoverConfig) line: 188	
+	ClustersWithDifferentSocketInterceptorsTest.test_betweenTwoClustersWithSocketInterceptorEnabled() line: 138	
+	NativeMethodAccessorImpl.invoke0(Method, Object, Object[]) line: not available [native method]	
+	NativeMethodAccessorImpl.invoke(Object, Object[]) line: 62	
+	DelegatingMethodAccessorImpl.invoke(Object, Object[]) line: 43	
+	Method.invoke(Object, Object...) line: 498	
+	FrameworkMethod$1.runReflectiveCall() line: 59	
+	FrameworkMethod$1(ReflectiveCallable).run() line: 12	
+	FrameworkMethod.invokeExplosively(Object, Object...) line: 56	
+	InvokeMethod.evaluate() line: 17	
+	FailOnTimeoutStatement$CallableStatement.call() line: 115	
+	FailOnTimeoutStatement$CallableStatement.call() line: 1	
+	FutureTask<V>.run() line: 266	
+	Thread.run() line: 748	
+
+
+Thread [hz.trusting_almeida.cached.thread-1] (Suspended (breakpoint at line 58 in ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor))	
+	ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor.init(Properties) line: 58	
+	EnterpriseNodeExtension.createOrGetSocketInterceptor(EndpointQualifier) line: 486	
+	EnterpriseNodeExtension.getSocketInterceptor(EndpointQualifier) line: 791	
+	TcpServerContext.getSocketInterceptor(EndpointQualifier) line: 292	
+	TcpServerContext.interceptSocket(EndpointQualifier, Socket, boolean) line: 235	
+	TcpServerAcceptor$AcceptorIOThread.newConnection0(TcpServerConnectionManager, Channel) line: 307	
+	TcpServerAcceptor$AcceptorIOThread.lambda$0(TcpServerConnectionManager, Channel) line: 299	
+	604870113.run() line: not available	
+	Executors$RunnableAdapter<T>.call() line: 511	
+	CompletableFutureTask<V>.run() line: 64	
+	CachedExecutorServiceDelegate$Worker.run() line: 217	
+	ThreadPoolExecutor.runWorker(ThreadPoolExecutor$Worker) line: 1149	
+	ThreadPoolExecutor$Worker.run() line: 624	
+	PoolExecutorThreadFactory$ManagedThread(Thread).run() line: 748	
+	PoolExecutorThreadFactory$ManagedThread(HazelcastManagedThread).executeRun() line: 76	
+	PoolExecutorThreadFactory$ManagedThread(HazelcastManagedThread).run() line: 102	
+
+
+Thread [hz.trusting_almeida.cached.thread-1] (Suspended (breakpoint at line 63 in ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor))	
+	ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor.onAccept(Socket) line: 63	
+	TcpServerContext.interceptSocket(EndpointQualifier, Socket, boolean) line: 241	
+	TcpServerAcceptor$AcceptorIOThread.newConnection0(TcpServerConnectionManager, Channel) line: 307	
+	TcpServerAcceptor$AcceptorIOThread.lambda$0(TcpServerConnectionManager, Channel) line: 299	
+	604870113.run() line: not available	
+	Executors$RunnableAdapter<T>.call() line: 511	
+	CompletableFutureTask<V>.run() line: 64	
+	CachedExecutorServiceDelegate$Worker.run() line: 217	
+	ThreadPoolExecutor.runWorker(ThreadPoolExecutor$Worker) line: 1149	
+	ThreadPoolExecutor$Worker.run() line: 624	
+	PoolExecutorThreadFactory$ManagedThread(Thread).run() line: 748	
+	PoolExecutorThreadFactory$ManagedThread(HazelcastManagedThread).executeRun() line: 76	
+	PoolExecutorThreadFactory$ManagedThread(HazelcastManagedThread).run() line: 102	
+
+Daemon Thread [test_betweenTwoClustersWithSocketInterceptorEnabled] (Suspended (breakpoint at line 79 in ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor))	
+	ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor.onConnect(Socket) line: 79	
+	TcpClientConnectionManager.createSocketConnection(Address) line: 717	
+	TcpClientConnectionManager.getOrConnectToAddress(Address, boolean) line: 613	
+	TcpClientConnectionManager.lambda$4(boolean, Object) line: 505	
+	194981649.apply(Object) line: not available	
+	TcpClientConnectionManager.connect(Object, Function<Object,Connection>) line: 459	
+	TcpClientConnectionManager.doConnectToCandidateCluster(CandidateClusterContext, boolean) line: 505	
+	TcpClientConnectionManager.doConnectToCluster() line: 411	
+	TcpClientConnectionManager.connectToCluster() line: 372	
+	HazelcastClientInstanceImpl.start() line: 381	
+	HazelcastClient.constructHazelcastClient(AddressProvider, ClientConfig, ClientFailoverConfig, String, InstanceFuture<HazelcastClientProxy>) line: 460	
+	HazelcastClient.newHazelcastClientInternal(AddressProvider, ClientConfig, ClientFailoverConfig) line: 416	
+	HazelcastClient.newHazelcastFailoverClient(ClientFailoverConfig) line: 188	
+	ClustersWithDifferentSocketInterceptorsTest.test_betweenTwoClustersWithSocketInterceptorEnabled() line: 138	
+	NativeMethodAccessorImpl.invoke0(Method, Object, Object[]) line: not available [native method]	
+	NativeMethodAccessorImpl.invoke(Object, Object[]) line: 62	
+	DelegatingMethodAccessorImpl.invoke(Object, Object[]) line: 43	
+	Method.invoke(Object, Object...) line: 498	
+	FrameworkMethod$1.runReflectiveCall() line: 59	
+	FrameworkMethod$1(ReflectiveCallable).run() line: 12	
+	FrameworkMethod.invokeExplosively(Object, Object...) line: 56	
+	InvokeMethod.evaluate() line: 17	
+	FailOnTimeoutStatement$CallableStatement.call() line: 115	
+	FailOnTimeoutStatement$CallableStatement.call() line: 1	
+	FutureTask<V>.run() line: 266	
+	Thread.run() line: 748	
+
+Thread [hz.client_1.internal-1] (Suspended (breakpoint at line 79 in ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor))	
+	ClustersWithDifferentSocketInterceptorsTest$CustomSocketInterceptor.onConnect(Socket) line: 79	
+	TcpClientConnectionManager.createSocketConnection(Address) line: 717	
+	TcpClientConnectionManager.getOrConnectToMember(Member, boolean) line: 626	
+	TcpClientConnectionManager.lambda$3(boolean, Object) line: 492	
+	1990730324.apply(Object) line: not available	
+	TcpClientConnectionManager.connect(Object, Function<Object,Connection>) line: 459	
+	TcpClientConnectionManager.doConnectToCandidateCluster(CandidateClusterContext, boolean) line: 492	
+	TcpClientConnectionManager.doConnectToCluster() line: 411	
+	TcpClientConnectionManager.lambda$1() line: 385	
+	1918268400.run() line: not available	
+	Executors$RunnableAdapter<T>.call() line: 511	
+	ScheduledThreadPoolExecutor$ScheduledFutureTask<V>(FutureTask<V>).run() line: 266	
+	ScheduledThreadPoolExecutor$ScheduledFutureTask<V>.access$201(ScheduledThreadPoolExecutor$ScheduledFutureTask) line: 180	
+	ScheduledThreadPoolExecutor$ScheduledFutureTask<V>.run() line: 293	
+	LoggingScheduledExecutor(ThreadPoolExecutor).runWorker(ThreadPoolExecutor$Worker) line: 1149	
+	ThreadPoolExecutor$Worker.run() line: 624	
+	PoolExecutorThreadFactory$ManagedThread(Thread).run() line: 748	
+	PoolExecutorThreadFactory$ManagedThread(HazelcastManagedThread).executeRun() line: 76	
+	PoolExecutorThreadFactory$ManagedThread(HazelcastManagedThread).run() line: 102
+```
+
+---
+
+Client (connect) workflow
+
+
+---
 ## Pipeline of handlers
 
-* Inbound and Outbind
+* Inbound and Outbound
 * updatable
 
 ???
 
 * 2 independent pipelines for each connection (channel)
-*
+* 
 
 
 ---
@@ -140,6 +260,13 @@ class: middle
 
 ### OutboundHandler
 * each instance initializes its `dst` buffer
+
+If there is something to write and the Pipeline is CLEAN or DIRTY its reexecuted.
+If there is nothing to write and Pipeline is CLEAN, the pipeline is put to sleep.
+
+If the pipeline returns BLOCKED, then it's put to sleep regardless of input buffer state.
+
+TODO check: Pipeline is awaken on new data arrival and/or manual wakeup call.
 
 ---
 
