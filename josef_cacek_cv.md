@@ -1,26 +1,40 @@
 # Josef Cacek
 
-Java developer with extensive knowledge of Java EE focusing on security components in the Java ecosystem. Open source software enthusiast and contributor or author in several projects.
+Java developer focusing on security. Extensive knowledge of Java EE. Open source software enthusiast and contributor or author in several projects.
 
 Specialties: 
+
 * Java
-* Security 
-* Open source 
+* Security
+* Open source
 * Containers/Docker
 * Clouds
-* Linux 
+* Linux
 
 ## Experience
 
 ### Hazelcast
 
-*Security Engineer (2019 - present)*
+*Security Architect (2021 - present)*
+*Security Engineer (2019 - 2021)*
 *Software Engineer (2018 - 2019)*
 *Quality Engineer (2017 - 2018)*
 
-* Implementing new security features;
+* Helping teams across the company with security-related decisions;
+* Developing new security features;
+* Implementing authentication mechanisms (LDAP, Kerberos);
+* Developing Maven plugin for code attribution;
 * Identifying and fixing security issues;
-* Improving Hazelcast IO subsystem.
+* Improving Hazelcast IO subsystem;
+* Responsible for managing part of the Engineering infrastructure: Jenkins CI, JFrog repositories, GitHub, Docker hub, Greenbone vulnerability manager.
+
+#### Technologies used
+
+* **Security and IP scanning:** Sonarcloud, Blackduck, Snyk, GHAS, Greenbone, JFrog security, OWASP dependency check;
+* **Java API:** JAAS, JSSE (TLS), netty-tcnative (OpenSSL/BoringSSL), GSS-API (Kerberos/Active Directory), JNDI (LDAP)
+* **QE:** JUnit, Testcontainers, Apache JMeter, JMH, Hazelcast Simulator
+* **Tools:** GitHub workflows, Jenkins CI, Maven, Bash, Docker, Kubernetes, Eclipse MAT, FlightRecorder+JMC
+* **Clouds:** Amazon AWS, MS Azure, GCP
 
 ### Red Hat
 
@@ -59,6 +73,7 @@ Specialties:
   * Developing and designing Java web applications for public sector customers;
   * Providing Java know-how among projects.
 
+<!--
 #### Technologies used
 
 * **Security:** JAAS, PKI, SSL/TLS, XACML
@@ -73,6 +88,7 @@ Specialties:
 
 * Java EE 5 Web Component Developer (SCWCD)
 * Sun Certified Programmer For The Java Platform SE 6 (SCJP)
+-->
 
 ###  USU Software
 
@@ -81,28 +97,32 @@ Specialties:
 * Programming a product aimed at IT-Controlling – Valuemation;
 * Software testing.
 
+<!--
 #### Technologies used
 
 * **Java EE:** Servlet
 * **QE:** JUnit, Rational Team Test, Windows Script Host (for Java DCOM bridge testing)
 * **Tools:** CVS, StarTeam, Ant, XSLT
 * **Databases:** Oracle, MSSQL, IBM DB2
+-->
 
 ## Open source
 
-Actively developing on GitHub ([profile](https://github.com/kwart)) and SourceForge.net ([profile](https://sourceforge.net/u/kwart/profile/)).
+Actively developing on GitHub ([@intoolswetrust](https://github.com/intoolswetrust), [@kwart](https://github.com/kwart)) and SourceForge.net ([kwart](https://sourceforge.net/u/kwart/profile/)).
 
 ### Author
-* [Sunstone](https://github.com/wildfly-extras/sunstone/)
 * [JSignPdf](http://jsignpdf.sourceforge.net/)
+* [jd-cli](https://github.com/intoolswetrust/jd-cli)
+* [attribution-maven-plugin](https://github.com/hazelcast/attribution-maven-plugin)
+* [Sunstone](https://github.com/wildfly-extras/sunstone/)
 * [totp-me](http://totpme.sourceforge.net/)
-* [EBookME](http://ebookme.sourceforge.net/) (original author: Tomas Darmovzal)
 
 ### Contributor
+* [Hazelcast](https://hazelcast.com/) - [commits](https://github.com/hazelcast/hazelcast/commits?author=kwart)
 * [WildFly](http://wildfly.org/) - commits in [wildfly-core](https://github.com/wildfly/wildfly-core/commits?author=kwart) and [wildfly](https://github.com/wildfly/wildfly/commits?author=kwart)
 * [Apache jclouds](http://jclouds.apache.org/) - commits in [jclouds-labs](https://github.com/jclouds/jclouds-labs/commits?author=kwart) and [jclouds](https://github.com/jclouds/jclouds/commits?author=kwart)
 * [pro-grade](http://pro-grade.sourceforge.net/) - [commits](https://github.com/pro-grade/pro-grade/commits?author=kwart)
-* [OpenOffice.org](http://www.openoffice.org/) - preparing and building first public Czech versions for MS Windows
+* [OpenOffice.org](http://www.openoffice.org/) - preparing and building the first public Czech versions for MS Windows
 
 ## Education
 
