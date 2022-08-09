@@ -270,6 +270,27 @@ TODO check: Pipeline is awaken on new data arrival and/or manual wakeup call.
 
 ---
 
+## Possible improvements
+
+### Pipeline customizations
+
+* integration points for custom inbound and outbound handlers
+* could replace `SocketInterceptor` (blocking, only used when a connection is started)
+* Sample handlers
+  * compression
+  * challenge/response authentication
+  * custom encryption schemes
+  * ...
+  
+### Non-blocking server acceptor
+
+* we're limited by a single thread accepting connections
+  * not a big deal for long-living clients
+* is limiting for single-op client calls
+  * do you remember the Silver bullet ProjectX?
+
+---
+
 ## Resources
 
 * https://www.javatpoint.com/java-nio
