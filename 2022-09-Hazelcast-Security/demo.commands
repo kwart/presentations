@@ -1,0 +1,19 @@
+#\nssh ubuntu@securitydemo.hazelcast.org
+#\n# CLEANUP\nrm -rf ~/hazelcast-code-samples-5.1.3\nunzip -q 
+#\ndocker run -it --rm hazelcast/hazelcast:5.1.3-slim
+#\ndocker run -it --rm -e JAVA_OPTS=-Dhazelcast.security.recommendations hazelcast/hazelcast:5.1.3-slim
+#\nls -1 ~/hazelcast-enterprise-5.1.3-slim/config/examples
+#\nhighlight --out-format=xterm256 ~/letsencrypt.sh
+#\nhighlight --out-format=xterm256 ~/hazelcast-security-configured.xml
+#\nJAVA_OPTS=-Dhazelcast.security.recommendations ~/hazelcast-enterprise-5.1.3-slim/bin/hz start
+#\ncurl -v https://securitydemo.hazelcast.org:8080/hazelcast/health
+#\nunzip -q hazelcast-code-samples-5.1.3.zip
+#\ncd ~/hazelcast-code-samples-5.1.3/enterprise/simple-authentication/
+#\nmvn clean install
+#\nscreen
+#\nmvn exec:java -Dexec.mainClass=Member
+#\nmvn exec:java -Dexec.mainClass=ProgrammaticMember
+#\nmvn exec:java -Dexec.mainClass=TimestampClient
+#\nmvn exec:java -Dexec.mainClass=TimestampClient -Dhazelcast.client.config=hazelcast-client-unauthorized.xml
+#\nvi hazelcast.xml
+#\ncp ~/demo.commands.backup ~/demo.commands

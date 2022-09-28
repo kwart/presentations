@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<hazelcast xmlns="http://www.hazelcast.com/schema/config"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.hazelcast.com/schema/config http://www.hazelcast.com/schema/config/hazelcast-config-5.1.xsd">
+
+    <cluster-name>security-features-demo</cluster-name>
+
+    <properties>
+        <property name="hazelcast.socket.bind.any">false</property>
+    </properties>
+
+    <management-center data-access-enabled="false" />
+    <!--
+    <jet enabled="false" resource-upload-enabled="false" />
+    -->
+    <advanced-network enabled="true">
+        <join>
+            <auto-detection enabled="false" />
+            <multicast enabled="false"/>
+            <tcp-ip enabled="true" connection-timeout-seconds="5">
+                <member-list>
+                    <member>10.0.23.151:15701</member>
+                    <member>10.0.23.151:15702</member>
+                    <member>10.0.23.151:15703</member>
+                    <member>10.0.23.151:15704</member>
+                    <member>10.0.23.151:15705</member>
+                </member-list>
+            </tcp-ip>
+        </join>
+
+        <member-server-socket-endpoint-config>
+            <interfaces enabled="true">
+                <interface>10.0.23.*</interface>
+            </interfaces>
+            <port port-count="5" auto-increment="true">15701</port>
+            <ssl enabled="true">
+                <properties>
+                    <property name="keyStoreType">PKCS12</property>
+                    <property name="keyStore">/opt/hazelcast-keystore.p12</property>
+                    <property name="keyStorePassword">C0X8rJhkWl160iW</property>
+                    <property name="trustStoreType">PKCS12</property>
+                    <property name="trustStore">/opt/hazelcast-truststore.p12</property>
+                    <property name="trustStorePassword">123456</property>
+                    <property name="mutualAuthentication">REQUIRED</property>
+                    <property name="protocol">TLSv1.3</property>
+                    <property name="ciphersuites">TLS_AES_128_GCM_SHA256</property>
+                </properties>
+            </ssl>
+        </member-server-socket-endpoint-config>
+	
+	<client-server-socket-endpoint-config>
+            <interfaces enabled="true">
+                <interface>10.0.23.*</interface>
+            </interfaces>
+            <port port-count="5" auto-increment="true">5701</port>
+            <ssl enabled="true">
+                <properties>
+                    <property name="keyStoreType">PKCS12</property>
+                    <property name="keyStore">/opt/hazelcast-keystore.p12</property>
+                    <property name="keyStorePassword">C0X8rJhkWl160iW</property>
+                    <property name="trustStoreType">PKCS12</property>
+                    <property name="trustStore">/opt/hazelcast-truststore.p12</property>
+                    <property name="trustStorePassword">123456</property>
+                    <property name="mutualAuthentication">REQUIRED</property>
+                    <property name="protocol">TLSv1.3</property>
+                    <property name="ciphersuites">TLS_AES_128_GCM_SHA256</property>
+                </properties>
+            </ssl>
+        </client-server-socket-endpoint-config>
+
+	<rest-server-socket-endpoint-config>
+	    <public-address>18.210.186.95</public-address>
+            <interfaces enabled="true">
+                <interface>10.0.23.151</interface>
+            </interfaces>
+            <port port-count="5" auto-increment="true">8080</port>
+            <endpoint-groups>
+                <endpoint-group name="CLUSTER_READ" enabled="false" />
+                <endpoint-group name="CLUSTER_WRITE" enabled="false" />
+                <endpoint-group name="HEALTH_CHECK" enabled="true" />
+                <endpoint-group name="PERSISTENCE" enabled="false" />
+                <endpoint-group name="WAN" enabled="false" />
+                <endpoint-group name="DATA" enabled="false" />
+                <endpoint-group name="CP" enabled="false" />
+            </endpoint-groups>
+            <ssl enabled="true">
+                <properties>
+                    <property name="keyStoreType">PKCS12</property>
+                    <property name="keyStore">/opt/hazelcast-keystore.p12</property>
+                    <property name="keyStorePassword">C0X8rJhkWl160iW</property>
+                    <property name="protocol">TLSv1.3</property>
+                </properties>
+            </ssl>
+        </rest-server-socket-endpoint-config>
+    </advanced-network>
+
+<!-- 
+################################################################################
+### Enterprise settings
+################################################################################
+ -->
+ 
+    <license-key>TrialLicense#10Nodes#QulXby18jYP06BTmwKOUkfJW2gCHZMidGnS9qED5NA19009200910011190111612110021110110100010001</license-key>
+
+    <auditlog enabled="true" />
+
+    <security enabled="true">
+        <realms>
+            <realm name="simpleRealm-members">
+                <identity>
+                    <username-password username="member" password="MayIJoin?" />
+                </identity>
+		<authentication>
+                    <simple>
+                        <user username="member" password="MayIJoin?"/>
+                    </simple>
+                </authentication>
+            </realm>
+            <realm name="simpleRealm-clients">
+                <authentication>
+                    <simple>
+                        <user username="securitydemo" password="0A7*Smb9EAaR">
+                            <role>admin</role>
+                        </user>
+                    </simple>
+                </authentication>
+            </realm>
+        </realms>
+        <member-authentication realm="simpleRealm-members" />
+        <client-authentication realm="simpleRealm-clients" />
+        <client-permissions>
+            <all-permissions principal="admin"/>
+        </client-permissions>
+    </security>
+
+</hazelcast>
