@@ -1,15 +1,15 @@
 # Josef Cacek / CV
 
-Java developer focusing on security. Extensive knowledge of Java EE. Open source software enthusiast and contributor or author in several projects.
+Security architect and Java developer. Extensive knowledge of Java EE. Open source software enthusiast and contributor or author in several projects.
 
-Specialties: 
+Specialties:
 
-* Java
 * Security
+* Java
 * Open source
+* Linux
 * Containers/Docker
 * Clouds
-* Linux
 
 ## Experience
 
@@ -22,11 +22,11 @@ Specialties:
 
 * Helping teams across the company with security-related decisions;
 * Developing new security features;
-* Implementing authentication mechanisms (LDAP, Kerberos);
+* Implementing authentication mechanisms (LDAP, Kerberos, X.509);
 * Developing Maven plugin for code attribution;
 * Identifying and fixing security issues;
 * Improving Hazelcast IO subsystem;
-* Responsible for managing part of the Engineering infrastructure: Jenkins CI, JFrog repositories, GitHub, Docker hub, Greenbone vulnerability manager.
+* Responsible for managing part of the Engineering infrastructure: Jenkins CI, JFrog repositories, GitHub, Docker hub, and Greenbone vulnerability manager.
 
 #### Technologies used
 
@@ -41,7 +41,7 @@ Specialties:
 *Principal Quality Assurance Engineer (2015 - 2017)*  
 *Senior Quality Assurance Engineer (2012 - 2015)*
 
-* Testing security components in JBoss Enterprise Application Platform (EAP); mainly focused on WildFly Elytron project and its integration to the application server
+* Testing security components in the JBoss Enterprise Application Platform (EAP), mainly focused on the WildFly Elytron project and its integration into the application server
 * Developing tests for certifications of JBoss EAP in containers and clouds;
 * Responsible for Common Criteria Certification testing of the JBoss EAP.
 
@@ -111,11 +111,11 @@ Specialties:
 Actively developing on GitHub ([@intoolswetrust](https://github.com/intoolswetrust), [@kwart](https://github.com/kwart)) and SourceForge.net ([kwart](https://sourceforge.net/u/kwart/profile/)).
 
 ### Author
-* [JSignPdf](http://jsignpdf.sourceforge.net/)
-* [jd-cli](https://github.com/intoolswetrust/jd-cli)
-* [attribution-maven-plugin](https://github.com/hazelcast/attribution-maven-plugin)
-* [Sunstone](https://github.com/wildfly-extras/sunstone/)
-* [totp-me](http://totpme.sourceforge.net/)
+* [JSignPdf](http://jsignpdf.sourceforge.net/) - Software for signing PDF documents
+* [jd-cli](https://github.com/intoolswetrust/jd-cli) - Java Decompiler command line interface
+* [attribution-maven-plugin](https://github.com/hazelcast/attribution-maven-plugin) - code attribution plugin for Maven
+* [Sunstone](https://github.com/wildfly-extras/sunstone/) - Java library which helps to control virtual machines in cloud environments
+* [totp-me](http://totpme.sourceforge.net/) -  Java ME authenticator for TOTP
 
 ### Contributor
 * [Hazelcast](https://hazelcast.com/) - [commits](https://github.com/hazelcast/hazelcast/commits?author=kwart)
