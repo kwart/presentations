@@ -98,12 +98,21 @@ This should be a kick-off for monthly (or occasional) presentations focused on s
 ???
 ## Focus areas
 
+3 main areas
 * Protecting communication on supported protocols
 * Limit who can join the cluster and work with data
-* Logging security-related events
+
+and then we will also cover other topics
+* data-at-rest encryption - which is available for our Persistence feature
+* Auditlog
+* Checking if secrets used in configuration match the policy 
+
+and we will finish by listing our extension points, where users can plugin their security module implementations
 
 ---
 ## Communication Security - Background
+
+Hazelcast is a network-based system.
 
 For attackers, it's easy to capture unprotected network communication.
 
@@ -271,6 +280,8 @@ Security-related integration points/interfaces:
 ## Resources
 * https://github.com/hazelcast/hazelcast/blob/master/docs/design/security/README.adoc
 * https://github.com/memcached/memcached/blob/master/doc/protocol.txt
+* https://github.com/hazelcast/hazelcast/blob/v5.3.5/hazelcast/src/main/resources/hazelcast-security-hardened.xml
+* https://github.com/hazelcast/hazelcast/blob/v5.3.5/hazelcast/src/main/resources/hazelcast-full-example.xml
 
 
 ---
