@@ -122,17 +122,19 @@ For attackers, it's easy to capture unprotected network communication.
  * HTTP REST
  * memcached protocol (disabled by default)
 ???
+
 memcached is a distributed key/value cache
 
 --
 
 * Members support two networking modes
-  * `default` - member networking accepts all protocols on a single port (default: `5701`)
-  * `advanced` - each protocol binds to its socket address - the ports are different
-
+    * **`default`** - member networking accepts all protocols on a single port (default: `5701`)
+    * **`advanced`** - each protocol binds to its socket address - the ports are different
 --
 * Members support multiple discovery strategies to find each other
   * Multicast discovery is the default in some Hazelcast packages
+
+--
 * Members do calls to external systems
 
 ---
@@ -141,8 +143,12 @@ memcached is a distributed key/value cache
 * Advanced networking
   * specify which protocols will be accessible from outside
   * allows employing firewalls
+
+--
 * Management operation protection on Client protocol
   * specify from which IP addresses cluster management operations can be executed
+
+--
 * Untrusted deserialization protection
   * allows configuring allow-lists/deny-lists for deserializing Java classes
 
@@ -153,9 +159,12 @@ memcached is a distributed key/value cache
 * TLS/SSL (Transport Layer Security) -  based on public-key cryptography; asymmetric encryption used for key exchange; symmetric encryption used for data transmission 
   * by default, server doesn't check client's identity; mutual authentication has to be enabled to do so;
   * Hazelcast supports native Java TLS implementation (JSSE) and netty bindings to other engines (OpenSSL &amp; BoringSSL)
+
+.grey[
 * Hazelcast Symmetric Encryption (deprecated feature)
   * only available for Hazelcast Member protocol
   * compared to TLS, it encrypts also the datagrams in Multicast discovery strategy
+]
 
 ---
 ## Communication Security - Rule of thumb
@@ -177,18 +186,23 @@ memcached is a distributed key/value cache
 
 ## Authentication
 
-* Hazelcast Authentication - part of Hazelcast Security suite
-  * security has to be enabled
-  * supported on protocols: Member, Client, REST (partly)
-* Mutual TLS authentication
+* **Mutual TLS** Authentication
+  * TLS has to be enabled
   * available for all protocols
   * configured in the networking configuration sections
+* **Hazelcast Authentication** - part of Hazelcast Security suite
+  * security has to be enabled
+  * supported on protocols: Member, Client, REST (partly)
+  * entry-point for Hazelcast Authorization (Client Permissions)
 
+???
+
+Basically, we can find two authentication types in Hazelcast.
 ---
 
 ## Authentication - Hazelcast Authentication
 
-*Hazelcast authentication is responsible for **verifying identity of the connecting party** (client-side on the given application protocol). It also **assigns roles** to the party. Roles can be later used during the authorization.*
+*Hazelcast Authentication is responsible for **verifying identity of the connecting party** (client-side on the given application protocol). It also **assigns roles** to the party. Roles can be later used during the authorization.*
 
 Out-of-the-box provided mechanisms:
 * **`simple`** - users and their roles directly configured in the Hazelcast member configuration file
@@ -212,6 +226,7 @@ Role-Based Access Control (RBAC) is available in Hazelcast. It can be configured
 * Clients get the roles assigned during authentication.
 * Before a task requested by a client is executed, the permission required for the given task is checked.
 
+--
 ### Simplicity vs flexibility
 
 When users first meet the Client permissions, they can struggle with the configuration complexity. It's a price for greater flexibility of the permission-based solution. It allows
@@ -251,6 +266,14 @@ logging category `hazelcast.auditlog`
 * prints warning banner during member startup
 * may be enforced (i.e. prevents the member from starting)
 
+*The feature is **only** configured via **System Properties**.*
+
+```
+-Dhazelcast.security.secret.strength.policy.enforced=true \
+-Dhazelcast.security.dictionary.policy.wordlist.path=/opt/wordlist.txt \
+-Dhazelcast.security.secret.policy.min.length=10
+```
+
 ---
 
 ## Pluggable Security
@@ -270,6 +293,15 @@ Security-related integration points/interfaces:
 * `IPermissionPolicy` - for custom permission mapping implementation.
 
 ---
+class: center, middle
+
+## `-Dhazelcast.security.recommendations`
+
+???
+
+Set the hazelcast.security.recommendations system property when starting a member to review a list of recommendations
+
+---
 
 ## Roadmap
 
@@ -281,10 +313,9 @@ Security-related integration points/interfaces:
 
 ## Resources
 * https://github.com/hazelcast/hazelcast/blob/master/docs/design/security/README.adoc
-* https://github.com/memcached/memcached/blob/master/doc/protocol.txt
 * https://github.com/hazelcast/hazelcast/blob/v5.3.5/hazelcast/src/main/resources/hazelcast-security-hardened.xml
 * https://github.com/hazelcast/hazelcast/blob/v5.3.5/hazelcast/src/main/resources/hazelcast-full-example.xml
-
+* https://github.com/memcached/memcached/blob/master/doc/protocol.txt
 
 ---
 class: center, middle
