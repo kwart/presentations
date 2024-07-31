@@ -24,10 +24,11 @@ Experienced security architect and Java developer with a strong background in Ja
 
 - Provided security-related guidance to cross-functional teams;
 - Developed new security features and authentication mechanisms (LDAP, Kerberos, X.509);
-- Created a Maven plugin for code attribution;
 - Identified and resolved security issues;
+- Handled CVEs in the Hazelcast Platform;
 - Improved the Hazelcast IO subsystem;
-- Managed Engineering infrastructure, including Jenkins CI, JFrog repositories, GitHub, Docker hub, and Greenbone vulnerability manager.
+- Managed Engineering infrastructure, including Jenkins CI, JFrog repositories, GitHub, Docker hub, and Greenbone vulnerability manager;
+- Created a Maven plugin for code attribution.
 
 #### Technologies used
 
@@ -107,7 +108,7 @@ Experienced security architect and Java developer with a strong background in Ja
 
 ## Open source
 
-Actively developing on GitHub ([@intoolswetrust](https://github.com/intoolswetrust), [@kwart](https://github.com/kwart)) and SourceForge.net ([kwart](https://sourceforge.net/u/kwart/profile/)).
+Developing on GitHub ([@intoolswetrust](https://github.com/intoolswetrust), [@kwart](https://github.com/kwart)) and SourceForge.net ([kwart](https://sourceforge.net/u/kwart/profile/)).
 
 ### Author
 - [JSignPdf](http://jsignpdf.sourceforge.net/) - Software for signing PDF documents
