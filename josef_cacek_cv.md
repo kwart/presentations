@@ -21,9 +21,8 @@ Member of the Knowledge Base team within Azul Intelligence Cloud - a SaaS produc
 - Designed an AI-assisted pipeline for triaging unrecognized Java components from customer JVMs - automatically categorizing them against software configurations and NVD CPE entries using LLM.
 - Owned data quality for the KB team - responsible for recognition accuracy of software configurations, vulnerability mappings, and CVE coverage across production systems.
 - Resolved customer-facing vulnerability detection issues (false positives/negatives) reported by enterprise customers.
-- Defined team processes and workflows.
 
-Technologies: Java, Kotlin, Python, Bash, GitLab CI, Jenkins, Docker, Kubernetes, AWS (S3), MongoDB, NVD/CVE/CPE, Maven ecosystem
+Technologies: Java, Kotlin, Python, Bash, Azure AI, Vertex AI, Ollama, GitLab CI, Jenkins, Docker, Kubernetes, AWS, MongoDB, NVD/CVE/CPE, Maven ecosystem
 
 ### Hazelcast
 
