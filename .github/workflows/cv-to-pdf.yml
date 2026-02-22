@@ -19,6 +19,10 @@ jobs:
           input_dir: .
           output_dir: pdfs
           build_html: false
+      - name: Move cv tag to latest commit
+        run: |
+          git tag -f cv
+          git push origin cv --force
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
         with:
