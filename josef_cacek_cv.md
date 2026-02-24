@@ -4,7 +4,7 @@
 
 **Security Researcher & Java Engineer** | Open Source Author | Vulnerability Intelligence
 
-Security researcher and Java engineer specializing in vulnerability intelligence systems, JVM security, and open source tooling. Builds systems that detect and classify Java vulnerabilities at bytecode level - from CVE data pipelines processing thousands of artifacts to microservice architectures serving enterprise customers. Author of open source security and developer tools on GitHub. Contributor to Hazelcast, WildFly, and Apache projects.
+Security researcher and Java engineer specializing in vulnerability intelligence systems, JVM security, and open source tooling. Builds systems that detect and classify Java vulnerabilities at bytecode level - from CVE data pipelines processing thousands of artifacts to microservice architectures serving enterprise customers. Author of open source security and developer tools on GitHub (JSignPdf, jd-cli). Contributor to Hazelcast, WildFly, and Apache projects.
 
 ## Experience
 
@@ -14,11 +14,11 @@ Security researcher and Java engineer specializing in vulnerability intelligence
 
 Member of the Knowledge Base team within Azul Intelligence Cloud - a SaaS product connecting millions of JVM runtimes to detect vulnerabilities and provide code inventory.
 
+- Designed and implemented an AI-assisted pipeline for triaging unrecognized Java components from customer JVMs - automatically categorizing them against software configurations and NVD CPE entries using LLM.
 - Built a bytecode-diff pipeline that identifies which specific Java classes are affected by a CVE - information absent from standard vulnerability databases.
-- Helped to design and implement a microservice architecture (7+ services) replacing a legacy monolithic pipeline. The new system focuses on components observed in customer JVMs and delivers more precise vulnerability data with faster turnaround.
+- Designed a microservice architecture (7+ services) replacing a legacy monolithic pipeline. The new system focuses on components observed in customer JVMs and delivers more precise vulnerability data with faster turnaround.
 - Developed the Maven Query service from scratch - a fast search service for Maven artifacts across multiple repositories, built on regularly updated Nexus Index data. Designed, implemented, deployed, and released.
 - Developed a service mapping vulnerability IDs to vulnerable Maven components, enabling automated correlation between CVEs and affected libraries.
-- Designed an AI-assisted pipeline for triaging unrecognized Java components from customer JVMs - automatically categorizing them against software configurations and NVD CPE entries using LLM.
 - Owned data quality for the KB team - responsible for recognition accuracy of software configurations, vulnerability mappings, and CVE coverage across production systems.
 - Resolved customer-facing vulnerability detection issues (false positives/negatives) reported by enterprise customers.
 
@@ -28,7 +28,7 @@ Technologies: Java, Kotlin, Python, Bash, Azure AI, Vertex AI, Ollama, GitLab CI
 
 *Security Architect (2021 - 2024)*
 
-- Provided security guidance across engineering teams; owned security architecture decisions for the Hazelcast Platform.
+- Owned security architecture decisions for the Hazelcast Platform; Provided security guidance across engineering teams.
 - Drove third-party penetration testing engagements and evaluated findings to resolution.
 - Implemented security features: properties encryption in configuration, untrusted deserialization protection, LDAP and Kerberos authentication, X.509 certificate-based identity.
 - Managed CVE lifecycle for the Hazelcast Platform - identification, evaluation, fix coordination, and disclosure.
