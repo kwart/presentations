@@ -4,7 +4,7 @@
 
 **Senior Java Security Engineer** | Open Source Author | JVM Internals & Vulnerability Research
 
-Senior Security Engineer with 15+ years of experience in the Java ecosystem, specialized in application security, TLS, and distributed systems. Open Source Author (jd-cli, JSignPdf) with a proven track record of designing and auditing security architectures for Hazelcast and WildFly. Expert in the full security stack: from bytecode analysis and crypto protocols (JAAS, Kerberos, X.509) to AI-driven vulnerability intelligence microservices.
+Senior Security Engineer with 15+ years of experience in the Java ecosystem, specialized in application security, TLS, and distributed systems. Open Source Author (jd-cli, JSignPdf) with a track record of designing and auditing security architectures for Hazelcast and WildFly. Expert in the full security stack: from bytecode analysis and crypto protocols (JAAS, Kerberos, X.509) to AI-driven vulnerability intelligence microservices.
 
 ## Experience
 
