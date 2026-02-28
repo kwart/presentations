@@ -19,7 +19,7 @@ Member of the Knowledge Base team within Azul Intelligence Cloud - a SaaS produc
 - Designed a microservice architecture (7+ services) replacing a legacy monolithic pipeline. The new system focuses on components observed in customer JVMs and delivers more precise vulnerability data with faster turnaround.
 - Developed the Maven Query service from scratch - a fast search service for Maven artifacts across multiple repositories, built on regularly updated Nexus Index data. Designed, implemented, deployed.
 - Owned data quality for the KB team - responsible for recognition accuracy of software configurations, vulnerability mappings, and CVE coverage across production systems.
-- Resolved customer-facing vulnerability detection issues (false positives/negatives) reported by enterprise customers.
+- Resolved vulnerability detection issues (false positives/negatives) reported by customers.
 
 Technologies: Java, Kotlin, Python, Bash, Azure AI, Vertex AI, Ollama, GitLab CI, Jenkins, Docker, Kubernetes, AWS, MongoDB, NVD/CVE/CPE, Maven ecosystem
 
