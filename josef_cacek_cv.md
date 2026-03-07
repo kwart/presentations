@@ -10,7 +10,7 @@ Senior Security Engineer with 15+ years of experience in the Java ecosystem, spe
 
 ### Azul
 
-*Security Researcher (2024 - present)*
+*Security Researcher / Staff Software Engineer (2024 - present)*
 
 Member of the Knowledge Base team within Azul Intelligence Cloud - a SaaS product connecting millions of JVM runtimes to detect vulnerabilities and provide code inventory.
 
