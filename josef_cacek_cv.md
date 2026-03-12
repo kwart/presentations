@@ -1,6 +1,6 @@
 # Josef Cacek
 
-[linkedin.com/in/josefcacek](https://www.linkedin.com/in/josefcacek/) | [github.com/kwart](https://github.com/kwart) | [github.com/intoolswetrust](https://github.com/intoolswetrust) | [javlog.cacek.cz](https://javlog.cacek.cz)
+[linkedin.com/in/josefcacek](https://www.linkedin.com/in/josefcacek/) | [github.com/intoolswetrust](https://github.com/intoolswetrust) | [github.com/kwart](https://github.com/kwart) | [javlog.cacek.cz](https://javlog.cacek.cz)
 
 **Senior Java Security Engineer** | Open Source Author | JVM Internals & Vulnerability Research
 
