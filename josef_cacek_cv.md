@@ -4,13 +4,13 @@
 
 **Senior Java Security Engineer** | Open Source Author | JVM Internals & Vulnerability Research
 
-Senior Security Engineer with 15+ years of experience in the Java ecosystem, specialized in application security, TLS, and distributed systems. Open Source Author (jd-cli, JSignPdf) with a track record of designing and auditing security architectures for Hazelcast and WildFly. Expert in the full security stack: from bytecode analysis and crypto protocols (JAAS, Kerberos, X.509) to AI-driven vulnerability intelligence microservices.
+Senior Engineer with 15+ years of experience in the Java ecosystem, specialized in application security, backend services, and distributed systems, with hands-on experience delivering and operating production systems. Open Source Author (jd-cli, JSignPdf) with a track record of designing and auditing security architectures for Hazelcast and WildFly. Expert in the full security stack: from bytecode analysis and crypto protocols (JAAS, Kerberos, X.509) to AI-driven vulnerability intelligence microservices.
 
 ## Experience
 
 ### Azul
 
-*Security Researcher / Staff Software Engineer (2024 - present)*
+* Staff Software Engineer / Security Researcher (2024 - present)*
 
 Member of the Knowledge Base team within Azul Intelligence Cloud - a SaaS product connecting millions of JVM runtimes to detect vulnerabilities and provide code inventory.
 
@@ -25,26 +25,15 @@ Technologies: Java, Kotlin, Python, Bash, Azure AI, Vertex AI, Ollama, GitLab CI
 
 ### Hazelcast
 
-*Security Architect (2021 - 2024)*
+*Java Security Engineer / Security Architect (2017 – 2024)*
 
-- Owned security architecture decisions for the Hazelcast Platform; Provided security guidance across engineering teams.
-- Drove third-party penetration testing engagements and evaluated findings to resolution.
-- Implemented security features: properties encryption in configuration, untrusted deserialization protection, LDAP and Kerberos authentication, X.509 certificate-based identity.
-- Managed CVE lifecycle for the Hazelcast Platform - identification, evaluation, fix coordination, and disclosure.
-- Performed security-focused code reviews across the codebase.
-- Managed security-related engineering infrastructure: Greenbone vulnerability scanner, GitHub Advanced Security, Snyk, BlackDuck, OWASP dependency check.
-
-*Security Engineer / Java Developer (2018 - 2021)*
-
-- Developed new security features and maintained existing ones in the Hazelcast Platform core.
-- Performed in-house penetration testing and evaluated third-party pentest results.
-- Improved the Hazelcast I/O subsystem; contributed to Java modules (JPMS) support.
-- Created the [attribution-maven-plugin](https://github.com/hazelcast/attribution-maven-plugin) for automated open source code attribution in Maven builds.
-
-*Quality Engineer (2017 - 2018)*
-
-- Helped establish the QE team at Hazelcast - defined processes, wrote test plans, built automated test suites for new features.
-- Maintained CI environment (Jenkins).
+- Owned security architecture decisions for the Hazelcast Platform and provided security guidance across engineering teams.
+- Designed and implemented platform security features including configuration encryption, untrusted deserialization protection, LDAP and Kerberos authentication, and X.509 certificate-based identity.
+- Performed security-focused code reviews across the platform codebase.
+- Owned vulnerability management for the Hazelcast Platform, including internal and third-party penetration testing, evaluation of security findings, and full CVE lifecycle management (identification, remediation, and disclosure).
+- Contributed improvements to the Hazelcast I/O subsystem and Java modules (JPMS) support.
+- Created the `attribution-maven-plugin` for automated open-source attribution in Maven builds.
+- Helped establish the QE team, defining testing processes, building automated test suites, and maintaining CI infrastructure (Jenkins).
 
 Technologies: JAAS, JSSE/TLS, GSS-API/Kerberos, JNDI/LDAP, netty-tcnative, JUnit, Testcontainers, Docker, Kubernetes, GitHub Actions, Jenkins, Maven, AWS, Azure, GCP
 
@@ -66,7 +55,7 @@ Technologies: SASL, JAAS, PKI, TLS, Kerberos, FIPS, Common Criteria, JASPIC, JAC
 
 Certifications: JBoss Application Administrator, Red Hat Certified JBoss Developer (RHCJD), Red Hat Certified Engineer - RHEL 7 (RHCSA+RHCE)
 
-### ANF Data / Siemens / LFRZ / Atos
+### Siemens
 
 *Senior Java Developer (2004 - 2012)*
 
